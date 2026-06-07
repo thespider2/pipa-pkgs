@@ -44,7 +44,7 @@ The local kernel source is:
 pkgbuilds/linux-pipa/PKGBUILD -> pkgver=7.0.8
 ```
 
-To build locally on an ARM64 Arch host:
+To build locally on an ARM64 host:
 
 ```bash
 git clone https://github.com/thespider2/pipa-pkgs.git
@@ -62,6 +62,8 @@ python scripts/fetch-upstream.py
 scripts/compose-repo.sh
 scripts/stage-pages.sh
 ```
+
+The builder container uses an Arch Linux ARM `base-devel` image so it can run on `aarch64` runners and hosts.
 
 To refresh the local `pkgbuilds/` tree from your main source repo:
 
@@ -92,6 +94,7 @@ PIPA_REPO_URL="https://thespider2.github.io/pipa-pkgs/repo/" \
 ## Notes
 
 - The workflow assumes an ARM64 runner because these packages target `aarch64`.
+- The builder image uses Arch Linux ARM so `docker build` works on ARM64 runners.
 - If `ubuntu-24.04-arm` is unavailable for your repository, use a self-hosted ARM64 runner.
 - The local kernel source in this repo is the Xiaomi Pad 6 `linux-pipa` package pinned to 7.0.8.
 - `packages.upstream.txt` now represents only the packages that still have no local `PKGBUILD` sources in this workspace.

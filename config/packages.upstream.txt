@@ -1,3 +1,4 @@
+# Packages that still have no local PKGBUILD sources in this repo.
 box64
 device-xiaomi-pipa
 gamescope

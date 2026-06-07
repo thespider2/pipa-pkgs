@@ -12,6 +12,7 @@ rmtfs
 tqftpserv
 pd-mapper
 pipa-dracut
+pipa-kernel-flasher-hook
 pipa-sensors
 pipa-sound-conf
 pipa-metapkg

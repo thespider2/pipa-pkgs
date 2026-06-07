@@ -2,20 +2,24 @@
 
 `pipa-pkgs` is a pacman repository for Xiaomi Pad 6 / Pipa packages, published with GitHub Pages.
 It is designed to replace or reduce dependency on the upstream `pipa-alarm` feed during image builds.
+This repo now carries your local `pkgbuilds/` tree directly, including the `linux-pipa` 7.0.8 kernel package source.
 
 ## Goals
 
-- Build the packages maintained in `endeavouros-pipa`
-- Mirror selected upstream Pipa packages into the same repo
+- Build all packages whose `PKGBUILD` sources are stored in this repo
+- Use the local `linux-pipa` 7.0.8 package as the kernel source of truth
+- Mirror only the remaining upstream Pipa packages that do not yet have local `PKGBUILD`s
 - Publish a pacman repository at `https://<user>.github.io/pipa-pkgs/repo/`
 - Make `pipa-endeavouros-builder/build-image.sh` faster by pointing `PIPA_REPO_URL` at a single cached feed
 
 ## Repository Layout
 
-- `config/packages.local.txt`: packages built from your source repo
-- `config/packages.upstream.txt`: packages mirrored from the upstream Pipa repo
-- `config/repo.env`: main configuration for source and upstream repos
+- `pkgbuilds/`: local package sources built into the pacman repo
+- `config/packages.local.txt`: local package directories that should be built
+- `config/packages.upstream.txt`: packages still mirrored from the upstream Pipa repo
+- `config/repo.env`: repo configuration, Pages URL, sync source, and kernel version note
 - `scripts/build-local-packages.sh`: builds local `PKGBUILD`s into the pacman repo
+- `scripts/sync-pkgbuilds.sh`: refreshes `pkgbuilds/` from the source `endeavouros-pipa` repo
 - `scripts/fetch-upstream.py`: downloads selected upstream packages into the pacman repo
 - `scripts/compose-repo.sh`: regenerates the pacman database from all package files
 - `scripts/stage-pages.sh`: prepares the GitHub Pages site output
@@ -33,27 +37,36 @@ Update `config/repo.env` before the first publish.
 
 ## Local Build
 
-This repo expects your package sources to come from:
+This repo is self-contained for the local packages that already live under `pkgbuilds/`.
+The local kernel source is:
 
 ```text
-https://github.com/aymanrgab/endeavouros-pipa.git
+pkgbuilds/linux-pipa/PKGBUILD -> pkgver=7.0.8
 ```
 
 To build locally on an ARM64 Arch host:
 
 ```bash
-git clone https://github.com/aymanrgab/pipa-pkgs.git
+git clone https://github.com/thespider2/pipa-pkgs.git
 cd pipa-pkgs
 docker build -t pipa-pkgs-builder .
-mkdir -p repo work
+mkdir -p repo
 
-git clone https://github.com/aymanrgab/endeavouros-pipa.git work/endeavouros-pipa
-
-docker run --rm   -v "$PWD/repo:/repo"   -v "$PWD/config:/config"   -v "$PWD/work/endeavouros-pipa:/src/endeavouros-pipa"   pipa-pkgs-builder /usr/local/bin/build-local-packages.sh
+docker run --rm \
+  -v "$PWD/repo:/repo" \
+  -v "$PWD/config:/config" \
+  -v "$PWD/pkgbuilds:/work/pkgbuilds" \
+  pipa-pkgs-builder /usr/local/bin/build-local-packages.sh
 
 python scripts/fetch-upstream.py
 scripts/compose-repo.sh
 scripts/stage-pages.sh
+```
+
+To refresh the local `pkgbuilds/` tree from your main source repo:
+
+```bash
+scripts/sync-pkgbuilds.sh
 ```
 
 ## Use In Image Builds
@@ -61,7 +74,11 @@ scripts/stage-pages.sh
 Point the builder at your published repo:
 
 ```bash
-PIPA_REPO_URL="https://<your-github-username>.github.io/pipa-pkgs/repo/"   docker run --privileged   -v "$(pwd)/images:/build/images"   -v "/dev:/dev"   pipa-endeavouros-builder plasma
+PIPA_REPO_URL="https://thespider2.github.io/pipa-pkgs/repo/" \
+  docker run --privileged \
+  -v "$(pwd)/images:/build/images" \
+  -v "/dev:/dev" \
+  pipa-endeavouros-builder plasma
 ```
 
 ## GitHub Setup
@@ -76,4 +93,6 @@ PIPA_REPO_URL="https://<your-github-username>.github.io/pipa-pkgs/repo/"   docke
 
 - The workflow assumes an ARM64 runner because these packages target `aarch64`.
 - If `ubuntu-24.04-arm` is unavailable for your repository, use a self-hosted ARM64 runner.
+- The local kernel source in this repo is the Xiaomi Pad 6 `linux-pipa` package pinned to 7.0.8.
+- `packages.upstream.txt` now represents only the packages that still have no local `PKGBUILD` sources in this workspace.
 - Local packages win over mirrored upstream packages because overlapping package names are intentionally excluded from `packages.upstream.txt`.

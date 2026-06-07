@@ -1,16 +1,26 @@
 #!/bin/bash
 set -euo pipefail
 
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+DEFAULT_LOCAL_BUILDER_ROOT="$ROOT_DIR"
+if [ -d /work/pkgbuilds ]; then
+    DEFAULT_LOCAL_BUILDER_ROOT="/work"
+fi
+LOCAL_BUILDER_ROOT="${LOCAL_BUILDER_ROOT:-$DEFAULT_LOCAL_BUILDER_ROOT}"
 SOURCE_ROOT="${SOURCE_ROOT:-/src/endeavouros-pipa}"
-BUILDER_ROOT="$SOURCE_ROOT/pipa-endeavouros-builder"
+FALLBACK_BUILDER_ROOT="$SOURCE_ROOT/pipa-endeavouros-builder"
 CONFIG_DIR="${CONFIG_DIR:-/config}"
 OUTPUT_ROOT="${OUTPUT_ROOT:-/repo}"
 REPO_SUBDIR="${REPO_SUBDIR:-repo}"
 REPO_DIR="$OUTPUT_ROOT/$REPO_SUBDIR"
 MAKEPKG_USER="${MAKEPKG_USER:-builder}"
 
-if [ ! -d "$BUILDER_ROOT/pkgbuilds" ]; then
-    echo "Missing package sources under $BUILDER_ROOT/pkgbuilds" >&2
+if [ -d "$LOCAL_BUILDER_ROOT/pkgbuilds" ]; then
+    BUILDER_ROOT="$LOCAL_BUILDER_ROOT"
+elif [ -d "$FALLBACK_BUILDER_ROOT/pkgbuilds" ]; then
+    BUILDER_ROOT="$FALLBACK_BUILDER_ROOT"
+else
+    echo "Missing package sources under $LOCAL_BUILDER_ROOT/pkgbuilds and $FALLBACK_BUILDER_ROOT/pkgbuilds" >&2
     exit 1
 fi
 

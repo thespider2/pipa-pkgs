@@ -15,6 +15,8 @@ RUN set -eux; \
     mv /etc/pacman.conf.bak /etc/pacman.conf; \
     trap - EXIT
 
+RUN sed -i 's/^DownloadUser[[:space:]]*=/#DownloadUser =/' /etc/pacman.conf
+
 RUN useradd -m builder
 
 COPY scripts/build-local-packages.sh /usr/local/bin/build-local-packages.sh

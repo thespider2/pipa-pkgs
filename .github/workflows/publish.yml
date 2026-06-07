@@ -1,0 +1,59 @@
+name: Publish pacman repo
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Load config
+        run: |
+          source config/repo.env
+          echo "SOURCE_REPO_URL=$SOURCE_REPO_URL" >> "$GITHUB_ENV"
+          echo "SOURCE_REPO_REF=$SOURCE_REPO_REF" >> "$GITHUB_ENV"
+
+      - name: Clone source repo
+        run: |
+          mkdir -p work
+          git clone --depth 1 --branch "$SOURCE_REPO_REF" "$SOURCE_REPO_URL" work/endeavouros-pipa
+
+      - name: Build builder image
+        run: docker build -t pipa-pkgs-builder .
+
+      - name: Build local packages
+        run: |
+          mkdir -p repo
+          docker run --rm             -v "$PWD/repo:/repo"             -v "$PWD/config:/config"             -v "$PWD/work/endeavouros-pipa:/src/endeavouros-pipa"             pipa-pkgs-builder /usr/local/bin/build-local-packages.sh
+
+      - name: Mirror upstream packages
+        run: python scripts/fetch-upstream.py
+
+      - name: Compose pacman repo
+        run: scripts/compose-repo.sh
+
+      - name: Stage Pages content
+        run: scripts/stage-pages.sh
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4

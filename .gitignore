@@ -1,0 +1,6 @@
+repo/
+site/
+work/
+__pycache__/
+*.pyc
+*.log

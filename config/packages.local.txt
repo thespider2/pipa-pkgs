@@ -1,0 +1,17 @@
+linux-pipa
+qbootctl
+xiaomi-pipa-firmware
+alsa-ucm-conf-sm8250
+bluez-git
+bootmac
+hexagonrpc
+libssc
+iio-sensor-proxy
+qrtr
+rmtfs
+tqftpserv
+pd-mapper
+pipa-dracut
+pipa-sensors
+pipa-sound-conf
+pipa-metapkg

@@ -4,7 +4,7 @@ RUN set -eux; \
     cp /etc/pacman.conf /etc/pacman.conf.bak; \
     trap 'mv /etc/pacman.conf.bak /etc/pacman.conf' EXIT; \
     sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf; \
-    pacman -Syu --needed --noconfirm --disable-sandbox-filesystem \
+    pacman -Syu --needed --noconfirm \
       git sudo gcc make pacman-contrib \
       arch-install-scripts e2fsprogs dosfstools zip unzip \
       bc bison flex cpio kmod python tar xz meson ninja cmake rsync wget curl \

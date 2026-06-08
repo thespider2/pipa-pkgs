@@ -42,7 +42,9 @@ jobs:
         run: python scripts/fetch-upstream.py
 
       - name: Compose pacman repo
-        run: scripts/compose-repo.sh
+        run: |
+          docker run --rm -v "$PWD:/work" -w /work pipa-pkgs-builder scripts/compose-repo.sh
+          sudo chown -R "$USER:$USER" repo
 
       - name: Stage Pages content
         run: scripts/stage-pages.sh

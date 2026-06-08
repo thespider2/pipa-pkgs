@@ -59,7 +59,8 @@ docker run --rm \
   pipa-pkgs-builder /usr/local/bin/build-local-packages.sh
 
 python scripts/fetch-upstream.py
-scripts/compose-repo.sh
+docker run --rm -v "$PWD:/work" -w /work pipa-pkgs-builder scripts/compose-repo.sh
+sudo chown -R "$USER:$USER" repo
 scripts/stage-pages.sh
 ```
 

@@ -24,6 +24,7 @@ cat > "$SITE_DIR/index.html" <<EOF
   <h1>$REPO_NAME</h1>
   <p>Pacman repository for Xiaomi Pad 6 / Pipa packages.</p>
   <p>Repo URL: <a href="$PAGES_BASE_URL/repo/">$PAGES_BASE_URL/repo/</a></p>
+  <p>Source repo: <a href="https://github.com/thespider2/pipa-pkgs">https://github.com/thespider2/pipa-pkgs</a></p>
 </body>
 </html>
 EOF

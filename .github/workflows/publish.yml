@@ -19,11 +19,32 @@ jobs:
       - name: Check out repo
         uses: actions/checkout@v4
 
+      - name: Compute pacman repo cache key
+        id: repo-cache-key
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            printf '%s\0' \
+              Dockerfile \
+              config/packages.local.txt \
+              config/packages.upstream.txt \
+              config/repo.env \
+              scripts/build-local-packages.sh \
+              scripts/compose-repo.sh \
+              scripts/fetch-upstream.py \
+              scripts/stage-pages.sh
+            find pkgbuilds -type f \
+              ! -path '*/src/*' \
+              ! -path '*/pkg/*' \
+              -print0
+          } | sort -z | xargs -0 sha256sum | sha256sum | awk '{print "hash="$1}' >> "$GITHUB_OUTPUT"
+
       - name: Restore pacman repo cache
         uses: actions/cache@v4
         with:
           path: repo
-          key: pacman-repo-${{ runner.os }}-${{ runner.arch }}-${{ github.ref_name }}-${{ hashFiles('Dockerfile', 'config/packages.local.txt', 'config/packages.upstream.txt', 'config/repo.env', 'pkgbuilds/**/*', 'scripts/build-local-packages.sh', 'scripts/compose-repo.sh', 'scripts/fetch-upstream.py', 'scripts/stage-pages.sh') }}
+          key: pacman-repo-${{ runner.os }}-${{ runner.arch }}-${{ github.ref_name }}-${{ steps.repo-cache-key.outputs.hash }}
           restore-keys: |
             pacman-repo-${{ runner.os }}-${{ runner.arch }}-${{ github.ref_name }}-
 

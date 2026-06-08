@@ -6,17 +6,17 @@ arch=('x86_64' 'aarch64')
 url="https://github.com/linux-msm/qbootctl"
 license=('GPL3')
 depends=('glibc')
-makedepends=('meson' 'ninja' 'gcc')
-source=("$pkgname-$pkgver.tar.gz::https://github.com/linux-msm/qbootctl/archive/refs/tags/${pkgver}.tar.gz")
+makedepends=('meson' 'ninja' 'gcc' 'git')
+source=("git+https://github.com/linux-msm/qbootctl.git#tag=${pkgver}")
 sha256sums=('SKIP')
 
 build() {
-  cd "$pkgname-$pkgver"
+  cd "$pkgname"
   meson setup build --prefix=/usr
   meson compile -C build
 }
 
 package() {
-  cd "$pkgname-$pkgver"
+  cd "$pkgname"
   DESTDIR="$pkgdir" meson install -C build
 }

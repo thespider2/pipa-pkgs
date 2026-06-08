@@ -6,8 +6,8 @@ arch=('x86_64' 'aarch64')
 url="https://github.com/linux-msm/hexagonrpc"
 license=('GPL3')
 depends=('systemd')
-makedepends=('meson' 'gcc')
-source=("https://github.com/linux-msm/hexagonrpc/archive/refs/tags/v${pkgver}.tar.gz"
+makedepends=('meson' 'gcc' 'git')
+source=("git+https://github.com/linux-msm/hexagonrpc.git#tag=v${pkgver}"
         "hexagonrpcd-adsp-rootpd.service"
         "hexagonrpcd-adsp-sensorspd.service"
         "hexagonrpcd-sdsp.service"
@@ -16,13 +16,13 @@ source=("https://github.com/linux-msm/hexagonrpc/archive/refs/tags/v${pkgver}.ta
 sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 build() {
-  cd "$pkgname-$pkgver"
+  cd "$pkgname"
   meson setup build --prefix=/usr --libexecdir=lib
   ninja -C build
 }
 
 package() {
-  cd "$pkgname-$pkgver"
+  cd "$pkgname"
   DESTDIR="$pkgdir" ninja -C build install
   
   install -d "$pkgdir/usr/include"

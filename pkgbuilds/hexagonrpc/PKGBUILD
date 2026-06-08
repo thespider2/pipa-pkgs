@@ -1,5 +1,5 @@
 pkgname=hexagonrpc
-pkgver=0.3.2
+pkgver=0.4.0
 pkgrel=1
 pkgdesc="FastRPC ioctl wrapper and a reverse tunnel"
 arch=('x86_64' 'aarch64')

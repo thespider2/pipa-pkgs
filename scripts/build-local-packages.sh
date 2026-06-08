@@ -70,7 +70,15 @@ for pkg in "${PKGS[@]}"; do
         esac
     done
 
-    if [ "$pkg" != "linux-pipa" ] && [ ${#install_packages[@]} -gt 0 ]; then
-        pacman -U --noconfirm --ask=4 "${install_packages[@]}"
-    fi
+    # Keep the builder container lean: do not install the kernel package there,
+    # and skip the meta package because it depends on linux-pipa being installed.
+    case "$pkg" in
+        linux-pipa|pipa-metapkg)
+            ;;
+        *)
+            if [ ${#install_packages[@]} -gt 0 ]; then
+                pacman -U --noconfirm --ask=4 "${install_packages[@]}"
+            fi
+            ;;
+    esac
 done

@@ -1,0 +1,161 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+BOOT_DIR=/boot
+GRUB_DIR="$BOOT_DIR/grub2"
+GRUB_CFG="$GRUB_DIR/grub.cfg"
+DTB_REL=dtbs/qcom/sm8250-xiaomi-pipa.dtb
+DTB_PATH="$BOOT_DIR/$DTB_REL"
+GZIP_KERNEL_REL=Image.gz
+RAW_KERNEL_REL=Image
+PRIMARY_RAW_REL=Image-pipa-dtb
+PRIMARY_GZIP_REL=Image.gz-pipa-dtb
+INITRAMFS_STABLE_REL=initramfs-linux-pipa.img
+INITRAMFS_STABLE_PATH="$BOOT_DIR/$INITRAMFS_STABLE_REL"
+DEFAULT_CMDLINE='rw rootwait console=tty0 console=ttyS0 earlycon quiet splash'
+
+log() {
+    printf 'pipa-grub-config: %s\n' "$*" >&2
+}
+
+require_file() {
+    local path="$1"
+    if [ ! -e "$path" ]; then
+        log "missing required file: $path"
+        exit 1
+    fi
+}
+
+if ! mountpoint -q "$BOOT_DIR"; then
+    log "$BOOT_DIR is not mounted; refusing to write GRUB config"
+    exit 1
+fi
+
+mkdir -p "$GRUB_DIR"
+require_file "$DTB_PATH"
+
+if [ -f "$BOOT_DIR/$RAW_KERNEL_REL" ]; then
+    cat "$BOOT_DIR/$RAW_KERNEL_REL" "$DTB_PATH" > "$BOOT_DIR/$PRIMARY_RAW_REL"
+fi
+
+if [ -f "$BOOT_DIR/$GZIP_KERNEL_REL" ]; then
+    cat "$BOOT_DIR/$GZIP_KERNEL_REL" "$DTB_PATH" > "$BOOT_DIR/$PRIMARY_GZIP_REL"
+fi
+
+primary_kernel_rel=
+if [ -f "$BOOT_DIR/$PRIMARY_RAW_REL" ]; then
+    primary_kernel_rel="$PRIMARY_RAW_REL"
+elif [ -f "$BOOT_DIR/$PRIMARY_GZIP_REL" ]; then
+    primary_kernel_rel="$PRIMARY_GZIP_REL"
+fi
+
+separate_kernel_rel=
+if [ -f "$BOOT_DIR/$RAW_KERNEL_REL" ]; then
+    separate_kernel_rel="$RAW_KERNEL_REL"
+elif [ -f "$BOOT_DIR/$GZIP_KERNEL_REL" ]; then
+    separate_kernel_rel="$GZIP_KERNEL_REL"
+else
+    log "no kernel image found under $BOOT_DIR"
+    exit 1
+fi
+
+gzip_kernel_rel=
+if [ -f "$BOOT_DIR/$GZIP_KERNEL_REL" ]; then
+    gzip_kernel_rel="$GZIP_KERNEL_REL"
+fi
+
+initramfs_source=
+for candidate in /usr/lib/modules/*/initramfs-*.img; do
+    if [ -f "$candidate" ]; then
+        initramfs_source="$candidate"
+    fi
+done
+if [ -z "$initramfs_source" ]; then
+    log "no initramfs image found under /usr/lib/modules"
+    exit 1
+fi
+cp -f "$initramfs_source" "$INITRAMFS_STABLE_PATH"
+
+cmdline="$(tr '\n' ' ' < /etc/cmdline 2>/dev/null | sed -e 's/[[:space:]]\+/ /g' -e 's/^ //' -e 's/ $//' || true)"
+if [ -z "$cmdline" ]; then
+    cmdline="$DEFAULT_CMDLINE"
+
+    root_uuid="$(findmnt -no UUID / 2>/dev/null || true)"
+    root_label="$(findmnt -no LABEL / 2>/dev/null || true)"
+    root_source="$(findmnt -no SOURCE / 2>/dev/null || true)"
+    boot_label="$(findmnt -no LABEL "$BOOT_DIR" 2>/dev/null || true)"
+
+    if [ -n "$root_uuid" ]; then
+        cmdline="root=UUID=$root_uuid $cmdline"
+    elif [ -n "$root_label" ]; then
+        cmdline="root=LABEL=$root_label $cmdline"
+    elif [ -n "$root_source" ]; then
+        cmdline="root=$root_source $cmdline"
+    fi
+
+    if [ -n "$boot_label" ]; then
+        cmdline="$cmdline boot=LABEL=$boot_label"
+    fi
+fi
+
+boot_search=
+boot_uuid="$(findmnt -no UUID "$BOOT_DIR" 2>/dev/null || true)"
+boot_label="$(findmnt -no LABEL "$BOOT_DIR" 2>/dev/null || true)"
+if [ -n "$boot_uuid" ]; then
+    boot_search="search --fs-uuid $boot_uuid --set=boot --no-floppy"
+elif [ -n "$boot_label" ]; then
+    boot_search="search --label $boot_label --set=boot --no-floppy"
+else
+    log "unable to determine boot filesystem UUID or label"
+    exit 1
+fi
+
+default_index=0
+if [ -n "$primary_kernel_rel" ]; then
+    default_index=1
+fi
+
+tmp_cfg="$(mktemp)"
+trap 'rm -f "$tmp_cfg"' EXIT
+
+{
+    printf 'set default=%s\n' "$default_index"
+    printf 'set timeout=5\n\n'
+    printf '%s\n' "$boot_search"
+    printf 'set root=($boot)\n\n'
+    printf 'if loadfont unicode; then\n'
+    printf '    set gfxmode=1800x2880\n'
+    printf '    set gfxpayload=keep\n'
+    printf '    terminal_output gfxterm\n'
+    printf 'fi\n\n'
+
+    if [ -n "$primary_kernel_rel" ]; then
+        printf 'menuentry "EndeavourOS ARM (Pipa)" {\n'
+        printf '    linux ($boot)/%s %s\n' "$primary_kernel_rel" "$cmdline"
+        printf '    initrd ($boot)/%s\n' "$INITRAMFS_STABLE_REL"
+        printf '}\n\n'
+    fi
+
+    printf 'menuentry "EndeavourOS ARM (Pipa) - Separate DTB Fallback" {\n'
+    printf '    devicetree ($boot)/%s\n' "$DTB_REL"
+    printf '    linux ($boot)/%s %s\n' "$separate_kernel_rel" "$cmdline"
+    printf '    initrd ($boot)/%s\n' "$INITRAMFS_STABLE_REL"
+    printf '}\n\n'
+
+    if [ -n "$gzip_kernel_rel" ] && [ "$gzip_kernel_rel" != "$separate_kernel_rel" ]; then
+        printf 'menuentry "EndeavourOS ARM (Pipa) - Gzipped Kernel Fallback" {\n'
+        printf '    devicetree ($boot)/%s\n' "$DTB_REL"
+        printf '    linux ($boot)/%s %s\n' "$gzip_kernel_rel" "$cmdline"
+        printf '    initrd ($boot)/%s\n' "$INITRAMFS_STABLE_REL"
+        printf '}\n\n'
+    fi
+
+    printf 'menuentry "EndeavourOS ARM (Pipa) - Debug Verbose" {\n'
+    printf '    devicetree ($boot)/%s\n' "$DTB_REL"
+    printf '    linux ($boot)/%s %s loglevel=7 systemd.log_level=debug\n' "$separate_kernel_rel" "$cmdline"
+    printf '    initrd ($boot)/%s\n' "$INITRAMFS_STABLE_REL"
+    printf '}\n'
+} > "$tmp_cfg"
+
+install -Dm644 "$tmp_cfg" "$GRUB_CFG"
+log "wrote $GRUB_CFG"

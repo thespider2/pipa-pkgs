@@ -13,6 +13,7 @@ tqftpserv
 pd-mapper
 pipa-dracut
 pipa-kernel-flasher-hook
+pipa-grub-config
 pipa-sensors
 pipa-sound-conf
 pipa-metapkg

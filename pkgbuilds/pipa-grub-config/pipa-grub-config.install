@@ -1,0 +1,7 @@
+post_install() {
+  /usr/local/bin/pipa-refresh-grub-config >/dev/null 2>&1 || true
+}
+
+post_upgrade() {
+  post_install "$@"
+}

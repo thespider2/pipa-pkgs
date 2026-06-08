@@ -23,7 +23,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: repo
-          key: pacman-repo-${{ runner.os }}-${{ runner.arch }}-${{ github.ref_name }}-${{ hashFiles('Dockerfile', 'config/packages.local.txt', 'config/packages.upstream.txt', 'config/repo.env', 'pkgbuilds/**', 'scripts/build-local-packages.sh', 'scripts/compose-repo.sh', 'scripts/fetch-upstream.py', 'scripts/stage-pages.sh') }}
+          key: pacman-repo-${{ runner.os }}-${{ runner.arch }}-${{ github.ref_name }}-${{ hashFiles('Dockerfile', 'config/packages.local.txt', 'config/packages.upstream.txt', 'config/repo.env', 'pkgbuilds/**/*', 'scripts/build-local-packages.sh', 'scripts/compose-repo.sh', 'scripts/fetch-upstream.py', 'scripts/stage-pages.sh') }}
           restore-keys: |
             pacman-repo-${{ runner.os }}-${{ runner.arch }}-${{ github.ref_name }}-
 

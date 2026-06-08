@@ -35,6 +35,9 @@ jobs:
             -v "$PWD/pkgbuilds:/work/pkgbuilds" \
             pipa-pkgs-builder /usr/local/bin/build-local-packages.sh
 
+      - name: Fix repo directory ownership
+        run: sudo chown -R "$USER:$USER" repo
+
       - name: Mirror upstream packages
         run: python scripts/fetch-upstream.py
 

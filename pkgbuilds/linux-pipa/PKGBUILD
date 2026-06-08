@@ -1,12 +1,12 @@
 pkgbase=linux-pipa
 pkgname=(linux-pipa linux-pipa-headers)
 _srcname=linux
-_commit=dba2f27e87cfa398cc5e5eb76e4beac30c2ecc71
+_commit=ac435427b11811ab0f530dfa2821dad00e304240
 pkgver=7.0.8
-pkgrel=1
+pkgrel=2
 pkgdesc='Linux kernel for Xiaomi Pad 6 (Pipa)'
 arch=('aarch64')
-url="https://github.com/PipaDB/linux"
+url="https://github.com/aymanrgab/linux"
 license=('GPL2')
 makedepends=(
   'bc' 'bison' 'cpio' 'flex' 'kmod' 'pahole' 'python'
@@ -14,7 +14,7 @@ makedepends=(
 )
 options=('!strip')
 source=(
-  "linux-${_commit}.tar.gz::https://github.com/PipaDB/linux/archive/${_commit}.tar.gz"
+  "linux-${_commit}.tar.gz::https://github.com/aymanrgab/linux/archive/${_commit}.tar.gz"
   'pipa.config'
 )
 sha256sums=('SKIP' 'SKIP')

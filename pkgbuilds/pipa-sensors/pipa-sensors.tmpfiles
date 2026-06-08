@@ -1,0 +1,4 @@
+d /mnt/vendor/persist 0775 fastrpc fastrpc -
+d /mnt/vendor/persist/sensors 0775 fastrpc fastrpc -
+d /mnt/vendor/persist/sensors/registry 0775 fastrpc fastrpc -
+d /mnt/vendor/persist/sensors/registry/registry 0775 fastrpc fastrpc -

@@ -19,6 +19,14 @@ jobs:
       - name: Check out repo
         uses: actions/checkout@v4
 
+      - name: Restore pacman repo cache
+        uses: actions/cache@v4
+        with:
+          path: repo
+          key: pacman-repo-${{ runner.os }}-${{ runner.arch }}-${{ github.ref_name }}-${{ hashFiles('Dockerfile', 'config/packages.local.txt', 'config/packages.upstream.txt', 'config/repo.env', 'pkgbuilds/**', 'scripts/build-local-packages.sh', 'scripts/compose-repo.sh', 'scripts/fetch-upstream.py', 'scripts/stage-pages.sh') }}
+          restore-keys: |
+            pacman-repo-${{ runner.os }}-${{ runner.arch }}-${{ github.ref_name }}-
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 

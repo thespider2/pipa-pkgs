@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+
+for dir in \
+    /mnt/vendor/persist \
+    /mnt/vendor/persist/sensors \
+    /mnt/vendor/persist/sensors/registry \
+    /mnt/vendor/persist/sensors/registry/registry
+do
+    install -d -m 0775 -o fastrpc -g fastrpc "$dir"
+done

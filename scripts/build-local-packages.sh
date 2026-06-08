@@ -13,6 +13,7 @@ CONFIG_DIR="${CONFIG_DIR:-/config}"
 OUTPUT_ROOT="${OUTPUT_ROOT:-/repo}"
 REPO_SUBDIR="${REPO_SUBDIR:-repo}"
 REPO_DIR="$OUTPUT_ROOT/$REPO_SUBDIR"
+CACHE_DIR="$REPO_DIR/.build-cache"
 MAKEPKG_USER="${MAKEPKG_USER:-builder}"
 
 if [ -d "$LOCAL_BUILDER_ROOT/pkgbuilds" ]; then
@@ -30,37 +31,124 @@ if [ ! -f "$CONFIG_DIR/packages.local.txt" ]; then
 fi
 
 mkdir -p "$REPO_DIR"
+mkdir -p "$CACHE_DIR"
 chown -R "$MAKEPKG_USER:$MAKEPKG_USER" "$REPO_DIR"
+
+compute_pkg_source_hash() {
+    local pkg_dir="$1"
+
+    python - "$pkg_dir" <<'PY'
+import hashlib
+import pathlib
+import sys
+
+root = pathlib.Path(sys.argv[1])
+ignore_dirs = {"src", "pkg", ".git"}
+ignore_suffixes = (
+    ".pkg.tar",
+    ".pkg.tar.gz",
+    ".pkg.tar.xz",
+    ".pkg.tar.zst",
+    ".src.tar",
+    ".src.tar.gz",
+    ".src.tar.xz",
+    ".src.tar.zst",
+)
+
+digest = hashlib.sha256()
+
+for path in sorted(root.rglob("*")):
+    rel = path.relative_to(root)
+
+    if any(part in ignore_dirs for part in rel.parts):
+        continue
+    if path.is_dir():
+        continue
+    if any(path.name.endswith(suffix) for suffix in ignore_suffixes):
+        continue
+
+    digest.update(str(rel).encode("utf-8"))
+    digest.update(b"\0")
+    digest.update(path.read_bytes())
+    digest.update(b"\0")
+
+print(digest.hexdigest())
+PY
+}
 
 mapfile -t PKGS < <(grep -vE '^[[:space:]]*(#|$)' "$CONFIG_DIR/packages.local.txt")
 
 for pkg in "${PKGS[@]}"; do
     pkg_dir="$BUILDER_ROOT/pkgbuilds/$pkg"
+    cache_file="$CACHE_DIR/$pkg"
     if [ ! -d "$pkg_dir" ]; then
         echo "Missing PKGBUILD directory for $pkg at $pkg_dir" >&2
         exit 1
     fi
 
-    echo "### Building $pkg"
-    chown -R "$MAKEPKG_USER:$MAKEPKG_USER" "$pkg_dir"
-    su "$MAKEPKG_USER" -c "cd '$pkg_dir' && rm -f ./*.pkg.tar.* && makepkg --nodeps --noconfirm --nocheck"
-
+    pkg_source_hash="$(compute_pkg_source_hash "$pkg_dir")"
     built_packages=()
-    shopt -s nullglob
-    for package_path in "$pkg_dir"/*.pkg.tar.zst "$pkg_dir"/*.pkg.tar.xz; do
-        case "$(basename "$package_path")" in
-            *-debug-*.pkg.tar.*|*-headers-*.pkg.tar.*) ;;
-            *) built_packages+=("$package_path") ;;
-        esac
-    done
-    shopt -u nullglob
 
-    if [ ${#built_packages[@]} -eq 0 ]; then
-        echo "No package archives were produced for $pkg" >&2
-        exit 1
+    if [ -f "$cache_file" ]; then
+        mapfile -t cache_lines < "$cache_file"
+        if [ "${#cache_lines[@]}" -gt 1 ] && [ "${cache_lines[0]}" = "$pkg_source_hash" ]; then
+            cache_hit=1
+            for package_name in "${cache_lines[@]:1}"; do
+                if [ -f "$REPO_DIR/$package_name" ]; then
+                    built_packages+=("$REPO_DIR/$package_name")
+                else
+                    cache_hit=0
+                    built_packages=()
+                    break
+                fi
+            done
+            if [ "$cache_hit" -eq 1 ] && [ ${#built_packages[@]} -gt 0 ]; then
+                echo "### Reusing cached build for $pkg"
+            fi
+        fi
     fi
 
-    cp "${built_packages[@]}" "$REPO_DIR/"
+    if [ ${#built_packages[@]} -eq 0 ]; then
+        echo "### Building $pkg"
+        chown -R "$MAKEPKG_USER:$MAKEPKG_USER" "$pkg_dir"
+        su "$MAKEPKG_USER" -c "cd '$pkg_dir' && rm -f ./*.pkg.tar.* ./*.src.tar.* && makepkg --nodeps --noconfirm --nocheck"
+
+        shopt -s nullglob
+        for package_path in "$pkg_dir"/*.pkg.tar.zst "$pkg_dir"/*.pkg.tar.xz; do
+            case "$(basename "$package_path")" in
+                *-debug-*.pkg.tar.*|*-headers-*.pkg.tar.*) ;;
+                *) built_packages+=("$package_path") ;;
+            esac
+        done
+        shopt -u nullglob
+
+        if [ ${#built_packages[@]} -eq 0 ]; then
+            echo "No package archives were produced for $pkg" >&2
+            exit 1
+        fi
+
+        if [ -f "$cache_file" ]; then
+            mapfile -t old_cache_lines < "$cache_file"
+            for old_package_name in "${old_cache_lines[@]:1}"; do
+                rm -f "$REPO_DIR/$old_package_name"
+            done
+        fi
+
+        cp -f "${built_packages[@]}" "$REPO_DIR/"
+
+        repo_packages=()
+        for package_path in "${built_packages[@]}"; do
+            repo_packages+=("$REPO_DIR/$(basename "$package_path")")
+        done
+        built_packages=("${repo_packages[@]}")
+
+        {
+            printf '%s\n' "$pkg_source_hash"
+            for package_path in "${built_packages[@]}"; do
+                basename "$package_path"
+            done
+        } > "$cache_file"
+    fi
 
     install_packages=()
     for package_path in "${built_packages[@]}"; do

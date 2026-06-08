@@ -66,6 +66,28 @@ scripts/stage-pages.sh
 
 The builder container uses an Arch Linux ARM `base-devel` image so it can run on `aarch64` runners and hosts.
 
+### Reuse Existing Package Builds
+
+Keep the local `repo/` directory between runs.
+`scripts/build-local-packages.sh` now stores a source hash per package under `repo/repo/.build-cache/` and reuses the already built package archives when the corresponding `pkgbuilds/<name>/` tree has not changed.
+If you change a PKGBUILD or any file under that package directory, only that package is rebuilt.
+The GitHub Actions publish workflow also restores the previous `repo/` cache first, so unchanged local packages are not rebuilt there either.
+
+### Update A Running Tablet
+
+Runtime fixes that belong in packages should be delivered through this repo so the tablet can pull them without a full image rebuild.
+For the current sensor suspend/resume recovery, publish the updated `pipa-sensors` package and then run on the tablet:
+
+```bash
+sudo pacman -Syu pipa-pkgs/pipa-sensors
+```
+
+That package now carries:
+
+- the sensor persist directory preparation helper
+- the safe sensor resume hook
+- the tmpfiles rule for `/mnt/vendor/persist/sensors/registry`
+
 To refresh the local `pkgbuilds/` tree from your main source repo:
 
 ```bash

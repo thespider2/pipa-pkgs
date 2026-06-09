@@ -1,9 +1,9 @@
 pkgbase=linux-pipa
 pkgname=(linux-pipa linux-pipa-headers)
 _srcname=linux
-_commit=5466320fd2e35e005da9ed0e9e73b18afab35999
+_commit=5466320fd2e3a5a4fc4669383d47c3dd09db6f1a
 pkgver=7.0.8
-pkgrel=6
+pkgrel=7
 pkgdesc='Linux kernel for Xiaomi Pad 6 (Pipa)'
 arch=('aarch64')
 url="https://github.com/aymanrgab/linux"

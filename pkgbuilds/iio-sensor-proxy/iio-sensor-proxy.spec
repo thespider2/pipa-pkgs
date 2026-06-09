@@ -24,6 +24,7 @@ BuildRequires:  gtk-doc
 BuildRequires:  pkgconfig(udev)
 BuildRequires:  pkgconfig(systemd)
 BuildRequires:  pkgconfig(libssc)
+Requires:       libssc >= 0.2.2
 BuildRequires:  pkgconfig(gio-2.0)
 BuildRequires:  pkgconfig(gudev-1.0)
 BuildRequires:  pkgconfig(polkit-gobject-1)

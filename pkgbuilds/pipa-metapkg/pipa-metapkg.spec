@@ -1,6 +1,6 @@
 Name: pipa-metapkg
 Version: 1.1
-Release: 4
+Release: 5
 Summary: Xiaomi Pad 6 support meta package
 License: MIT
 
@@ -12,6 +12,8 @@ Requires: pipa-grub-config
 Requires: pipa-sound-conf
 Requires: bootmac
 Requires: wireless-regdb
+Requires: tuned
+Requires: tuned-ppd
 
 %description
 Xiaomi Pad 6 support meta packges

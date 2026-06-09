@@ -10,3 +10,8 @@ for dir in \
 do
     install -d -m 0775 -o fastrpc -g fastrpc "$dir"
 done
+
+# hexagonrpcd tries to write to ../temp.json
+# Ensure the parent directory is writable by fastrpc
+chown fastrpc:fastrpc /mnt/vendor/persist/sensors/registry
+chmod 0775 /mnt/vendor/persist/sensors/registry

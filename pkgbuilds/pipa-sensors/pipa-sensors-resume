@@ -40,7 +40,6 @@ recover_display() {
 run_post_resume() {
     sleep 2
 
-    /usr/local/bin/pipa-prepare-sensor-persist || true
     systemctl restart hexagonrpcd-adsp-rootpd.service || true
     systemctl restart hexagonrpcd-sdsp.service || true
     systemctl restart hexagonrpcd-adsp-sensorspd.service || true

@@ -1,18 +1,74 @@
 #!/bin/sh
 set -eu
 
+find_graphical_vt() {
+    if ! command -v loginctl >/dev/null 2>&1; then
+        return 1
+    fi
+
+    loginctl list-sessions --no-legend 2>/dev/null | awk '
+        $4 == "seat0" && $6 == "user" && $7 ~ /^tty[0-9]+$/ {
+            sub(/^tty/, "", $7)
+            print $7
+            exit
+        }
+    '
+}
+
+recover_display() {
+    local target_vt alt_vt
+
+    [ -w /sys/class/graphics/fb0/blank ] && echo 0 > /sys/class/graphics/fb0/blank || true
+
+    if ! command -v chvt >/dev/null 2>&1; then
+        return 0
+    fi
+
+    target_vt="$(find_graphical_vt || true)"
+    [ -n "$target_vt" ] || return 0
+
+    alt_vt=1
+    [ "$target_vt" = "$alt_vt" ] && alt_vt=2
+
+    chvt "$alt_vt" >/dev/null 2>&1 || true
+    sleep 1
+    chvt "$target_vt" >/dev/null 2>&1 || true
+
+    [ -w /sys/class/graphics/fb0/blank ] && echo 0 > /sys/class/graphics/fb0/blank || true
+}
+
+run_post_resume() {
+    sleep 2
+
+    /usr/local/bin/pipa-prepare-sensor-persist || true
+    systemctl restart hexagonrpcd-adsp-rootpd.service || true
+    systemctl restart hexagonrpcd-sdsp.service || true
+    systemctl restart hexagonrpcd-adsp-sensorspd.service || true
+    systemctl restart iio-sensor-proxy.service || true
+    recover_display
+}
+
+case "${1:-}" in
+    run-post-resume)
+        run_post_resume
+        exit 0
+        ;;
+esac
+
 case "${1:-}/${2:-}" in
     post/*)
+        if command -v systemd-run >/dev/null 2>&1; then
+            systemd-run \
+                --unit=pipa-sensors-resume \
+                --collect \
+                --no-block \
+                "$0" run-post-resume || true
+            exit 0
+        fi
+
+        run_post_resume
         ;;
     *)
         exit 0
         ;;
 esac
-
-sleep 2
-
-/usr/local/bin/pipa-prepare-sensor-persist || true
-systemctl restart hexagonrpcd-adsp-rootpd.service || true
-systemctl restart hexagonrpcd-sdsp.service || true
-systemctl restart hexagonrpcd-adsp-sensorspd.service || true
-systemctl restart iio-sensor-proxy.service || true

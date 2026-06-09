@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+log() {
+    printf 'linux-pipa.install: %s\n' "$*" >&2
+}
+
+ensure_tmpdir() {
+    local tmpdir="${TMPDIR:-/tmp}"
+
+    mkdir -p /tmp /var/tmp
+    chmod 1777 /tmp /var/tmp 2>/dev/null || true
+
+    if [ ! -d "$tmpdir" ] || [ ! -w "$tmpdir" ]; then
+        tmpdir=/tmp
+    fi
+
+    export TMPDIR="$tmpdir"
+}
+
+refresh_boot_artifacts() {
+    local pkgver="$1"
+    local kernver="${pkgver}-pipa"
+    local module_dir="/usr/lib/modules/$kernver"
+    local initramfs="$module_dir/initramfs-$kernver.img"
+
+    ensure_tmpdir
+
+    if [ ! -d "$module_dir" ]; then
+        log "missing module directory: $module_dir"
+        return 1
+    fi
+
+    log "building initramfs for $kernver"
+    dracut --force --kver "$kernver" "$initramfs"
+
+    if [ -x /usr/local/bin/pipa-refresh-grub-config ]; then
+        log "refreshing GRUB menu"
+        PIPA_INITRAMFS_SOURCE="$initramfs" /usr/local/bin/pipa-refresh-grub-config
+    else
+        log "GRUB refresh helper not installed; skipping"
+    fi
+}
+
+post_install() {
+    refresh_boot_artifacts "$1"
+}
+
+post_upgrade() {
+    refresh_boot_artifacts "$1"
+}

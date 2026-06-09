@@ -1,9 +1,9 @@
 pkgbase=linux-pipa
 pkgname=(linux-pipa linux-pipa-headers)
 _srcname=linux
-_commit=ac435427b11811ab0f530dfa2821dad00e304240
+_commit=d1bb5c46c7dc21d74e6f3ae5b33b2d8412b0426c
 pkgver=7.0.8
-pkgrel=2
+pkgrel=3
 pkgdesc='Linux kernel for Xiaomi Pad 6 (Pipa)'
 arch=('aarch64')
 url="https://github.com/aymanrgab/linux"
@@ -13,6 +13,7 @@ makedepends=(
   'tar' 'xz' 'rsync'
 )
 options=('!strip')
+install=linux-pipa.install
 source=(
   "linux-${_commit}.tar.gz::https://github.com/aymanrgab/linux/archive/${_commit}.tar.gz"
   'pipa.config'
@@ -33,7 +34,7 @@ build() {
 
 package_linux-pipa() {
   pkgdesc="The Linux kernel and modules for Xiaomi Pad 6"
-  depends=('coreutils' 'kmod')
+  depends=('coreutils' 'dracut' 'kmod')
   provides=('linux')
 
   cd $_srcname-${_commit}

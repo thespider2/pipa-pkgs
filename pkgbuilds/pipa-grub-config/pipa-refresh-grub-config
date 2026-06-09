@@ -18,6 +18,19 @@ log() {
     printf 'pipa-grub-config: %s\n' "$*" >&2
 }
 
+ensure_tmpdir() {
+    local tmpdir="${TMPDIR:-/tmp}"
+
+    mkdir -p /tmp /var/tmp
+    chmod 1777 /tmp /var/tmp 2>/dev/null || true
+
+    if [ ! -d "$tmpdir" ] || [ ! -w "$tmpdir" ]; then
+        tmpdir=/tmp
+    fi
+
+    export TMPDIR="$tmpdir"
+}
+
 require_file() {
     local path="$1"
     if [ ! -e "$path" ]; then
@@ -33,6 +46,7 @@ fi
 
 mkdir -p "$GRUB_DIR"
 require_file "$DTB_PATH"
+ensure_tmpdir
 
 if [ -f "$BOOT_DIR/$RAW_KERNEL_REL" ]; then
     cat "$BOOT_DIR/$RAW_KERNEL_REL" "$DTB_PATH" > "$BOOT_DIR/$PRIMARY_RAW_REL"
@@ -65,11 +79,17 @@ if [ -f "$BOOT_DIR/$GZIP_KERNEL_REL" ]; then
 fi
 
 initramfs_source=
-for candidate in /usr/lib/modules/*/initramfs-*.img; do
-    if [ -f "$candidate" ]; then
-        initramfs_source="$candidate"
+if [ -n "${PIPA_INITRAMFS_SOURCE:-}" ] && [ -f "${PIPA_INITRAMFS_SOURCE}" ]; then
+    initramfs_source="${PIPA_INITRAMFS_SOURCE}"
+else
+    shopt -s nullglob
+    initramfs_candidates=(/usr/lib/modules/*/initramfs-*.img)
+    shopt -u nullglob
+
+    if [ "${#initramfs_candidates[@]}" -gt 0 ]; then
+        initramfs_source="$(printf '%s\n' "${initramfs_candidates[@]}" | xargs -r ls -1t | head -n1)"
     fi
-done
+fi
 if [ -z "$initramfs_source" ]; then
     log "no initramfs image found under /usr/lib/modules"
     exit 1

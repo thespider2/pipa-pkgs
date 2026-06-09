@@ -45,12 +45,14 @@ Requires:   %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %install
 %meson_install
+ln -sf libssc.so.2 %{buildroot}%{_libdir}/libssc.so.0
 
 %files
 %license LICENSE
 %{_bindir}/ssc-server
 %{_bindir}/ssc-server-tests
 %{_bindir}/ssccli
+%{_libdir}/%{name}.so.2
 %{_libdir}/%{name}.so.0
 
 %files devel

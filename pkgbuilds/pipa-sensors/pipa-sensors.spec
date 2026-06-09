@@ -1,6 +1,6 @@
 Name: pipa-sensors
 Version: 1.2
-Release: 8
+Release: 9
 Summary: Sensors configs for the Xiaomi Pad 6
 Source1: 81-libssc-xiaomi-pipa.rules
 Source2: hexagonrpcd-sdsp.conf

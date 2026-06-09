@@ -1,7 +1,7 @@
 pkgbase=linux-pipa
 pkgname=(linux-pipa linux-pipa-headers)
 _srcname=linux
-_commit=d1bb5c46c7dc21d74e6f3ae5b33b2d8412b0426c
+_commit=ac435427b11811ab0f530dfa2821dad00e304240
 pkgver=7.0.8
 pkgrel=3
 pkgdesc='Linux kernel for Xiaomi Pad 6 (Pipa)'
@@ -17,11 +17,15 @@ install=linux-pipa.install
 source=(
   "linux-${_commit}.tar.gz::https://github.com/aymanrgab/linux/archive/${_commit}.tar.gz"
   'pipa.config'
+  '0001-soundwire-wait-for-codec-init-after-reattach.patch'
+  '0001-arm64-dts-qcom-sm8250-pipa-enable-pm8150b_fg.patch'
 )
-sha256sums=('SKIP' 'SKIP')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 prepare() {
   cd $_srcname-${_commit}
+  patch -p1 < ../0001-soundwire-wait-for-codec-init-after-reattach.patch
+  patch -p1 < ../0001-arm64-dts-qcom-sm8250-pipa-enable-pm8150b_fg.patch
   cp ../pipa.config .config
   
   make EXTRAVERSION="-${pkgrel}-pipa" olddefconfig

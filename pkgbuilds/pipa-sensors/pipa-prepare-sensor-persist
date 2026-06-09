@@ -2,6 +2,7 @@
 set -eu
 
 for dir in \
+    /mnt/vendor \
     /mnt/vendor/persist \
     /mnt/vendor/persist/sensors \
     /mnt/vendor/persist/sensors/registry \

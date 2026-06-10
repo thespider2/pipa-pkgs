@@ -4,8 +4,7 @@ set -euo pipefail
 BOOT_DIR=/boot
 GRUB_DIR="$BOOT_DIR/grub2"
 GRUB_CFG="$GRUB_DIR/grub.cfg"
-DTB_REL=dtbs/qcom/sm8250-xiaomi-pipa.dtb
-DTB_PATH="$BOOT_DIR/$DTB_REL"
+declare -a DTB_RELS=()
 GZIP_KERNEL_REL=Image.gz
 RAW_KERNEL_REL=Image
 PRIMARY_RAW_REL=Image-pipa-dtb
@@ -39,21 +38,74 @@ require_file() {
     fi
 }
 
+dtb_title() {
+    case "$(basename "$1")" in
+        sm8250-xiaomi-pipa-csot.dtb)
+            printf 'CSOT Panel'
+            ;;
+        sm8250-xiaomi-pipa-tianma.dtb)
+            printf 'Tianma Panel'
+            ;;
+        sm8250-xiaomi-pipa.dtb)
+            printf 'Generic DTB'
+            ;;
+        *)
+            printf '%s' "$(basename "$1" .dtb)"
+            ;;
+    esac
+}
+
+discover_dtbs() {
+    local path
+
+    if [ -n "${PIPA_DTB_REL:-}" ]; then
+        require_file "$BOOT_DIR/$PIPA_DTB_REL"
+        DTB_RELS=("$PIPA_DTB_REL")
+        return
+    fi
+
+    if [ -f "$BOOT_DIR/dtbs/qcom/sm8250-xiaomi-pipa.dtb" ]; then
+        DTB_RELS+=(dtbs/qcom/sm8250-xiaomi-pipa.dtb)
+    fi
+
+    shopt -s nullglob
+    for path in "$BOOT_DIR"/dtbs/qcom/sm8250-xiaomi-pipa-*.dtb; do
+        DTB_RELS+=("${path#$BOOT_DIR/}")
+    done
+    shopt -u nullglob
+
+    if [ "${#DTB_RELS[@]}" -eq 0 ]; then
+        log "no Xiaomi Pad 6 DTB found under $BOOT_DIR/dtbs/qcom"
+        exit 1
+    fi
+}
+
 if ! mountpoint -q "$BOOT_DIR"; then
     log "$BOOT_DIR is not mounted; refusing to write GRUB config"
     exit 1
 fi
 
 mkdir -p "$GRUB_DIR"
-require_file "$DTB_PATH"
 ensure_tmpdir
+discover_dtbs
 
-if [ -f "$BOOT_DIR/$RAW_KERNEL_REL" ]; then
-    cat "$BOOT_DIR/$RAW_KERNEL_REL" "$DTB_PATH" > "$BOOT_DIR/$PRIMARY_RAW_REL"
+primary_dtb_rel=
+if [ "${#DTB_RELS[@]}" -eq 1 ]; then
+    primary_dtb_rel="${DTB_RELS[0]}"
+elif [ -f "$BOOT_DIR/dtbs/qcom/sm8250-xiaomi-pipa.dtb" ]; then
+    primary_dtb_rel=dtbs/qcom/sm8250-xiaomi-pipa.dtb
 fi
 
-if [ -f "$BOOT_DIR/$GZIP_KERNEL_REL" ]; then
-    cat "$BOOT_DIR/$GZIP_KERNEL_REL" "$DTB_PATH" > "$BOOT_DIR/$PRIMARY_GZIP_REL"
+if [ -n "$primary_dtb_rel" ]; then
+    if [ -f "$BOOT_DIR/$RAW_KERNEL_REL" ]; then
+        cat "$BOOT_DIR/$RAW_KERNEL_REL" "$BOOT_DIR/$primary_dtb_rel" > "$BOOT_DIR/$PRIMARY_RAW_REL"
+    fi
+
+    if [ -f "$BOOT_DIR/$GZIP_KERNEL_REL" ]; then
+        cat "$BOOT_DIR/$GZIP_KERNEL_REL" "$BOOT_DIR/$primary_dtb_rel" > "$BOOT_DIR/$PRIMARY_GZIP_REL"
+    fi
+else
+    rm -f "$BOOT_DIR/$PRIMARY_RAW_REL" "$BOOT_DIR/$PRIMARY_GZIP_REL"
 fi
 
 primary_kernel_rel=
@@ -156,22 +208,24 @@ trap 'rm -f "$tmp_cfg"' EXIT
         printf '}\n\n'
     fi
 
-    printf 'menuentry "EndeavourOS ARM (Pipa) - Separate DTB Fallback" {\n'
-    printf '    devicetree ($boot)/%s\n' "$DTB_REL"
-    printf '    linux ($boot)/%s %s\n' "$separate_kernel_rel" "$cmdline"
-    printf '    initrd ($boot)/%s\n' "$INITRAMFS_STABLE_REL"
-    printf '}\n\n'
-
-    if [ -n "$gzip_kernel_rel" ] && [ "$gzip_kernel_rel" != "$separate_kernel_rel" ]; then
-        printf 'menuentry "EndeavourOS ARM (Pipa) - Gzipped Kernel Fallback" {\n'
-        printf '    devicetree ($boot)/%s\n' "$DTB_REL"
-        printf '    linux ($boot)/%s %s\n' "$gzip_kernel_rel" "$cmdline"
+    for dtb_rel in "${DTB_RELS[@]}"; do
+        printf 'menuentry "EndeavourOS ARM (Pipa) - %s" {\n' "$(dtb_title "$dtb_rel")"
+        printf '    devicetree ($boot)/%s\n' "$dtb_rel"
+        printf '    linux ($boot)/%s %s\n' "$separate_kernel_rel" "$cmdline"
         printf '    initrd ($boot)/%s\n' "$INITRAMFS_STABLE_REL"
         printf '}\n\n'
-    fi
+
+        if [ -n "$gzip_kernel_rel" ] && [ "$gzip_kernel_rel" != "$separate_kernel_rel" ]; then
+            printf 'menuentry "EndeavourOS ARM (Pipa) - %s (Gzip)" {\n' "$(dtb_title "$dtb_rel")"
+            printf '    devicetree ($boot)/%s\n' "$dtb_rel"
+            printf '    linux ($boot)/%s %s\n' "$gzip_kernel_rel" "$cmdline"
+            printf '    initrd ($boot)/%s\n' "$INITRAMFS_STABLE_REL"
+            printf '}\n\n'
+        fi
+    done
 
     printf 'menuentry "EndeavourOS ARM (Pipa) - Debug Verbose" {\n'
-    printf '    devicetree ($boot)/%s\n' "$DTB_REL"
+    printf '    devicetree ($boot)/%s\n' "${DTB_RELS[0]}"
     printf '    linux ($boot)/%s %s loglevel=7 systemd.log_level=debug\n' "$separate_kernel_rel" "$cmdline"
     printf '    initrd ($boot)/%s\n' "$INITRAMFS_STABLE_REL"
     printf '}\n'

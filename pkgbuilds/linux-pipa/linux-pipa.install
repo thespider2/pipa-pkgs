@@ -19,12 +19,31 @@ ensure_tmpdir() {
 }
 
 refresh_boot_artifacts() {
-    local pkgver="$1"
-    local kernver="${pkgver}-pipa"
-    local module_dir="/usr/lib/modules/$kernver"
+    local kernver=
+    local module_dir=
     local initramfs="$module_dir/initramfs-$kernver.img"
+    local release_file=/usr/share/kernel/xiaomi-pipa/kernel.release
 
     ensure_tmpdir
+
+    if [ -f "$release_file" ]; then
+        kernver="$(tr -d '\n' < "$release_file")"
+    else
+        shopt -s nullglob
+        local pipa_modules=(/usr/lib/modules/*pipa*)
+        shopt -u nullglob
+        if [ "${#pipa_modules[@]}" -gt 0 ]; then
+            kernver="$(basename "$(printf '%s\n' "${pipa_modules[@]}" | xargs -r ls -1dt | head -n1)")"
+        fi
+    fi
+
+    if [ -z "$kernver" ]; then
+        log "unable to determine installed kernel release"
+        return 1
+    fi
+
+    module_dir="/usr/lib/modules/$kernver"
+    initramfs="$module_dir/initramfs-$kernver.img"
 
     if [ ! -d "$module_dir" ]; then
         log "missing module directory: $module_dir"

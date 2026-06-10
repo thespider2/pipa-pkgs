@@ -30,8 +30,6 @@ source=(
   '0010-HACK-ASoC-codecs-aw88261-add-xiaomi-pipa-hacks.patch'
   '0011-FROMLIST-ASoC-qcom-qdsp6-q6afe-fix-clk-vote-response.patch'
   '0012-HACK-ASoC-qcom-qdsp6-q6afe-pretend-the-AFE-vote-didn.patch'
-  '0013-nt36xxx-add-pen-input-resolution.patch'
-  '0014-input-nt36xxx-enable-pen-support.patch'
   '0015-nt36xxx-fix-pen-max-min-calculation.patch'
   '0016-input-keyboard-add-nanosic-803-driver.patch'
   '0017-input-keyboard-nanosic-803-add-touchpad-button-event.patch'
@@ -41,8 +39,6 @@ source=(
   '0021-arm64-dts-sm8250-xiaomi-pipa-fix-nanosic-gpio-flags.patch'
 )
 sha256sums=(
-  'SKIP'
-  'SKIP'
   'SKIP'
   'SKIP'
   'SKIP'

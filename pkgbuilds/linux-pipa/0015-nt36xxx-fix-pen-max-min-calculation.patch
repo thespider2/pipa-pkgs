@@ -1,0 +1,28 @@
+From 12b0bec49fc3e1c91dc369d8fe63715dd1f59235 Mon Sep 17 00:00:00 2001
+From: Luka Panio <lukapanio@gmail.com>
+Date: Sun, 29 Dec 2024 19:21:20 +0100
+Subject: [PATCH] nt36xxx: fix pen max/min calculation
+
+(cherry picked from commit bb04a13f70bced6c8672c5d883833c81ed56790b)
+---
+ drivers/input/touchscreen/nt36523/nt36xxx.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/input/touchscreen/nt36523/nt36xxx.c b/drivers/input/touchscreen/nt36523/nt36xxx.c
+index 16ab81ade4a2..cd2d0c011edd 100644
+--- a/drivers/input/touchscreen/nt36523/nt36xxx.c
++++ b/drivers/input/touchscreen/nt36523/nt36xxx.c
+@@ -1375,8 +1375,8 @@ NVT_LOG("Hi2\n");
+ 		int x_max, y_max;
+ 
+ 		if (ts->wgp_stylus) {
+-			x_max = ts->abs_x_max * 2 - 1;
+-			y_max = ts->abs_y_max * 2 - 1;
++			x_max = ts->abs_x_max * 10 - 1;
++			y_max = ts->abs_y_max * 10 - 1;
+ 		} else {
+ 			x_max = ts->abs_x_max - 1;
+ 			y_max = ts->abs_y_max - 1;
+-- 
+2.54.0
+

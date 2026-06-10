@@ -1,35 +1,90 @@
 pkgbase=linux-pipa
 pkgname=(linux-pipa linux-pipa-headers)
 _srcname=linux
-_commit=cc2115d94201849e3714ba60a85f492e053329ae
-pkgver=7.0.8
-pkgrel=24
+_flavor=xiaomi-pipa
+pkgver=7.0.6
+pkgrel=1
 pkgdesc='Linux kernel for Xiaomi Pad 6 (Pipa)'
 arch=('aarch64')
-url="https://github.com/aymanrgab/linux"
+url="https://kernel.org"
 license=('GPL2')
 makedepends=(
-  'bc' 'bison' 'cpio' 'flex' 'kmod' 'pahole' 'python'
-  'tar' 'xz' 'rsync'
+  'bc' 'bison' 'clang' 'diffutils' 'elfutils' 'flex' 'kmod' 'lld'
+  'llvm' 'openssl' 'pahole' 'perl' 'python' 'rsync' 'rust'
+  'rust-bindgen' 'tar' 'xz' 'zstd'
 )
 options=('!strip')
 install=linux-pipa.install
 source=(
-  "linux-${_commit}.tar.gz::https://github.com/aymanrgab/linux/archive/${_commit}.tar.gz"
-  'pipa.config'
+  "linux-${pkgver}.tar.xz::https://cdn.kernel.org/pub/linux/kernel/v${pkgver%%.*}.x/linux-${pkgver}.tar.xz"
+  "config-$_flavor.$arch"
+  '0001-arm64-dts-qcom-sm8250-xiaomi-pipa-Add-device-tree-fo.patch'
+  '0002-power-supply-Add-driver-for-Qualcomm-PMIC-fuel-gauge.patch'
+  '0003-Input-Add-nt36523-touchscreen-driver.patch'
+  '0004-drm-msm-dsi-change-sync-mode-to-sync-on-DSI0-rather-.patch'
+  '0005-drm-msm-dsi-support-DSC-configurations-with-slice_pe.patch'
+  '0006-drm-panel-Add-support-for-Novatek-NT36532-panel.patch'
+  '0007-drivers-media-i2c-ov13b10-add-device-tree-support-an.patch'
+  '0008-ASoC-qcom-sm8250-add-tertiary-tdm-support.patch'
+  '0009-UPSTREAM-ASoC-codecs-aw88261-backport-linux-next-cha.patch'
+  '0010-HACK-ASoC-codecs-aw88261-add-xiaomi-pipa-hacks.patch'
+  '0011-FROMLIST-ASoC-qcom-qdsp6-q6afe-fix-clk-vote-response.patch'
+  '0012-HACK-ASoC-qcom-qdsp6-q6afe-pretend-the-AFE-vote-didn.patch'
+  '0013-nt36xxx-add-pen-input-resolution.patch'
+  '0014-input-nt36xxx-enable-pen-support.patch'
+  '0015-nt36xxx-fix-pen-max-min-calculation.patch'
+  '0016-input-keyboard-add-nanosic-803-driver.patch'
+  '0017-input-keyboard-nanosic-803-add-touchpad-button-event.patch'
+  '0018-nanosic-803-refactor-keyboard-touchpad-registering.patch'
+  '0019-arm64-dts-sm8250-xiaomi-pipa-enable-nanosic-803.patch'
+  '0020-arm64-dts-sm8250-xiaomi-pipa-add-nanosic-pinctrl.patch'
+  '0021-arm64-dts-sm8250-xiaomi-pipa-fix-nanosic-gpio-flags.patch'
 )
-sha256sums=('SKIP' 'SKIP')
+sha256sums=(
+  'SKIP'
+  'SKIP'
+  'SKIP'
+  'SKIP'
+  'SKIP'
+  'SKIP'
+  'SKIP'
+  'SKIP'
+  'SKIP'
+  'SKIP'
+  'SKIP'
+  'SKIP'
+  'SKIP'
+  'SKIP'
+  'SKIP'
+  'SKIP'
+  'SKIP'
+  'SKIP'
+  'SKIP'
+  'SKIP'
+  'SKIP'
+  'SKIP'
+  'SKIP'
+)
 
 prepare() {
-  cd $_srcname-${_commit}
-  cp ../pipa.config .config
-  
-  make EXTRAVERSION="-${pkgrel}-pipa" olddefconfig
+  cd "$srcdir/$_srcname-$pkgver"
+
+  cp "$srcdir/config-$_flavor.$arch" .config
+
+  for patch in "$srcdir"/0*.patch; do
+    patch -Np1 -i "$patch"
+  done
+
+  make ARCH=arm64 LLVM=1 olddefconfig
 }
 
 build() {
-  cd $_srcname-${_commit}
-  make EXTRAVERSION="-${pkgrel}-pipa" -j$(nproc) Image Image.gz modules dtbs
+  cd "$srcdir/$_srcname-$pkgver"
+
+  unset LDFLAGS
+  make ARCH=arm64 LLVM=1 \
+    KBUILD_BUILD_VERSION="$((pkgrel + 1))-${_flavor}" \
+    Image Image.gz modules dtbs
 }
 
 package_linux-pipa() {
@@ -37,27 +92,32 @@ package_linux-pipa() {
   depends=('coreutils' 'dracut' 'kmod')
   provides=('linux')
 
-  cd $_srcname-${_commit}
-  
-  local kernver="$(make EXTRAVERSION="-${pkgrel}-pipa" kernelrelease)"
+  cd "$srcdir/$_srcname-$pkgver"
 
-  mkdir -p "$pkgdir/boot/dtbs/qcom"
-  cp arch/arm64/boot/Image.gz "$pkgdir/boot/vmlinuz-$kernver"
-  cp arch/arm64/boot/Image "$pkgdir/boot/vmlinuz-$kernver.uncompressed"
+  local kernver="$(make ARCH=arm64 LLVM=1 kernelrelease)"
+
+  make ARCH=arm64 LLVM=1 \
+    INSTALL_PATH="$pkgdir/boot" \
+    INSTALL_MOD_PATH="$pkgdir/usr" \
+    INSTALL_MOD_STRIP=1 \
+    INSTALL_DTBS_PATH="$pkgdir/boot/dtbs" \
+    modules_install zinstall dtbs_install
+
   cp arch/arm64/boot/Image.gz "$pkgdir/boot/Image.gz"
   cp arch/arm64/boot/Image "$pkgdir/boot/Image"
   cp System.map "$pkgdir/boot/System.map-$kernver"
   cp .config "$pkgdir/boot/config-$kernver"
-  cp arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dtb "$pkgdir/boot/dtbs/qcom/"
 
-  make EXTRAVERSION="-${pkgrel}-pipa" INSTALL_MOD_PATH="$pkgdir/usr" modules_install
-  
   mkdir -p "$pkgdir/usr/lib/modules/$kernver/devicetree"
-  cp arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dtb "$pkgdir/usr/lib/modules/$kernver/devicetree/"
+  cp arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa-*.dtb \
+    "$pkgdir/usr/lib/modules/$kernver/devicetree/"
   ln -s devicetree "$pkgdir/usr/lib/modules/$kernver/dtb"
   cp arch/arm64/boot/Image.gz "$pkgdir/usr/lib/modules/$kernver/vmlinuz"
   cp arch/arm64/boot/Image "$pkgdir/usr/lib/modules/$kernver/vmlinuz.uncompressed"
-  
+
+  install -Dm644 include/config/kernel.release \
+    "$pkgdir/usr/share/kernel/$_flavor/kernel.release"
+
   rm -f "$pkgdir/usr/lib/modules/$kernver/build"
   rm -f "$pkgdir/usr/lib/modules/$kernver/source"
 }
@@ -65,9 +125,7 @@ package_linux-pipa() {
 package_linux-pipa-headers() {
   pkgdesc="Header files and scripts for building modules for Linux kernel"
   provides=('linux-headers')
-  
-  cd $_srcname-${_commit}
-  local kernver="$(make EXTRAVERSION="-${pkgrel}-pipa" kernelrelease)"
-  
-  make EXTRAVERSION="-${pkgrel}-pipa" INSTALL_HDR_PATH="$pkgdir/usr" headers_install
+
+  cd "$srcdir/$_srcname-$pkgver"
+  make ARCH=arm64 LLVM=1 INSTALL_HDR_PATH="$pkgdir/usr" headers_install
 }

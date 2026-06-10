@@ -1,0 +1,49 @@
+From 441c62d538bb4c5e90fa336601c9a37b09268788 Mon Sep 17 00:00:00 2001
+From: vipoll <vipollmail@gmail.com>
+Date: Thu, 25 Sep 2025 11:35:39 +0400
+Subject: [PATCH] arm64: dts: sm8250-xiaomi-pipa: add nanosic pinctrl
+
+(cherry picked from commit 80f8f74ca794789bace23ff63929dff75026502b)
+---
+ .../arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts b/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts
+index 4a221a238c72..f15ce00af97c 100644
+--- a/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts
++++ b/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts
+@@ -784,6 +784,8 @@ nanosic_803: nanosic803@4c {
+ 		compatible = "nanosic,803";
+ 		status = "okay";
+ 		reg = <0x4c>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&nanosic_default>;
+ 		reset-gpios = <&tlmm 141 GPIO_ACTIVE_LOW>;
+ 		sleep-gpios = <&tlmm 155 GPIO_ACTIVE_LOW>;
+ 		vdd-gpios = <&tlmm 127 GPIO_ACTIVE_HIGH>;
+@@ -1413,6 +1415,22 @@ aw88230_sl_int: aw88230-sl-int-state {
+ 		input-enable;
+ 	};
+ 
++	nanosic_default: nanosic-default-state {
++		sleep-pins {
++			pins = "gpio155";
++			function = "gpio";
++			drive-strength = <2>;
++			output-low;
++		};
++
++		reset-pins {
++			pins = "gpio141";
++			function = "gpio";
++			drive-strength = <2>;
++			output-low;
++		};
++	};
++
+ 	hall {
+ 		hall_intr3_active: hall_intr3_active {
+ 			/* active state */
+-- 
+2.54.0
+

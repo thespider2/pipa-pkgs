@@ -39,9 +39,11 @@ source=(
   '0015-nt36xxx-fix-pen-max-min-calculation.patch'
   '0016-input-keyboard-add-nanosic-803-driver.patch'
   '0018-nanosic-803-refactor-keyboard-touchpad-registering.patch'
+  '0020-nanosic-803-fix-7.0.6-build.patch'
   '0019-arm64-dts-sm8250-xiaomi-pipa-enable-nanosic-803.patch'
 )
 sha256sums=(
+  'SKIP'
   'SKIP'
   'SKIP'
   'SKIP'

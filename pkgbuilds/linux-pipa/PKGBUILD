@@ -15,6 +15,12 @@ makedepends=(
 )
 options=('!strip')
 install=linux-pipa.install
+_make_flags=(ARCH=arm64)
+
+if command -v clang >/dev/null 2>&1 && command -v ld.lld >/dev/null 2>&1; then
+  _make_flags+=(LLVM=1)
+fi
+
 source=(
   "linux-${pkgver}.tar.xz::https://cdn.kernel.org/pub/linux/kernel/v${pkgver%%.*}.x/linux-${pkgver}.tar.xz"
   "config-$_flavor.$arch"
@@ -65,14 +71,14 @@ prepare() {
     patch -Np1 -i "$patch"
   done
 
-  make ARCH=arm64 LLVM=1 olddefconfig
+  make "${_make_flags[@]}" olddefconfig
 }
 
 build() {
   cd "$srcdir/$_srcname-$pkgver"
 
   unset LDFLAGS
-  make ARCH=arm64 LLVM=1 \
+  make "${_make_flags[@]}" \
     KBUILD_BUILD_VERSION="$((pkgrel + 1))-${_flavor}" \
     Image Image.gz modules dtbs
 }
@@ -84,9 +90,10 @@ package_linux-pipa() {
 
   cd "$srcdir/$_srcname-$pkgver"
 
-  local kernver="$(make ARCH=arm64 LLVM=1 kernelrelease)"
+  local kernver
+  kernver="$(make "${_make_flags[@]}" kernelrelease)"
 
-  make ARCH=arm64 LLVM=1 \
+  make "${_make_flags[@]}" \
     INSTALL_PATH="$pkgdir/boot" \
     INSTALL_MOD_PATH="$pkgdir/usr" \
     INSTALL_MOD_STRIP=1 \
@@ -117,5 +124,5 @@ package_linux-pipa-headers() {
   provides=('linux-headers')
 
   cd "$srcdir/$_srcname-$pkgver"
-  make ARCH=arm64 LLVM=1 INSTALL_HDR_PATH="$pkgdir/usr" headers_install
+  make "${_make_flags[@]}" INSTALL_HDR_PATH="$pkgdir/usr" headers_install
 }

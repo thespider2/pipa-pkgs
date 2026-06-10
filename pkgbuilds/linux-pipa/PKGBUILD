@@ -34,12 +34,8 @@ source=(
   '0016-input-keyboard-add-nanosic-803-driver.patch'
   '0018-nanosic-803-refactor-keyboard-touchpad-registering.patch'
   '0019-arm64-dts-sm8250-xiaomi-pipa-enable-nanosic-803.patch'
-  '0020-arm64-dts-sm8250-xiaomi-pipa-add-nanosic-pinctrl.patch'
-  '0021-arm64-dts-sm8250-xiaomi-pipa-fix-nanosic-gpio-flags.patch'
 )
 sha256sums=(
-  'SKIP'
-  'SKIP'
   'SKIP'
   'SKIP'
   'SKIP'

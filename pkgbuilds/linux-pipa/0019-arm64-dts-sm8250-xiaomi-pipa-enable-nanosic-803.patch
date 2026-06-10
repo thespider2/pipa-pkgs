@@ -1,57 +1,69 @@
-From 26eaec59f88b4f186111e27fa226dd857f2afa86 Mon Sep 17 00:00:00 2001
-From: Luka Panio <lukapanio@gmail.com>
-Date: Sun, 12 Jan 2025 22:21:17 +0100
-Subject: [PATCH] pipa: Enable nanosic_803
-
-(cherry picked from commit 44db284ec801f5078500a983eff20b2619c2f23d)
----
- .../boot/dts/qcom/sm8250-xiaomi-pipa.dts      | 26 ++++++++++++++++++-
- 1 file changed, 25 insertions(+), 1 deletion(-)
-
-diff --git a/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts b/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts
-index 242dc5be6c58..e9fd15f9eb2d 100644
---- a/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts
-+++ b/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts
-@@ -439,7 +439,13 @@ vreg_l1c_1p8: ldo1 {
- 			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+diff --git a/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa-common.dtsi b/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa-common.dtsi
+--- a/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa-common.dtsi
++++ b/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa-common.dtsi
+@@ -528,7 +528,14 @@
+ regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
  		};
  
--		/* L2-4 are unused. */
-+		/* L2 & L3 are unused. */
-+		vreg_l4c_1p8: ldo4 {
-+			regulator-name = "vreg_l4c_1p8";
-+			regulator-min-microvolt = <1800000>;
-+			regulator-max-microvolt = <1980000>;
-+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
-+		};
+---/* L2 and L4 are unused. */
++--/* L2 is unused. */
++
++--vreg_l4c_1p8: ldo4 {
++---regulator-name = "vreg_l4c_1p8";
++---regulator-min-microvolt = <1800000>;
++---regulator-max-microvolt = <1980000>;
++---regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
++--};
  
- 		vreg_l5c_1p8: ldo5 {
- 			regulator-name = "vreg_l5c_1p8";
-@@ -615,6 +621,24 @@ &mdss_dsi1_phy {
- 	status = "okay";
+ 		vreg_l3c_1p2: ldo3 {
+ 			regulator-name = "vreg_l3c_1p2";
+@@ -710,6 +717,25 @@
+ 	};
  };
  
 +&i2c2 {
-+	status = "okay";
++-status = "okay";
 +
-+	nanosic_803: nanosic803@4c {
-+		compatible = "nanosic,803";
-+		status = "okay";
-+		reg = <0x4c>;
-+		reset-gpios = <&tlmm 141 0x00>;
-+		sleep-gpios = <&tlmm 155 0x00>;
-+		vdd-gpios = <&tlmm 127 0x00>;
-+		irq-gpios = <&tlmm 100 0x6001>;
-+		touchpad-resolution-x = <2879>;
-+		touchpad-resolution-y = <1799>;
-+		vdd_1v8-supply = <&vreg_l4c_1p8>;
-+		vdd_3v3-supply = <&vreg_l10c_3p3>;
-+	};
++-nanosic_803: nanosic803@4c {
++--compatible = "nanosic,803";
++--status = "okay";
++--reg = <0x4c>;
++--pinctrl-names = "default";
++--pinctrl-0 = <&nanosic_default>;
++--reset-gpios = <&tlmm 141 GPIO_ACTIVE_LOW>;
++--sleep-gpios = <&tlmm 155 GPIO_ACTIVE_LOW>;
++--vdd-gpios = <&tlmm 127 GPIO_ACTIVE_HIGH>;
++--irq-gpios = <&tlmm 100 IRQ_TYPE_EDGE_RISING>;
++--touchpad-resolution-x = <2879>;
++--touchpad-resolution-y = <1799>;
++--vdd_1v8-supply = <&vreg_l4c_1p8>;
++--vdd_3v3-supply = <&vreg_l10c_3p3>;
++-};
 +};
 +
- &i2c8 {
+ &i2c3 {
  	clock-frequency = <400000>;
  	status = "okay";
--- 
-2.54.0
-
+@@ -1256,6 +1282,20 @@
+ 		bias-pull-up;
+ 		input-enable;
+ 	};
++
++-nanosic_default: nanosic-default-state {
++--sleep-pins {
++---pins = "gpio155";
++---function = "gpio";
++---drive-strength = <2>;
++---output-low;
++--};
++
++--reset-pins {
++---pins = "gpio141";
++---function = "gpio";
++---drive-strength = <2>;
++---output-low;
++--};
++-};
+ 
+ 	bt_en_state: bt-default-state {
+ 		bt-en-pins {

@@ -1,8 +1,8 @@
 pkgbase=linux-pipa
 pkgname=(linux-pipa linux-pipa-headers)
 _srcname=linux
-_commit=c5a31c119b0ae21e57c866dce2c19459700aaed3
-pkgver=6.15.11
+_commit=dba2f27e87cfa398cc5e5eb76e4beac30c2ecc71
+pkgver=7.0.8
 pkgrel=1
 pkgdesc='Linux kernel for Xiaomi Pad 6 (Pipa)'
 arch=('aarch64')
@@ -13,12 +13,13 @@ makedepends=(
   'tar' 'xz' 'rsync'
 )
 options=('!strip')
-install=linux-pipa.install
 source=(
   "linux-${_commit}.tar.gz::https://github.com/aymanrgab/linux/archive/${_commit}.tar.gz"
   'pipa.config'
+  'linux-pipa.preset'
+  'cmdline.txt'
 )
-sha256sums=('SKIP' 'SKIP')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 prepare() {
   cd $_srcname-${_commit}
@@ -34,12 +35,18 @@ build() {
 
 package_linux-pipa() {
   pkgdesc="The Linux kernel and modules for Xiaomi Pad 6"
-  depends=('coreutils' 'dracut' 'kmod')
+  depends=('coreutils' 'kmod' 'mkinitcpio' 'xiaomi-pipa-firmware')
   provides=('linux')
+  backup=('boot/cmdline.txt')
 
   cd $_srcname-${_commit}
   
   local kernver="$(make EXTRAVERSION="-${pkgrel}-pipa" kernelrelease)"
+  local modulesdir="$pkgdir/usr/lib/modules/$kernver"
+  local _subst="
+    s|%PKGBASE%|${pkgbase}|g
+    s|%KERNVER%|${kernver}|g
+  "
 
   mkdir -p "$pkgdir/boot/dtbs/qcom"
   cp arch/arm64/boot/Image.gz "$pkgdir/boot/vmlinuz-$kernver"
@@ -49,17 +56,23 @@ package_linux-pipa() {
   cp System.map "$pkgdir/boot/System.map-$kernver"
   cp .config "$pkgdir/boot/config-$kernver"
   cp arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dtb "$pkgdir/boot/dtbs/qcom/"
+  install -Dm644 "$srcdir/cmdline.txt" "$pkgdir/boot/cmdline.txt"
 
   make EXTRAVERSION="-${pkgrel}-pipa" INSTALL_MOD_PATH="$pkgdir/usr" modules_install
   
-  mkdir -p "$pkgdir/usr/lib/modules/$kernver/devicetree"
-  cp arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dtb "$pkgdir/usr/lib/modules/$kernver/devicetree/"
-  ln -s devicetree "$pkgdir/usr/lib/modules/$kernver/dtb"
-  cp arch/arm64/boot/Image.gz "$pkgdir/usr/lib/modules/$kernver/vmlinuz"
-  cp arch/arm64/boot/Image "$pkgdir/usr/lib/modules/$kernver/vmlinuz.uncompressed"
+  mkdir -p "$modulesdir/devicetree"
+  cp arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dtb "$modulesdir/devicetree/"
+  ln -s devicetree "$modulesdir/dtb"
+  cp arch/arm64/boot/Image.gz "$modulesdir/vmlinuz"
+  cp arch/arm64/boot/Image "$modulesdir/vmlinuz.uncompressed"
+
+  sed "${_subst}" ../linux-pipa.preset > linux-pipa.preset.install
+  install -Dm644 linux-pipa.preset.install "$pkgdir/etc/mkinitcpio.d/${pkgbase}.preset"
+  install -d "$pkgdir/usr/lib/initcpio"
+  printf 'trigger mkinitcpio for %s\n' "$kernver" > "$pkgdir/usr/lib/initcpio/$kernver"
   
-  rm -f "$pkgdir/usr/lib/modules/$kernver/build"
-  rm -f "$pkgdir/usr/lib/modules/$kernver/source"
+  rm -f "$modulesdir/build"
+  rm -f "$modulesdir/source"
 }
 
 package_linux-pipa-headers() {

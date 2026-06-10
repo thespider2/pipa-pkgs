@@ -100,7 +100,7 @@ package_linux-pipa() {
     INSTALL_MOD_PATH="$pkgdir/usr" \
     INSTALL_MOD_STRIP=1 \
     INSTALL_DTBS_PATH="$pkgdir/boot/dtbs" \
-    modules_install zinstall dtbs_install
+    modules_install dtbs_install
 
   cp arch/arm64/boot/Image.gz "$pkgdir/boot/Image.gz"
   cp arch/arm64/boot/Image "$pkgdir/boot/Image"

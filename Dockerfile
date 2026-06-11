@@ -10,7 +10,8 @@ RUN set -eux; \
       bc bison flex cpio kmod python tar xz meson ninja cmake rsync wget curl \
       glib2 libgudev polkit libqmi protobuf-c qrtr dracut android-tools \
       pahole gtk-doc umockdev alsa-lib dbus ell json-c libical readline \
-      python-docutils python-pygments autoconf automake libtool; \
+      python-docutils python-pygments autoconf automake libtool \
+      grub ttf-dejavu; \
     pacman -Scc --noconfirm; \
     mv /etc/pacman.conf.bak /etc/pacman.conf; \
     trap - EXIT

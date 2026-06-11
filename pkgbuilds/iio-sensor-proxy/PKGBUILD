@@ -1,6 +1,6 @@
 pkgname=iio-sensor-proxy-pipa
 pkgver=3.7
-pkgrel=4
+pkgrel=5
 pkgdesc="IIO accelerometer sensor to input device proxy (with libssc support)"
 arch=('x86_64' 'aarch64')
 url="https://gitlab.freedesktop.org/hadess/iio-sensor-proxy"
@@ -18,8 +18,9 @@ source=("https://gitlab.freedesktop.org/hadess/iio-sensor-proxy/-/archive/${pkgv
         "0006-data-add-libssc-udev-rules.patch"
         "0007-data-iio-sensor-proxy.service.in-add-AF_QIPCRTR.patch"
         "0008-drv-ssc-implement-set_polling.patch"
+        "0010-drv-ssc-fix-polling-lifecycle.patch"
         "0009-tests-integration-test-add-SSC-sensors.patch")
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 prepare() {
   cd "iio-sensor-proxy-$pkgver"
@@ -31,6 +32,7 @@ prepare() {
   patch -p1 < ../0006-data-add-libssc-udev-rules.patch
   patch -p1 < ../0007-data-iio-sensor-proxy.service.in-add-AF_QIPCRTR.patch
   patch -p1 < ../0008-drv-ssc-implement-set_polling.patch
+  patch -p1 < ../0010-drv-ssc-fix-polling-lifecycle.patch
   patch -p1 < ../0009-tests-integration-test-add-SSC-sensors.patch
 }
 
@@ -47,9 +49,7 @@ package() {
   install -d "$pkgdir/usr/lib/systemd/system/iio-sensor-proxy.service.d"
   cat > "$pkgdir/usr/lib/systemd/system/iio-sensor-proxy.service.d/hexagonrpcd.conf" <<'EOF'
 [Unit]
-Wants=hexagonrpcd-adsp-rootpd.service
 Wants=hexagonrpcd-sdsp.service
-After=hexagonrpcd-adsp-rootpd.service
 After=hexagonrpcd-sdsp.service
 EOF
 

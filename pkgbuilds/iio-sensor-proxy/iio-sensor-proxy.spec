@@ -16,6 +16,7 @@ Patch:          0005-compass-support-SSC-compass-sensor.patch
 Patch:          0006-data-add-libssc-udev-rules.patch
 Patch:          0007-data-iio-sensor-proxy.service.in-add-AF_QIPCRTR.patch
 Patch:          0008-drv-ssc-implement-set_polling.patch
+Patch:          0010-drv-ssc-fix-polling-lifecycle.patch
 Patch:          0009-tests-integration-test-add-SSC-sensors.patch
 
 BuildRequires:  meson

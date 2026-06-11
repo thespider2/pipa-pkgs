@@ -199,7 +199,11 @@ fi
     if [ "$has_eos_theme" -eq 1 ]; then
         printf 'insmod png\n'
         printf 'insmod jpeg\n'
-        printf 'set theme=($boot)/%s/themes/endeavouros/theme.txt\n' "$(basename "$GRUB_DIR")"
+        if [ -f "$eos_theme_dest/EndeavourOS/theme.txt" ]; then
+            printf 'set theme=($boot)/%s/themes/endeavouros/EndeavourOS/theme.txt\n' "$(basename "$GRUB_DIR")"
+        else
+            printf 'set theme=($boot)/%s/themes/endeavouros/theme.txt\n' "$(basename "$GRUB_DIR")"
+        fi
         printf 'export theme\n\n'
     fi
 

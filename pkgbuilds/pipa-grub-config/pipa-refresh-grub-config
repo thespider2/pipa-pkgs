@@ -171,6 +171,20 @@ fi
 tmp_cfg="$(mktemp)"
 trap 'rm -f "$tmp_cfg"' EXIT
 
+# Copy EndeavourOS theme if available
+eos_theme_src="/usr/share/grub/themes/EndeavourOS"
+eos_theme_dest="$GRUB_DIR/themes/EndeavourOS"
+has_eos_theme=0
+
+if [ -d "$eos_theme_src" ]; then
+    mkdir -p "$(dirname "$eos_theme_dest")"
+    rm -rf "$eos_theme_dest"
+    cp -r "$eos_theme_src" "$eos_theme_dest"
+    has_eos_theme=1
+elif [ -d "$eos_theme_dest" ]; then
+    has_eos_theme=1
+fi
+
 {
     printf 'set default=0\n'
     printf 'set timeout=5\n\n'
@@ -181,6 +195,13 @@ trap 'rm -f "$tmp_cfg"' EXIT
     printf '    set gfxpayload=keep\n'
     printf '    terminal_output gfxterm\n'
     printf 'fi\n\n'
+
+    if [ "$has_eos_theme" -eq 1 ]; then
+        printf 'insmod png\n'
+        printf 'insmod jpeg\n'
+        printf 'set theme=($boot)/%s/themes/EndeavourOS/theme.txt\n' "$(basename "$GRUB_DIR")"
+        printf 'export theme\n\n'
+    fi
 
     for dtb_rel in "${DTB_RELS[@]}"; do
         printf 'menuentry "EndeavourOS ARM (Pipa) - %s" {\n' "$(dtb_title "$dtb_rel")"

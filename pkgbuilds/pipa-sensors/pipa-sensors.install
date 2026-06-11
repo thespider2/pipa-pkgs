@@ -1,0 +1,17 @@
+prepare_sensor_persist() {
+  if command -v systemd-tmpfiles >/dev/null 2>&1; then
+    systemd-tmpfiles --create /usr/lib/tmpfiles.d/pipa-sensors.conf >/dev/null 2>&1 || true
+  fi
+
+  if [ -x /usr/local/bin/pipa-prepare-sensor-persist ]; then
+    /usr/local/bin/pipa-prepare-sensor-persist >/dev/null 2>&1 || true
+  fi
+}
+
+post_install() {
+  prepare_sensor_persist
+}
+
+post_upgrade() {
+  prepare_sensor_persist
+}

@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+
+for dir in \
+    /mnt/vendor \
+    /mnt/vendor/persist \
+    /mnt/vendor/persist/sensors \
+    /mnt/vendor/persist/sensors/registry \
+    /mnt/vendor/persist/sensors/registry/registry
+do
+    install -d -m 0775 -o fastrpc -g fastrpc "$dir"
+done
+
+# hexagonrpcd writes files one level above the leaf registry directory.
+chown fastrpc:fastrpc /mnt/vendor/persist/sensors/registry
+chmod 0775 /mnt/vendor/persist/sensors/registry

@@ -16,4 +16,5 @@ pipa-kernel-flasher-hook
 pipa-grub-config
 pipa-sensors
 pipa-sound-conf
+grub2-theme-endeavouros-classic
 pipa-metapkg

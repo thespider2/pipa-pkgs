@@ -68,6 +68,9 @@ install -D -m 644 %{SOURCE5} %{buildroot}%{_udevrulesdir}/10-fastrpc.rules
 %systemd_post hexagonrpcd-adsp-rootpd.service
 %systemd_post hexagonrpcd-adsp-sensorspd.service
 %systemd_post hexagonrpcd-sdsp.service
+systemctl stop hexagonrpcd-adsp-rootpd.service >/dev/null 2>&1 || :
+systemctl disable hexagonrpcd-adsp-rootpd.service >/dev/null 2>&1 || :
+systemctl mask hexagonrpcd-adsp-rootpd.service >/dev/null 2>&1 || :
 
 %preun
 %systemd_preun hexagonrpcd-adsp-rootpd.service
@@ -75,7 +78,7 @@ install -D -m 644 %{SOURCE5} %{buildroot}%{_udevrulesdir}/10-fastrpc.rules
 %systemd_preun hexagonrpcd-sdsp.service
 
 %postun
-%systemd_postun_with_restart hexagonrpcd-adsp-rootpd.service
+%systemd_postun hexagonrpcd-adsp-rootpd.service
 %systemd_postun_with_restart hexagonrpcd-adsp-sensorspd.service
 %systemd_postun_with_restart hexagonrpcd-sdsp.service
 

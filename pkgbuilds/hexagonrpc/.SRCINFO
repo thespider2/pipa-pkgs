@@ -1,0 +1,29 @@
+pkgbase = hexagonrpc
+	pkgdesc = FastRPC ioctl wrapper and a reverse tunnel
+	pkgver = 0.4.0
+	pkgrel = 2
+	url = https://github.com/linux-msm/hexagonrpc
+	install = hexagonrpc.install
+	arch = x86_64
+	arch = aarch64
+	license = GPL3
+	makedepends = meson
+	makedepends = gcc
+	makedepends = git
+	depends = systemd
+	source = git+https://github.com/linux-msm/hexagonrpc.git#tag=v0.4.0
+	source = hexagonrpc.install
+	source = hexagonrpcd-adsp-rootpd.service
+	source = hexagonrpcd-adsp-sensorspd.service
+	source = hexagonrpcd-sdsp.service
+	source = sysusers.conf
+	source = 10-fastrpc.rules
+	sha256sums = SKIP
+	sha256sums = SKIP
+	sha256sums = SKIP
+	sha256sums = SKIP
+	sha256sums = SKIP
+	sha256sums = SKIP
+	sha256sums = SKIP
+
+pkgname = hexagonrpc

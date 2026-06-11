@@ -1,0 +1,15 @@
+mask_bad_adsp_service() {
+  if command -v systemctl >/dev/null 2>&1; then
+    systemctl stop hexagonrpcd-adsp-rootpd.service >/dev/null 2>&1 || true
+    systemctl disable hexagonrpcd-adsp-rootpd.service >/dev/null 2>&1 || true
+    systemctl mask hexagonrpcd-adsp-rootpd.service >/dev/null 2>&1 || true
+  fi
+}
+
+post_install() {
+  mask_bad_adsp_service
+}
+
+post_upgrade() {
+  mask_bad_adsp_service
+}

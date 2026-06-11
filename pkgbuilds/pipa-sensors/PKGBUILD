@@ -1,6 +1,6 @@
 pkgname=pipa-sensors
 pkgver=1.2
-pkgrel=12
+pkgrel=13
 pkgdesc="Sensors configs for the Xiaomi Pad 6"
 arch=('any')
 license=('MIT')

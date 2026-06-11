@@ -14,3 +14,12 @@ done
 # hexagonrpcd writes files one level above the leaf registry directory.
 chown fastrpc:fastrpc /mnt/vendor/persist/sensors/registry
 chmod 0775 /mnt/vendor/persist/sensors/registry
+
+for file in \
+    /mnt/vendor/persist/sensors/registry/sns_reg_version \
+    /mnt/vendor/persist/sensors/registry/temp.json
+do
+    : > "$file"
+    chown fastrpc:fastrpc "$file"
+    chmod 0664 "$file"
+done

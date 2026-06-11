@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+
+for _ in $(seq 1 20); do
+    if [ -r /proc/asound/cards ] && ! grep -q '^--- no soundcards ---$' /proc/asound/cards; then
+        break
+    fi
+    sleep 1
+done
+
+alsactl init 0 || true

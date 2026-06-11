@@ -1,0 +1,18 @@
+#!/bin/sh
+set -eu
+
+case "${1:-}/${2:-}" in
+    post/*)
+        ;;
+    *)
+        exit 0
+        ;;
+esac
+
+# Give the fastrpc devices a moment to reappear after resume.
+sleep 2
+
+/usr/local/bin/pipa-prepare-sensor-persist || true
+systemctl restart hexagonrpcd-sdsp.service || true
+systemctl restart hexagonrpcd-adsp-sensorspd.service || true
+systemctl restart iio-sensor-proxy.service || true

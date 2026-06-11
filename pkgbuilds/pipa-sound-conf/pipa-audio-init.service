@@ -1,0 +1,13 @@
+[Unit]
+Description=Initialize Xiaomi Pad 6 ALSA state
+After=systemd-udev-settle.service pd-mapper.service rmtfs.service tqftpserv.service
+Wants=systemd-udev-settle.service pd-mapper.service rmtfs.service tqftpserv.service
+Before=display-manager.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/pipa-audio-init
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

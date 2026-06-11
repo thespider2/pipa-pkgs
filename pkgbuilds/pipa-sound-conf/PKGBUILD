@@ -1,13 +1,19 @@
 pkgname=pipa-sound-conf
 pkgver=1.4
-pkgrel=3
+pkgrel=4
 pkgdesc="Sound settings for Xiaomi Mi Pad 6 (pipa)"
 arch=('any')
 license=('custom')
-depends=('alsa-ucm-conf-sm8250' 'wireplumber')
-source=('51-pipa.conf')
-sha256sums=('SKIP')
+depends=('alsa-ucm-conf-sm8250' 'alsa-utils' 'wireplumber')
+source=('51-pipa.conf'
+        'pipa-audio-init'
+        'pipa-audio-init.service')
+sha256sums=('SKIP'
+            'SKIP'
+            'SKIP')
 
 package() {
   install -Dm644 51-pipa.conf "$pkgdir/usr/share/wireplumber/wireplumber.conf.d/51-pipa.conf"
+  install -Dm755 pipa-audio-init "$pkgdir/usr/local/bin/pipa-audio-init"
+  install -Dm644 pipa-audio-init.service "$pkgdir/usr/lib/systemd/system/pipa-audio-init.service"
 }

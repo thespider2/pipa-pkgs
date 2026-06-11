@@ -108,11 +108,11 @@ fi
 initramfs_source=
 if [ -n "${PIPA_INITRAMFS_SOURCE:-}" ] && [ -f "${PIPA_INITRAMFS_SOURCE}" ]; then
     initramfs_source="${PIPA_INITRAMFS_SOURCE}"
-elif [ -n "${PIPA_INITRAMFS_REL:-}" ]; then
-    require_file "$BOOT_DIR/$PIPA_INITRAMFS_REL"
-    initramfs_source="$BOOT_DIR/$PIPA_INITRAMFS_REL"
 elif [ -f "$BOOT_DIR/$INITRAMFS_STABLE_REL" ]; then
     initramfs_source="$BOOT_DIR/$INITRAMFS_STABLE_REL"
+elif [ -f "$BOOT_DIR/initramfs.img" ]; then
+    # Migrate legacy builder images to the stable dracut path that GRUB uses.
+    initramfs_source="$BOOT_DIR/initramfs.img"
 else
     shopt -s nullglob
     initramfs_candidates=(/usr/lib/modules/*/initramfs-*.img)
@@ -126,7 +126,12 @@ if [ -z "$initramfs_source" ]; then
     log "no initramfs image found under /usr/lib/modules or $BOOT_DIR"
     exit 1
 fi
-cp -f "$initramfs_source" "$INITRAMFS_STABLE_PATH"
+
+initramfs_source_real="$(realpath -m "$initramfs_source")"
+initramfs_stable_real="$(realpath -m "$INITRAMFS_STABLE_PATH")"
+if [ "$initramfs_source_real" != "$initramfs_stable_real" ]; then
+    cp -f "$initramfs_source" "$INITRAMFS_STABLE_PATH"
+fi
 
 cmdline="$(tr '\n' ' ' < /etc/cmdline 2>/dev/null | sed -e 's/[[:space:]]\+/ /g' -e 's/^ //' -e 's/ $//' || true)"
 if [ -z "$cmdline" ] && [ -f "$BOOT_DIR/cmdline.txt" ]; then

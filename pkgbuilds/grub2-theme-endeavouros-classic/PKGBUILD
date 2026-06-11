@@ -1,17 +1,23 @@
 pkgname=grub2-theme-endeavouros-classic
 pkgver=1.0
-pkgrel=1
-pkgdesc="EndeavourOS Classic GRUB Theme"
+pkgrel=2
+pkgdesc="EndeavourOS Classic GRUB Theme (HiDPI)"
 arch=('any')
 url="https://github.com/EndeavourOS-Community-Editions/grub2-theme-endeavouros-classic"
 license=('GPL3')
 depends=('grub')
-makedepends=('git')
+makedepends=('git' 'grub' 'ttf-dejavu')
 source=("git+https://github.com/EndeavourOS-Community-Editions/grub2-theme-endeavouros-classic.git")
 sha256sums=('SKIP')
+
+build() {
+  cd "$pkgname"
+  grub-mkfont -s 48 -o EndeavourOS/dejavu-48.pf2 /usr/share/fonts/TTF/DejaVuSans.ttf
+  sed -i 's/Unifont Regular 16/DejaVu Sans Regular 48/g' EndeavourOS/theme.txt
+}
 
 package() {
   cd "$pkgname"
   install -d "$pkgdir/usr/share/grub/themes/endeavouros"
-  cp -r * "$pkgdir/usr/share/grub/themes/endeavouros/"
+  cp -r EndeavourOS "$pkgdir/usr/share/grub/themes/endeavouros/"
 }

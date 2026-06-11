@@ -1,6 +1,6 @@
 pkgname=iio-sensor-proxy-pipa
 pkgver=3.7
-pkgrel=6
+pkgrel=7
 pkgdesc="IIO accelerometer sensor to input device proxy (with libssc support)"
 arch=('x86_64' 'aarch64')
 url="https://gitlab.freedesktop.org/hadess/iio-sensor-proxy"
@@ -52,6 +52,7 @@ package() {
 [Unit]
 Wants=hexagonrpcd-sdsp.service
 After=hexagonrpcd-sdsp.service
+PartOf=hexagonrpcd-sdsp.service
 EOF
 
   install -d "$pkgdir/etc/systemd/system/iio-sensor-proxy.service.d"

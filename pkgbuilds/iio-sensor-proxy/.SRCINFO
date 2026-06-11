@@ -1,7 +1,7 @@
 pkgbase = iio-sensor-proxy-pipa
 	pkgdesc = IIO accelerometer sensor to input device proxy (with libssc support)
 	pkgver = 3.7
-	pkgrel = 6
+	pkgrel = 7
 	url = https://gitlab.freedesktop.org/hadess/iio-sensor-proxy
 	arch = x86_64
 	arch = aarch64

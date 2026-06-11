@@ -56,6 +56,13 @@ This package contains the documentation for %{name}.
 %install
 %meson_install
 install -Dpm0755 %{SOURCE1} %{buildroot}%{_prefix}/lib/systemd/system-sleep/iio-sensor-proxy-resume
+install -d %{buildroot}%{_unitdir}/%{name}.service.d
+cat > %{buildroot}%{_unitdir}/%{name}.service.d/hexagonrpcd.conf <<'EOF'
+[Unit]
+Wants=hexagonrpcd-sdsp.service
+After=hexagonrpcd-sdsp.service
+PartOf=hexagonrpcd-sdsp.service
+EOF
 
 %post
 %systemd_post %{name}.service
@@ -72,6 +79,7 @@ install -Dpm0755 %{SOURCE1} %{buildroot}%{_prefix}/lib/systemd/system-sleep/iio-
 %{_bindir}/monitor-sensor
 %{_libexecdir}/%{name}
 %{_unitdir}/%{name}.service
+%{_unitdir}/%{name}.service.d/hexagonrpcd.conf
 %{_udevrulesdir}/*-%{name}*.rules
 %{_datadir}/dbus-1/system.d/net.hadess.SensorProxy.conf
 %{_datadir}/polkit-1/actions/net.hadess.SensorProxy.policy

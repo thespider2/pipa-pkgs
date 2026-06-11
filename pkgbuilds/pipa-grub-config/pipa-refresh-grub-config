@@ -191,7 +191,7 @@ fi
     printf '%s\n' "$boot_search"
     printf 'set root=($boot)\n\n'
     printf 'if loadfont unicode; then\n'
-    printf '    set gfxmode=1800x2880\n'
+    printf '    set gfxmode=900x1440,1024x768,auto\n'
     printf '    set gfxpayload=keep\n'
     printf '    terminal_output gfxterm\n'
     printf 'fi\n\n'

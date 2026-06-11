@@ -172,8 +172,8 @@ tmp_cfg="$(mktemp)"
 trap 'rm -f "$tmp_cfg"' EXIT
 
 # Copy EndeavourOS theme if available
-eos_theme_src="/usr/share/grub/themes/EndeavourOS"
-eos_theme_dest="$GRUB_DIR/themes/EndeavourOS"
+eos_theme_src="/usr/share/grub/themes/endeavouros"
+eos_theme_dest="$GRUB_DIR/themes/endeavouros"
 has_eos_theme=0
 
 if [ -d "$eos_theme_src" ]; then
@@ -199,7 +199,7 @@ fi
     if [ "$has_eos_theme" -eq 1 ]; then
         printf 'insmod png\n'
         printf 'insmod jpeg\n'
-        printf 'set theme=($boot)/%s/themes/EndeavourOS/theme.txt\n' "$(basename "$GRUB_DIR")"
+        printf 'set theme=($boot)/%s/themes/endeavouros/theme.txt\n' "$(basename "$GRUB_DIR")"
         printf 'export theme\n\n'
     fi
 

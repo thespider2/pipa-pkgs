@@ -7,6 +7,7 @@ Summary:        IIO accelerometer sensor to input device proxy
 License:        GPL-3.0-or-later
 URL:            https://gitlab.freedesktop.org/hadess/iio-sensor-proxy/
 Source0:        %{url}/-/archive/%{version}/%{name}-%{version}.tar.gz
+Source1:        iio-sensor-proxy-resume
 
 Patch:          0001-iio-sensor-proxy-depend-on-libssc.patch
 Patch:          0002-proximity-support-SSC-proximity-sensor.patch
@@ -54,6 +55,7 @@ This package contains the documentation for %{name}.
 
 %install
 %meson_install
+install -Dpm0755 %{SOURCE1} %{buildroot}%{_prefix}/lib/systemd/system-sleep/iio-sensor-proxy-resume
 
 %post
 %systemd_post %{name}.service
@@ -73,6 +75,7 @@ This package contains the documentation for %{name}.
 %{_udevrulesdir}/*-%{name}*.rules
 %{_datadir}/dbus-1/system.d/net.hadess.SensorProxy.conf
 %{_datadir}/polkit-1/actions/net.hadess.SensorProxy.policy
+%{_prefix}/lib/systemd/system-sleep/iio-sensor-proxy-resume
 
 %files docs
 %dir %{_datadir}/gtk-doc/

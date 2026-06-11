@@ -1,6 +1,6 @@
 pkgname=iio-sensor-proxy-pipa
 pkgver=3.7
-pkgrel=5
+pkgrel=6
 pkgdesc="IIO accelerometer sensor to input device proxy (with libssc support)"
 arch=('x86_64' 'aarch64')
 url="https://gitlab.freedesktop.org/hadess/iio-sensor-proxy"
@@ -19,8 +19,9 @@ source=("https://gitlab.freedesktop.org/hadess/iio-sensor-proxy/-/archive/${pkgv
         "0007-data-iio-sensor-proxy.service.in-add-AF_QIPCRTR.patch"
         "0008-drv-ssc-implement-set_polling.patch"
         "0010-drv-ssc-fix-polling-lifecycle.patch"
+        "iio-sensor-proxy-resume"
         "0009-tests-integration-test-add-SSC-sensors.patch")
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 prepare() {
   cd "iio-sensor-proxy-$pkgver"
@@ -59,4 +60,7 @@ EOF
 Restart=always
 RestartSec=5
 EOF
+
+  install -Dm755 ../iio-sensor-proxy-resume \
+    "$pkgdir/usr/lib/systemd/system-sleep/iio-sensor-proxy-resume"
 }

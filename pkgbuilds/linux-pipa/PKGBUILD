@@ -3,11 +3,12 @@ pkgname=(linux-pipa linux-pipa-headers)
 _srcname=linux
 _commit=dba2f27e87cfa398cc5e5eb76e4beac30c2ecc71
 pkgver=7.0.8
-pkgrel=1
+pkgrel=2
 pkgdesc='Linux kernel for Xiaomi Pad 6 (Pipa)'
 arch=('aarch64')
 url="https://github.com/aymanrgab/linux"
 license=('GPL2')
+install=linux-pipa.install
 makedepends=(
   'bc' 'bison' 'cpio' 'flex' 'kmod' 'pahole' 'python'
   'tar' 'xz' 'rsync'
@@ -16,10 +17,8 @@ options=('!strip')
 source=(
   "linux-${_commit}.tar.gz::https://github.com/aymanrgab/linux/archive/${_commit}.tar.gz"
   'pipa.config'
-  'linux-pipa.preset'
-  'cmdline.txt'
 )
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
+sha256sums=('SKIP' 'SKIP')
 
 prepare() {
   cd $_srcname-${_commit}
@@ -35,18 +34,13 @@ build() {
 
 package_linux-pipa() {
   pkgdesc="The Linux kernel and modules for Xiaomi Pad 6"
-  depends=('coreutils' 'kmod' 'mkinitcpio' 'xiaomi-pipa-firmware')
+  depends=('coreutils' 'dracut' 'kmod' 'xiaomi-pipa-firmware')
   provides=('linux')
-  backup=('boot/cmdline.txt')
 
   cd $_srcname-${_commit}
   
   local kernver="$(make EXTRAVERSION="-${pkgrel}-pipa" kernelrelease)"
   local modulesdir="$pkgdir/usr/lib/modules/$kernver"
-  local _subst="
-    s|%PKGBASE%|${pkgbase}|g
-    s|%KERNVER%|${kernver}|g
-  "
 
   mkdir -p "$pkgdir/boot/dtbs/qcom"
   cp arch/arm64/boot/Image.gz "$pkgdir/boot/vmlinuz-$kernver"
@@ -56,7 +50,6 @@ package_linux-pipa() {
   cp System.map "$pkgdir/boot/System.map-$kernver"
   cp .config "$pkgdir/boot/config-$kernver"
   cp arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dtb "$pkgdir/boot/dtbs/qcom/"
-  install -Dm644 "$srcdir/cmdline.txt" "$pkgdir/boot/cmdline.txt"
 
   make EXTRAVERSION="-${pkgrel}-pipa" INSTALL_MOD_PATH="$pkgdir/usr" modules_install
   
@@ -65,11 +58,6 @@ package_linux-pipa() {
   ln -s devicetree "$modulesdir/dtb"
   cp arch/arm64/boot/Image.gz "$modulesdir/vmlinuz"
   cp arch/arm64/boot/Image "$modulesdir/vmlinuz.uncompressed"
-
-  sed "${_subst}" ../linux-pipa.preset > linux-pipa.preset.install
-  install -Dm644 linux-pipa.preset.install "$pkgdir/etc/mkinitcpio.d/${pkgbase}.preset"
-  install -d "$pkgdir/usr/lib/initcpio"
-  printf 'trigger mkinitcpio for %s\n' "$kernver" > "$pkgdir/usr/lib/initcpio/$kernver"
   
   rm -f "$modulesdir/build"
   rm -f "$modulesdir/source"

@@ -1,1 +1,0 @@
-root=LABEL=eos-pipa rw rootwait boot=LABEL=boot console=tty0 console=ttyS0 earlycon quiet splash

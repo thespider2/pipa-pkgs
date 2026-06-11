@@ -7,8 +7,8 @@ GRUB_CFG="$GRUB_DIR/grub.cfg"
 declare -a DTB_RELS=()
 RAW_KERNEL_REL=Image
 GZIP_KERNEL_REL=Image.gz
-MKINITCPIO_INITRAMFS_REL=initramfs.img
-DRACUT_INITRAMFS_REL=initramfs-linux-pipa.img
+INITRAMFS_STABLE_REL=initramfs-linux-pipa.img
+INITRAMFS_STABLE_PATH="$BOOT_DIR/$INITRAMFS_STABLE_REL"
 DEFAULT_CMDLINE='rw rootwait console=tty0 console=ttyS0 earlycon quiet splash'
 
 log() {
@@ -105,31 +105,28 @@ if [ -f "$BOOT_DIR/$GZIP_KERNEL_REL" ]; then
     gzip_kernel_rel="$GZIP_KERNEL_REL"
 fi
 
-initramfs_rel=
-if [ -n "${PIPA_INITRAMFS_REL:-}" ]; then
+initramfs_source=
+if [ -n "${PIPA_INITRAMFS_SOURCE:-}" ] && [ -f "${PIPA_INITRAMFS_SOURCE}" ]; then
+    initramfs_source="${PIPA_INITRAMFS_SOURCE}"
+elif [ -n "${PIPA_INITRAMFS_REL:-}" ]; then
     require_file "$BOOT_DIR/$PIPA_INITRAMFS_REL"
-    initramfs_rel="$PIPA_INITRAMFS_REL"
-elif [ -f "$BOOT_DIR/$MKINITCPIO_INITRAMFS_REL" ]; then
-    initramfs_rel="$MKINITCPIO_INITRAMFS_REL"
-elif [ -f "$BOOT_DIR/$DRACUT_INITRAMFS_REL" ]; then
-    initramfs_rel="$DRACUT_INITRAMFS_REL"
-elif [ -n "${PIPA_INITRAMFS_SOURCE:-}" ] && [ -f "${PIPA_INITRAMFS_SOURCE}" ]; then
-    cp -f "${PIPA_INITRAMFS_SOURCE}" "$BOOT_DIR/$DRACUT_INITRAMFS_REL"
-    initramfs_rel="$DRACUT_INITRAMFS_REL"
+    initramfs_source="$BOOT_DIR/$PIPA_INITRAMFS_REL"
+elif [ -f "$BOOT_DIR/$INITRAMFS_STABLE_REL" ]; then
+    initramfs_source="$BOOT_DIR/$INITRAMFS_STABLE_REL"
 else
     shopt -s nullglob
     initramfs_candidates=(/usr/lib/modules/*/initramfs-*.img)
     shopt -u nullglob
 
     if [ "${#initramfs_candidates[@]}" -gt 0 ]; then
-        cp -f "$(printf '%s\n' "${initramfs_candidates[@]}" | xargs -r ls -1t | head -n1)" "$BOOT_DIR/$DRACUT_INITRAMFS_REL"
-        initramfs_rel="$DRACUT_INITRAMFS_REL"
+        initramfs_source="$(printf '%s\n' "${initramfs_candidates[@]}" | xargs -r ls -1t | head -n1)"
     fi
 fi
-if [ -z "$initramfs_rel" ]; then
-    log "no initramfs image found under $BOOT_DIR or /usr/lib/modules"
+if [ -z "$initramfs_source" ]; then
+    log "no initramfs image found under /usr/lib/modules or $BOOT_DIR"
     exit 1
 fi
+cp -f "$initramfs_source" "$INITRAMFS_STABLE_PATH"
 
 cmdline="$(tr '\n' ' ' < /etc/cmdline 2>/dev/null | sed -e 's/[[:space:]]\+/ /g' -e 's/^ //' -e 's/ $//' || true)"
 if [ -z "$cmdline" ] && [ -f "$BOOT_DIR/cmdline.txt" ]; then
@@ -211,7 +208,7 @@ fi
         printf 'menuentry "EndeavourOS ARM (Pipa) - %s" {\n' "$(dtb_title "$dtb_rel")"
         printf '    devicetree ($boot)/%s\n' "$dtb_rel"
         printf '    linux ($boot)/%s %s\n' "$separate_kernel_rel" "$cmdline"
-        printf '    initrd ($boot)/%s\n' "$initramfs_rel"
+        printf '    initrd ($boot)/%s\n' "$INITRAMFS_STABLE_REL"
         printf '}\n\n'
     done
 } > "$tmp_cfg"

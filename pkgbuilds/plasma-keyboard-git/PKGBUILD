@@ -1,0 +1,52 @@
+pkgname=plasma-keyboard-git
+_pkgname=plasma-keyboard
+pkgver=6.6.4.r41.ga17cb83
+pkgrel=1
+pkgdesc="Virtual keyboard for Qt-based desktops"
+arch=('aarch64' 'x86_64')
+url="https://github.com/rr1111/plasma-keyboard"
+license=('LGPL-2.1-or-later')
+depends=(
+  'gcc-libs'
+  'glibc'
+  'kcmutils'
+  'kconfig'
+  'kcoreaddons'
+  'kcrash'
+  'ki18n'
+  'kirigami'
+  'kirigami-addons'
+  'libxkbcommon'
+  'plasma-framework'
+  'qt6-base'
+  'qt6-declarative'
+  'qt6-virtualkeyboard'
+  'qt6-wayland'
+  'wayland'
+  'wayland-protocols'
+)
+makedepends=('cmake' 'extra-cmake-modules' 'git' 'gtest')
+provides=("$_pkgname")
+conflicts=("$_pkgname")
+source=("$pkgname::git+https://github.com/rr1111/plasma-keyboard.git")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "$pkgname"
+  git describe --tags --long --always | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+build() {
+  cd "$srcdir"
+  cmake -B build -S "$pkgname" \
+    -DCMAKE_BUILD_TYPE=None \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DBUILD_TESTING=OFF
+  cmake --build build
+}
+
+package() {
+  cd "$srcdir"
+  sed -i '/samples\/cmake_install.cmake/d' build/cmake_install.cmake
+  DESTDIR="$pkgdir" cmake --install build
+}

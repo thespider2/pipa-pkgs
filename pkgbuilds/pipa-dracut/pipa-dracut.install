@@ -1,0 +1,13 @@
+refresh_initramfs() {
+  if [ -x /usr/local/bin/pipa-refresh-initramfs ]; then
+    /usr/local/bin/pipa-refresh-initramfs >/dev/null 2>&1 || true
+  fi
+}
+
+post_install() {
+  refresh_initramfs
+}
+
+post_upgrade() {
+  refresh_initramfs
+}

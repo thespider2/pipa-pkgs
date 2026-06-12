@@ -1,16 +1,22 @@
 pkgname=pipa-dracut
 pkgver=1.1
-pkgrel=4
+pkgrel=5
 pkgdesc="Dracut modules for the Xiaomi Pad 6"
 arch=('any')
 license=('GPL2')
 depends=('xiaomi-pipa-firmware' 'dracut')
+install='pipa-dracut.install'
 source=('module-setup.sh'
-        'pipa.conf')
+        'pipa.conf'
+        'pipa-refresh-initramfs'
+        'pipa-dracut.install')
 sha256sums=('SKIP'
+            'SKIP'
+            'SKIP'
             'SKIP')
 
 package() {
   install -Dm755 module-setup.sh "$pkgdir/usr/lib/dracut/modules.d/90pipafw/module-setup.sh"
   install -Dm644 pipa.conf "$pkgdir/usr/lib/dracut/dracut.conf.d/10-pipa.conf"
+  install -Dm755 pipa-refresh-initramfs "$pkgdir/usr/local/bin/pipa-refresh-initramfs"
 }

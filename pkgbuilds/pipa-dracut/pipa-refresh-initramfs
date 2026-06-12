@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+log() {
+    printf 'pipa-refresh-initramfs: %s\n' "$*" >&2
+}
+
+ensure_tmpdir() {
+    local tmpdir="${TMPDIR:-/tmp}"
+
+    mkdir -p /tmp /var/tmp
+    chmod 1777 /tmp /var/tmp 2>/dev/null || true
+
+    if [ ! -d "$tmpdir" ] || [ ! -w "$tmpdir" ]; then
+        tmpdir=/tmp
+    fi
+
+    export TMPDIR="$tmpdir"
+}
+
+find_pipa_kernel() {
+    local release_file=/usr/share/kernel/xiaomi-pipa/kernel.release
+
+    if [ -f "$release_file" ]; then
+        tr -d '\n' < "$release_file"
+        return 0
+    fi
+
+    shopt -s nullglob
+    local pipa_modules=(/usr/lib/modules/*pipa*)
+    shopt -u nullglob
+    if [ "${#pipa_modules[@]}" -eq 0 ]; then
+        return 1
+    fi
+
+    basename "$(printf '%s\n' "${pipa_modules[@]}" | xargs -r ls -1dt | head -n1)"
+}
+
+main() {
+    local kernver=
+    local module_dir=
+    local initramfs=
+
+    ensure_tmpdir
+
+    if ! kernver="$(find_pipa_kernel)"; then
+        log "no installed pipa kernel found; skipping dracut rebuild"
+        return 0
+    fi
+
+    module_dir="/usr/lib/modules/$kernver"
+    initramfs="$module_dir/initramfs-$kernver.img"
+
+    if [ ! -d "$module_dir" ]; then
+        log "missing module directory: $module_dir"
+        return 0
+    fi
+
+    log "building initramfs for $kernver"
+    dracut --force --kver "$kernver" "$initramfs"
+
+    if [ -x /usr/local/bin/pipa-refresh-grub-config ]; then
+        log "refreshing GRUB menu"
+        PIPA_INITRAMFS_SOURCE="$initramfs" /usr/local/bin/pipa-refresh-grub-config
+    else
+        log "GRUB refresh helper not installed; skipping"
+    fi
+}
+
+main "$@"

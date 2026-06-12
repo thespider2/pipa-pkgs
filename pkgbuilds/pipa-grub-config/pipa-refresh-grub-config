@@ -1,0 +1,222 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+BOOT_DIR=/boot
+GRUB_DIR="$BOOT_DIR/grub2"
+GRUB_CFG="$GRUB_DIR/grub.cfg"
+declare -a DTB_RELS=()
+RAW_KERNEL_REL=Image
+GZIP_KERNEL_REL=Image.gz
+INITRAMFS_STABLE_REL=initramfs-linux-pipa.img
+INITRAMFS_STABLE_PATH="$BOOT_DIR/$INITRAMFS_STABLE_REL"
+DEFAULT_CMDLINE='rw rootwait console=tty0 console=ttyS0 earlycon quiet splash'
+
+log() {
+    printf 'pipa-grub-config: %s\n' "$*" >&2
+}
+
+ensure_tmpdir() {
+    local tmpdir="${TMPDIR:-/tmp}"
+
+    mkdir -p /tmp /var/tmp
+    chmod 1777 /tmp /var/tmp 2>/dev/null || true
+
+    if [ ! -d "$tmpdir" ] || [ ! -w "$tmpdir" ]; then
+        tmpdir=/tmp
+    fi
+
+    export TMPDIR="$tmpdir"
+}
+
+require_file() {
+    local path="$1"
+    if [ ! -e "$path" ]; then
+        log "missing required file: $path"
+        exit 1
+    fi
+}
+
+dtb_title() {
+    case "$(basename "$1")" in
+        sm8250-xiaomi-pipa-csot.dtb)
+            printf 'CSOT Panel'
+            ;;
+        sm8250-xiaomi-pipa-tianma.dtb)
+            printf 'Tianma Panel'
+            ;;
+        sm8250-xiaomi-pipa.dtb)
+            printf 'Generic DTB'
+            ;;
+        *)
+            printf '%s' "$(basename "$1" .dtb)"
+            ;;
+    esac
+}
+
+discover_dtbs() {
+    local path
+    local -a split_dtbs=()
+
+    if [ -n "${PIPA_DTB_REL:-}" ]; then
+        require_file "$BOOT_DIR/$PIPA_DTB_REL"
+        DTB_RELS=("$PIPA_DTB_REL")
+        return
+    fi
+
+    shopt -s nullglob
+    for path in "$BOOT_DIR"/dtbs/qcom/sm8250-xiaomi-pipa-*.dtb; do
+        split_dtbs+=("${path#$BOOT_DIR/}")
+    done
+    shopt -u nullglob
+
+    if [ "${#split_dtbs[@]}" -gt 0 ]; then
+        DTB_RELS=("${split_dtbs[@]}")
+    elif [ -f "$BOOT_DIR/dtbs/qcom/sm8250-xiaomi-pipa.dtb" ]; then
+        DTB_RELS=(dtbs/qcom/sm8250-xiaomi-pipa.dtb)
+    fi
+
+    if [ "${#DTB_RELS[@]}" -eq 0 ]; then
+        log "no Xiaomi Pad 6 DTB found under $BOOT_DIR/dtbs/qcom"
+        exit 1
+    fi
+}
+
+if ! mountpoint -q "$BOOT_DIR"; then
+    log "$BOOT_DIR is not mounted; refusing to write GRUB config"
+    exit 1
+fi
+
+mkdir -p "$GRUB_DIR"
+ensure_tmpdir
+discover_dtbs
+
+separate_kernel_rel=
+if [ -f "$BOOT_DIR/$RAW_KERNEL_REL" ]; then
+    separate_kernel_rel="$RAW_KERNEL_REL"
+elif [ -f "$BOOT_DIR/$GZIP_KERNEL_REL" ]; then
+    separate_kernel_rel="$GZIP_KERNEL_REL"
+else
+    log "no kernel image found under $BOOT_DIR"
+    exit 1
+fi
+
+gzip_kernel_rel=
+if [ -f "$BOOT_DIR/$GZIP_KERNEL_REL" ]; then
+    gzip_kernel_rel="$GZIP_KERNEL_REL"
+fi
+
+initramfs_source=
+if [ -n "${PIPA_INITRAMFS_SOURCE:-}" ] && [ -f "${PIPA_INITRAMFS_SOURCE}" ]; then
+    initramfs_source="${PIPA_INITRAMFS_SOURCE}"
+elif [ -f "$BOOT_DIR/$INITRAMFS_STABLE_REL" ]; then
+    initramfs_source="$BOOT_DIR/$INITRAMFS_STABLE_REL"
+elif [ -f "$BOOT_DIR/initramfs.img" ]; then
+    # Migrate legacy builder images to the stable dracut path that GRUB uses.
+    initramfs_source="$BOOT_DIR/initramfs.img"
+else
+    shopt -s nullglob
+    initramfs_candidates=(/usr/lib/modules/*/initramfs-*.img)
+    shopt -u nullglob
+
+    if [ "${#initramfs_candidates[@]}" -gt 0 ]; then
+        initramfs_source="$(printf '%s\n' "${initramfs_candidates[@]}" | xargs -r ls -1t | head -n1)"
+    fi
+fi
+if [ -z "$initramfs_source" ]; then
+    log "no initramfs image found under /usr/lib/modules or $BOOT_DIR"
+    exit 1
+fi
+
+initramfs_source_real="$(realpath -m "$initramfs_source")"
+initramfs_stable_real="$(realpath -m "$INITRAMFS_STABLE_PATH")"
+if [ "$initramfs_source_real" != "$initramfs_stable_real" ]; then
+    cp -f "$initramfs_source" "$INITRAMFS_STABLE_PATH"
+fi
+
+cmdline="$(tr '\n' ' ' < /etc/cmdline 2>/dev/null | sed -e 's/[[:space:]]\+/ /g' -e 's/^ //' -e 's/ $//' || true)"
+if [ -z "$cmdline" ] && [ -f "$BOOT_DIR/cmdline.txt" ]; then
+    cmdline="$(tr '\n' ' ' < "$BOOT_DIR/cmdline.txt" | sed -e 's/[[:space:]]\+/ /g' -e 's/^ //' -e 's/ $//')"
+fi
+if [ -z "$cmdline" ]; then
+    cmdline="$DEFAULT_CMDLINE"
+
+    root_uuid="$(findmnt -no UUID / 2>/dev/null || true)"
+    root_label="$(findmnt -no LABEL / 2>/dev/null || true)"
+    root_source="$(findmnt -no SOURCE / 2>/dev/null || true)"
+    boot_label="$(findmnt -no LABEL "$BOOT_DIR" 2>/dev/null || true)"
+
+    if [ -n "$root_uuid" ]; then
+        cmdline="root=UUID=$root_uuid $cmdline"
+    elif [ -n "$root_label" ]; then
+        cmdline="root=LABEL=$root_label $cmdline"
+    elif [ -n "$root_source" ]; then
+        cmdline="root=$root_source $cmdline"
+    fi
+
+    if [ -n "$boot_label" ]; then
+        cmdline="$cmdline boot=LABEL=$boot_label"
+    fi
+fi
+
+boot_search=
+boot_uuid="$(findmnt -no UUID "$BOOT_DIR" 2>/dev/null || true)"
+boot_label="$(findmnt -no LABEL "$BOOT_DIR" 2>/dev/null || true)"
+if [ -n "$boot_uuid" ]; then
+    boot_search="search --fs-uuid $boot_uuid --set=boot --no-floppy"
+elif [ -n "$boot_label" ]; then
+    boot_search="search --label $boot_label --set=boot --no-floppy"
+else
+    log "unable to determine boot filesystem UUID or label"
+    exit 1
+fi
+
+tmp_cfg="$(mktemp)"
+trap 'rm -f "$tmp_cfg"' EXIT
+
+# Copy EndeavourOS theme if available
+eos_theme_src="/usr/share/grub/themes/endeavouros"
+eos_theme_dest="$GRUB_DIR/themes/endeavouros"
+has_eos_theme=0
+
+if [ -d "$eos_theme_src" ]; then
+    mkdir -p "$(dirname "$eos_theme_dest")"
+    rm -rf "$eos_theme_dest"
+    cp -r "$eos_theme_src" "$eos_theme_dest"
+    has_eos_theme=1
+elif [ -d "$eos_theme_dest" ]; then
+    has_eos_theme=1
+fi
+
+{
+    printf 'set default=0\n'
+    printf 'set timeout=5\n\n'
+    printf '%s\n' "$boot_search"
+    printf 'set root=($boot)\n\n'
+    printf 'if loadfont unicode; then\n'
+    printf '    set gfxmode=900x1440,1024x768,auto\n'
+    printf '    set gfxpayload=keep\n'
+    printf '    terminal_output gfxterm\n'
+    printf 'fi\n\n'
+
+    if [ "$has_eos_theme" -eq 1 ]; then
+        printf 'insmod png\n'
+        printf 'insmod jpeg\n'
+        if [ -f "$eos_theme_dest/EndeavourOS/theme.txt" ]; then
+            printf 'set theme=($boot)/%s/themes/endeavouros/EndeavourOS/theme.txt\n' "$(basename "$GRUB_DIR")"
+        else
+            printf 'set theme=($boot)/%s/themes/endeavouros/theme.txt\n' "$(basename "$GRUB_DIR")"
+        fi
+        printf 'export theme\n\n'
+    fi
+
+    for dtb_rel in "${DTB_RELS[@]}"; do
+        printf 'menuentry "EndeavourOS ARM (Pipa) - %s" {\n' "$(dtb_title "$dtb_rel")"
+        printf '    devicetree ($boot)/%s\n' "$dtb_rel"
+        printf '    linux ($boot)/%s %s\n' "$separate_kernel_rel" "$cmdline"
+        printf '    initrd ($boot)/%s\n' "$INITRAMFS_STABLE_REL"
+        printf '}\n\n'
+    done
+} > "$tmp_cfg"
+
+install -Dm644 "$tmp_cfg" "$GRUB_CFG"
+log "wrote $GRUB_CFG"

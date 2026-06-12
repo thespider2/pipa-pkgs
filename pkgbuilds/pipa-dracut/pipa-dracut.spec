@@ -1,6 +1,6 @@
 Name: pipa-dracut
 Version: 1.1
-Release: 6
+Release: 5
 Summary: Dracut modules for the Xiaomi Pad 6
 Source1: module-setup.sh
 Source2: pipa.conf

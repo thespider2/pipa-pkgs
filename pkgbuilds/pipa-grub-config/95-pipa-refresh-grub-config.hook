@@ -1,0 +1,11 @@
+[Trigger]
+Type = Package
+Operation = Install
+Operation = Upgrade
+Target = linux-pipa
+Target = linux
+
+[Action]
+Description = Refreshing Xiaomi Pad 6 GRUB menu
+When = PostTransaction
+Exec = /usr/local/bin/pipa-refresh-grub-config

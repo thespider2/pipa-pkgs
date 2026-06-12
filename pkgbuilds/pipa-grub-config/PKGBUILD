@@ -1,0 +1,16 @@
+pkgname=pipa-grub-config
+pkgver=1.0
+pkgrel=12
+pkgdesc="GRUB config refresh helper for the Xiaomi Pad 6"
+arch=('any')
+license=('MIT')
+depends=('bash' 'coreutils' 'util-linux')
+install='pipa-grub-config.install'
+source=('pipa-refresh-grub-config'
+        '95-pipa-refresh-grub-config.hook')
+sha256sums=('SKIP' 'SKIP')
+
+package() {
+  install -Dm755 pipa-refresh-grub-config "$pkgdir/usr/local/bin/pipa-refresh-grub-config"
+  install -Dm644 95-pipa-refresh-grub-config.hook "$pkgdir/usr/share/libalpm/hooks/95-pipa-refresh-grub-config.hook"
+}

@@ -1,4 +1,5 @@
 linux-pipa
+qbootctl
 xiaomi-pipa-firmware
 alsa-ucm-conf-sm8250
 bluez-git
@@ -11,9 +12,11 @@ rmtfs
 tqftpserv
 pd-mapper
 pipa-dracut
-pipa-limine-config
+pipa-kernel-flasher-hook
+pipa-grub-config
 pipa-sensors
 pipa-sound-conf
 swclock-offset
 plasma-keyboard-git
+grub2-theme-endeavouros-classic
 pipa-metapkg

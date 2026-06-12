@@ -111,7 +111,7 @@ for pkg in "${PKGS[@]}"; do
     if [ ${#built_packages[@]} -eq 0 ]; then
         echo "### Building $pkg"
         chown -R "$MAKEPKG_USER:$MAKEPKG_USER" "$pkg_dir"
-        su "$MAKEPKG_USER" -c "cd '$pkg_dir' && rm -f ./*.pkg.tar.* ./*.src.tar.* && makepkg --nodeps --noconfirm --nocheck"
+        su "$MAKEPKG_USER" -c "cd '$pkg_dir' && rm -f ./*.pkg.tar.* ./*.src.tar.* && makepkg --syncdeps --noconfirm --nocheck"
 
         shopt -s nullglob
         for package_path in "$pkg_dir"/*.pkg.tar.zst "$pkg_dir"/*.pkg.tar.xz; do

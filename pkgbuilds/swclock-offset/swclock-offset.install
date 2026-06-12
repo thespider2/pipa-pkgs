@@ -1,0 +1,44 @@
+enable_swclock_offset() {
+  if command -v systemctl >/dev/null 2>&1; then
+    systemctl daemon-reload >/dev/null 2>&1 || true
+    systemctl enable swclock-offset-boot.service >/dev/null 2>&1 || true
+    systemctl enable swclock-offset-shutdown.service >/dev/null 2>&1 || true
+  fi
+}
+
+disable_swclock_offset() {
+  if command -v systemctl >/dev/null 2>&1; then
+    systemctl disable --now swclock-offset-boot.service >/dev/null 2>&1 || true
+    systemctl disable --now swclock-offset-shutdown.service >/dev/null 2>&1 || true
+    systemctl daemon-reload >/dev/null 2>&1 || true
+  fi
+}
+
+cleanup_swclock_offset_state() {
+  local offset_file="/var/cache/swclock-offset/offset-storage"
+  local offset_directory="/var/cache/swclock-offset"
+
+  if [ -f "$offset_file" ]; then
+    rm -f "$offset_file"
+  fi
+
+  if [ -d "$offset_directory" ]; then
+    rmdir "$offset_directory" 2>/dev/null || true
+  fi
+}
+
+post_install() {
+  enable_swclock_offset
+}
+
+post_upgrade() {
+  enable_swclock_offset
+}
+
+pre_remove() {
+  disable_swclock_offset
+}
+
+post_remove() {
+  cleanup_swclock_offset_state
+}

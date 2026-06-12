@@ -7,6 +7,7 @@ arch=('aarch64' 'x86_64')
 url="https://github.com/rr1111/plasma-keyboard"
 license=('LGPL-2.1-or-later')
 depends=(
+  'extra-cmake-modules'
   'gcc-libs'
   'glibc'
   'kcmutils'
@@ -25,7 +26,7 @@ depends=(
   'wayland'
   'wayland-protocols'
 )
-makedepends=('cmake' 'extra-cmake-modules' 'git' 'gtest')
+makedepends=('cmake' 'extra-cmake-modules' 'git')
 provides=("$_pkgname")
 conflicts=("$_pkgname")
 source=("$pkgname::git+https://github.com/rr1111/plasma-keyboard.git")

@@ -3,6 +3,7 @@ set -euo pipefail
 
 BOOT_DIR=/boot
 LIMINE_CFG="$BOOT_DIR/limine.conf"
+LIMINE_EFI_SOURCE=/usr/share/limine/BOOTAA64.EFI
 declare -a DTB_RELS=()
 RAW_KERNEL_REL=Image
 GZIP_KERNEL_REL=Image.gz
@@ -12,6 +13,16 @@ DEFAULT_CMDLINE='rw rootwait console=tty0 console=ttyS0 earlycon quiet splash'
 
 log() {
     printf 'pipa-limine-config: %s\n' "$*" >&2
+}
+
+is_fat_filesystem() {
+    case "$1" in
+        vfat|msdos|fat|fat16|fat32)
+            return 0
+            ;;
+    esac
+
+    return 1
 }
 
 ensure_tmpdir() {
@@ -77,6 +88,61 @@ discover_dtbs() {
     if [ "${#DTB_RELS[@]}" -eq 0 ]; then
         log "no Xiaomi Pad 6 DTB found under $BOOT_DIR/dtbs/qcom"
         exit 1
+    fi
+}
+
+find_esp_dir() {
+    local path=
+    local fstype=
+
+    for path in "${PIPA_ESP_DIR:-}" /efi /boot/efi; do
+        [ -n "$path" ] || continue
+
+        if ! mountpoint -q "$path"; then
+            continue
+        fi
+
+        fstype="$(findmnt -no FSTYPE "$path" 2>/dev/null || true)"
+        if is_fat_filesystem "$fstype"; then
+            printf '%s\n' "$path"
+            return 0
+        fi
+    done
+
+    if mountpoint -q "$BOOT_DIR"; then
+        fstype="$(findmnt -no FSTYPE "$BOOT_DIR" 2>/dev/null || true)"
+        if is_fat_filesystem "$fstype"; then
+            printf '%s\n' "$BOOT_DIR"
+            return 0
+        fi
+    fi
+
+    return 1
+}
+
+install_limine_efi() {
+    local esp_dir=
+    local target=
+    local compat_target=
+
+    if [ ! -f "$LIMINE_EFI_SOURCE" ]; then
+        log "missing Limine EFI binary: $LIMINE_EFI_SOURCE"
+        return 1
+    fi
+
+    if ! esp_dir="$(find_esp_dir)"; then
+        log "no mounted EFI system partition found; skipping BOOTAA64.EFI install"
+        return 0
+    fi
+
+    target="$esp_dir/EFI/BOOT/BOOTAA64.EFI"
+    install -Dm644 "$LIMINE_EFI_SOURCE" "$target"
+    log "installed Limine EFI binary to $target"
+
+    compat_target="$esp_dir/EFI/endeavouros/grubaa64.efi"
+    if [ -e "$compat_target" ] || [ -d "$(dirname "$compat_target")" ]; then
+        install -Dm644 "$LIMINE_EFI_SOURCE" "$compat_target"
+        log "replaced legacy EndeavourOS GRUB path with Limine at $compat_target"
     fi
 }
 
@@ -170,3 +236,4 @@ trap 'rm -f "$tmp_cfg"' EXIT
 
 install -Dm644 "$tmp_cfg" "$LIMINE_CFG"
 log "wrote $LIMINE_CFG"
+install_limine_efi

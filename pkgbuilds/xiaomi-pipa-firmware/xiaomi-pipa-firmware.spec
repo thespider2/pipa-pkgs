@@ -5,7 +5,7 @@
 
 Name: xiaomi-pipa-firmware
 Version: 1.1
-Release: 2
+Release: 3
 URL: https://github.com/pipa-mainline/xiaomi-pipa-firmware
 Summary: Firmware package for Xiaomi Pad 6 (pipa)
 Source1: %{url}/archive/%{_commit}/xiaomi-pipa-firmware-%{_commit}.tar.gz
@@ -13,6 +13,7 @@ Source2: awinic_firmware.files
 Source3: dsp_firmware.files
 Source4: qcom_firmware.files
 Source5: novatek_firmware.files
+Source6: nuvolta_firmware.files
 License: Unknown
 
 Requires: qcom-firmware
@@ -43,8 +44,13 @@ for firmware in $(cat %{SOURCE5}); do
 	install -Dm644 ${firmware} "%{buildroot}/%{_firmwarepath}/novatek/$(basename "${firmware}")"
 done
 
+for firmware in $(cat %{SOURCE6}); do
+	install -Dm644 ${firmware} "%{buildroot}/%{_firmwarepath}/nuvolta/$(basename "${firmware}")"
+done
+
 %files
 %{_firmwarepath}/qcom/*
 %{_firmwarepath}/novatek/*
+%{_firmwarepath}/nuvolta/*
 %{_firmwarepath}/awinic/*
 %{_hexegonpath}/*

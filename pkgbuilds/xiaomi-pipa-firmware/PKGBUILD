@@ -1,6 +1,6 @@
 pkgname=xiaomi-pipa-firmware
 pkgver=1.1
-pkgrel=2
+pkgrel=3
 _commit=842d35beffeda8c6d1b0e611b335543bf0e6b41e
 pkgdesc="Firmware package for Xiaomi Pad 6 (pipa)"
 arch=('any')
@@ -11,8 +11,9 @@ source=("${pkgname}-${_commit}.tar.gz::https://github.com/pipa-mainline/xiaomi-p
         'awinic_firmware.files'
         'dsp_firmware.files'
         'qcom_firmware.files'
-        'novatek_firmware.files')
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+        'novatek_firmware.files'
+        'nuvolta_firmware.files')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 package() {
   cd "$pkgname-$_commit"
@@ -31,5 +32,9 @@ package() {
   
   for firmware in $(cat ../novatek_firmware.files); do
     install -Dm644 "$firmware" "$pkgdir/usr/lib/firmware/novatek/$(basename "$firmware")"
+  done
+
+  for firmware in $(cat ../nuvolta_firmware.files); do
+    install -Dm644 "$firmware" "$pkgdir/usr/lib/firmware/nuvolta/$(basename "$firmware")"
   done
 }

@@ -1,13 +1,12 @@
 pkgname=plasma-keyboard-git
 _pkgname=plasma-keyboard
 pkgver=6.6.4.r41.ga17cb83
-pkgrel=1
+pkgrel=2
 pkgdesc="Virtual keyboard for Qt-based desktops"
 arch=('aarch64' 'x86_64')
 url="https://github.com/rr1111/plasma-keyboard"
 license=('LGPL-2.1-or-later')
 depends=(
-  'extra-cmake-modules'
   'gcc-libs'
   'glibc'
   'kcmutils'
@@ -17,8 +16,8 @@ depends=(
   'ki18n'
   'kirigami'
   'kirigami-addons'
+  'libplasma'
   'libxkbcommon'
-  'plasma-framework'
   'qt6-base'
   'qt6-declarative'
   'qt6-virtualkeyboard'

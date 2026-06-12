@@ -1,8 +1,9 @@
 Name: pipa-limine-config
 Version: 1.0
-Release: 2
+Release: 4
 Summary: Limine config refresh helper for the Xiaomi Pad 6
 License: MIT
+Requires: dosfstools
 Requires: limine
 Source1: pipa-refresh-limine-config
 Source2: 95-pipa-refresh-limine-config.hook

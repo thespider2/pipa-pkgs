@@ -76,6 +76,16 @@ print(digest.hexdigest())
 PY
 }
 
+collect_pkg_dependencies() {
+    local pkg_dir="$1"
+
+    env -i HOME="$HOME" bash --noprofile --norc -c '
+        set -e
+        source "$1"
+        printf "%s\n" "${depends[@]-}" "${makedepends[@]-}"
+    ' _ "$pkg_dir/PKGBUILD" | awk 'NF' | sort -u
+}
+
 mapfile -t PKGS < <(grep -vE '^[[:space:]]*(#|$)' "$CONFIG_DIR/packages.local.txt")
 
 for pkg in "${PKGS[@]}"; do
@@ -111,7 +121,11 @@ for pkg in "${PKGS[@]}"; do
     if [ ${#built_packages[@]} -eq 0 ]; then
         echo "### Building $pkg"
         chown -R "$MAKEPKG_USER:$MAKEPKG_USER" "$pkg_dir"
-        su "$MAKEPKG_USER" -c "cd '$pkg_dir' && rm -f ./*.pkg.tar.* ./*.src.tar.* && makepkg --syncdeps --noconfirm --nocheck"
+        mapfile -t pkg_dependencies < <(collect_pkg_dependencies "$pkg_dir")
+        if [ ${#pkg_dependencies[@]} -gt 0 ]; then
+            pacman -S --needed --noconfirm "${pkg_dependencies[@]}"
+        fi
+        su "$MAKEPKG_USER" -c "cd '$pkg_dir' && rm -f ./*.pkg.tar.* ./*.src.tar.* && makepkg --nodeps --noconfirm --nocheck"
 
         shopt -s nullglob
         for package_path in "$pkg_dir"/*.pkg.tar.zst "$pkg_dir"/*.pkg.tar.xz; do

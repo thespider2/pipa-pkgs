@@ -9,10 +9,27 @@ case "${1:-}/${2:-}" in
         ;;
 esac
 
-# Give the fastrpc devices a moment to reappear after resume.
-sleep 2
+run_resume_restarts() {
+    sleep 2
+    /usr/local/bin/pipa-prepare-sensor-persist || true
+    systemctl restart hexagonrpcd-sdsp.service || true
+    systemctl restart hexagonrpcd-adsp-sensorspd.service || true
+    systemctl restart iio-sensor-proxy.service || true
+}
 
-/usr/local/bin/pipa-prepare-sensor-persist || true
-systemctl restart hexagonrpcd-sdsp.service || true
-systemctl restart hexagonrpcd-adsp-sensorspd.service || true
-systemctl restart iio-sensor-proxy.service || true
+if command -v systemd-run >/dev/null 2>&1; then
+    systemd-run \
+        --quiet \
+        --collect \
+        --unit=pipa-sensors-post-resume \
+        --property=After=systemd-suspend.service \
+        /bin/sh -c '
+            sleep 2
+            /usr/local/bin/pipa-prepare-sensor-persist || true
+            systemctl restart hexagonrpcd-sdsp.service || true
+            systemctl restart hexagonrpcd-adsp-sensorspd.service || true
+            systemctl restart iio-sensor-proxy.service || true
+        ' || true
+else
+    run_resume_restarts >/dev/null 2>&1 &
+fi

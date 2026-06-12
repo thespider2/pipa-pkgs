@@ -53,11 +53,11 @@ refresh_boot_artifacts() {
     log "building initramfs for $kernver"
     dracut --force --kver "$kernver" "$initramfs"
 
-    if [ -x /usr/local/bin/pipa-refresh-grub-config ]; then
-        log "refreshing GRUB menu"
-        PIPA_INITRAMFS_SOURCE="$initramfs" /usr/local/bin/pipa-refresh-grub-config
+    if [ -x /usr/local/bin/pipa-refresh-limine-config ]; then
+        log "refreshing Limine menu"
+        PIPA_INITRAMFS_SOURCE="$initramfs" /usr/local/bin/pipa-refresh-limine-config
     else
-        log "GRUB refresh helper not installed; skipping"
+        log "Limine refresh helper not installed; skipping"
     fi
 }
 

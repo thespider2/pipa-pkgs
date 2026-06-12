@@ -1,0 +1,16 @@
+pkgname=pipa-limine-config
+pkgver=1.0
+pkgrel=1
+pkgdesc="Limine config refresh helper for the Xiaomi Pad 6"
+arch=('any')
+license=('MIT')
+depends=('bash' 'coreutils' 'util-linux')
+install='pipa-limine-config.install'
+source=('pipa-refresh-limine-config'
+        '95-pipa-refresh-limine-config.hook')
+sha256sums=('SKIP' 'SKIP')
+
+package() {
+  install -Dm755 pipa-refresh-limine-config "$pkgdir/usr/local/bin/pipa-refresh-limine-config"
+  install -Dm644 95-pipa-refresh-limine-config.hook "$pkgdir/usr/share/libalpm/hooks/95-pipa-refresh-limine-config.hook"
+}

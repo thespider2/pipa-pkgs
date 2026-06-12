@@ -2,8 +2,7 @@
 set -euo pipefail
 
 BOOT_DIR=/boot
-GRUB_DIR="$BOOT_DIR/grub2"
-GRUB_CFG="$GRUB_DIR/grub.cfg"
+LIMINE_CFG="$BOOT_DIR/limine.conf"
 declare -a DTB_RELS=()
 RAW_KERNEL_REL=Image
 GZIP_KERNEL_REL=Image.gz
@@ -12,7 +11,7 @@ INITRAMFS_STABLE_PATH="$BOOT_DIR/$INITRAMFS_STABLE_REL"
 DEFAULT_CMDLINE='rw rootwait console=tty0 console=ttyS0 earlycon quiet splash'
 
 log() {
-    printf 'pipa-grub-config: %s\n' "$*" >&2
+    printf 'pipa-limine-config: %s\n' "$*" >&2
 }
 
 ensure_tmpdir() {
@@ -82,27 +81,21 @@ discover_dtbs() {
 }
 
 if ! mountpoint -q "$BOOT_DIR"; then
-    log "$BOOT_DIR is not mounted; refusing to write GRUB config"
+    log "$BOOT_DIR is not mounted; refusing to write Limine config"
     exit 1
 fi
 
-mkdir -p "$GRUB_DIR"
 ensure_tmpdir
 discover_dtbs
 
-separate_kernel_rel=
+kernel_rel=
 if [ -f "$BOOT_DIR/$RAW_KERNEL_REL" ]; then
-    separate_kernel_rel="$RAW_KERNEL_REL"
+    kernel_rel="$RAW_KERNEL_REL"
 elif [ -f "$BOOT_DIR/$GZIP_KERNEL_REL" ]; then
-    separate_kernel_rel="$GZIP_KERNEL_REL"
+    kernel_rel="$GZIP_KERNEL_REL"
 else
     log "no kernel image found under $BOOT_DIR"
     exit 1
-fi
-
-gzip_kernel_rel=
-if [ -f "$BOOT_DIR/$GZIP_KERNEL_REL" ]; then
-    gzip_kernel_rel="$GZIP_KERNEL_REL"
 fi
 
 initramfs_source=
@@ -111,7 +104,6 @@ if [ -n "${PIPA_INITRAMFS_SOURCE:-}" ] && [ -f "${PIPA_INITRAMFS_SOURCE}" ]; the
 elif [ -f "$BOOT_DIR/$INITRAMFS_STABLE_REL" ]; then
     initramfs_source="$BOOT_DIR/$INITRAMFS_STABLE_REL"
 elif [ -f "$BOOT_DIR/initramfs.img" ]; then
-    # Migrate legacy builder images to the stable dracut path that GRUB uses.
     initramfs_source="$BOOT_DIR/initramfs.img"
 else
     shopt -s nullglob
@@ -158,65 +150,23 @@ if [ -z "$cmdline" ]; then
     fi
 fi
 
-boot_search=
-boot_uuid="$(findmnt -no UUID "$BOOT_DIR" 2>/dev/null || true)"
-boot_label="$(findmnt -no LABEL "$BOOT_DIR" 2>/dev/null || true)"
-if [ -n "$boot_uuid" ]; then
-    boot_search="search --fs-uuid $boot_uuid --set=boot --no-floppy"
-elif [ -n "$boot_label" ]; then
-    boot_search="search --label $boot_label --set=boot --no-floppy"
-else
-    log "unable to determine boot filesystem UUID or label"
-    exit 1
-fi
-
 tmp_cfg="$(mktemp)"
 trap 'rm -f "$tmp_cfg"' EXIT
 
-# Copy EndeavourOS theme if available
-eos_theme_src="/usr/share/grub/themes/endeavouros"
-eos_theme_dest="$GRUB_DIR/themes/endeavouros"
-has_eos_theme=0
-
-if [ -d "$eos_theme_src" ]; then
-    mkdir -p "$(dirname "$eos_theme_dest")"
-    rm -rf "$eos_theme_dest"
-    cp -r "$eos_theme_src" "$eos_theme_dest"
-    has_eos_theme=1
-elif [ -d "$eos_theme_dest" ]; then
-    has_eos_theme=1
-fi
-
 {
-    printf 'set default=0\n'
-    printf 'set timeout=5\n\n'
-    printf '%s\n' "$boot_search"
-    printf 'set root=($boot)\n\n'
-    printf 'if loadfont unicode; then\n'
-    printf '    set gfxmode=900x1440,1024x768,auto\n'
-    printf '    set gfxpayload=keep\n'
-    printf '    terminal_output gfxterm\n'
-    printf 'fi\n\n'
-
-    if [ "$has_eos_theme" -eq 1 ]; then
-        printf 'insmod png\n'
-        printf 'insmod jpeg\n'
-        if [ -f "$eos_theme_dest/EndeavourOS/theme.txt" ]; then
-            printf 'set theme=($boot)/%s/themes/endeavouros/EndeavourOS/theme.txt\n' "$(basename "$GRUB_DIR")"
-        else
-            printf 'set theme=($boot)/%s/themes/endeavouros/theme.txt\n' "$(basename "$GRUB_DIR")"
-        fi
-        printf 'export theme\n\n'
-    fi
+    printf 'timeout: 5\n'
+    printf 'default_entry: 1\n'
+    printf 'remember_last_entry: yes\n\n'
 
     for dtb_rel in "${DTB_RELS[@]}"; do
-        printf 'menuentry "EndeavourOS ARM (Pipa) - %s" {\n' "$(dtb_title "$dtb_rel")"
-        printf '    devicetree ($boot)/%s\n' "$dtb_rel"
-        printf '    linux ($boot)/%s %s\n' "$separate_kernel_rel" "$cmdline"
-        printf '    initrd ($boot)/%s\n' "$INITRAMFS_STABLE_REL"
-        printf '}\n\n'
+        printf '/EndeavourOS ARM (Pipa) - %s\n' "$(dtb_title "$dtb_rel")"
+        printf '    protocol: linux\n'
+        printf '    kernel_path: boot():/%s\n' "$kernel_rel"
+        printf '    module_path: boot():/%s\n' "$INITRAMFS_STABLE_REL"
+        printf '    dtb_path: boot():/%s\n' "$dtb_rel"
+        printf '    cmdline: %s\n\n' "$cmdline"
     done
 } > "$tmp_cfg"
 
-install -Dm644 "$tmp_cfg" "$GRUB_CFG"
-log "wrote $GRUB_CFG"
+install -Dm644 "$tmp_cfg" "$LIMINE_CFG"
+log "wrote $LIMINE_CFG"

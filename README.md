@@ -76,10 +76,10 @@ The GitHub Actions publish workflow also restores the previous `repo/` cache fir
 ### Update A Running Tablet
 
 Runtime fixes that belong in packages should be delivered through this repo so the tablet can pull them without a full image rebuild.
-For the current sensor suspend/resume recovery and the GRUB menu refresh, publish the updated packages and then run on the tablet:
+For the current sensor suspend/resume recovery and the Limine menu refresh, publish the updated packages and then run on the tablet:
 
 ```bash
-sudo pacman -Syu pipa-pkgs/pipa-sensors pipa-pkgs/pipa-grub-config
+sudo pacman -Syu pipa-pkgs/pipa-sensors pipa-pkgs/pipa-limine-config
 ```
 
 Those packages now carry:
@@ -87,9 +87,9 @@ Those packages now carry:
 - the sensor persist directory preparation helper
 - the safe sensor resume hook
 - the tmpfiles rule for `/mnt/vendor/persist/sensors/registry`
-- the tablet-side `/boot/grub2/grub.cfg` refresh helper
-- the separate DTB GRUB entry as the default boot option
-- the GRUB menu resolution set to `1800x2880`
+- the tablet-side `/boot/limine.conf` refresh helper
+- the separate DTB Limine entries for available panel DTBs
+- the stable initramfs path used by the Limine menu
 
 To refresh the local `pkgbuilds/` tree from your main source repo:
 

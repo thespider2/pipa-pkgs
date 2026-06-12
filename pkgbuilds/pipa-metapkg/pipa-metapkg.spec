@@ -1,14 +1,14 @@
 Name: pipa-metapkg
 Version: 1.1
-Release: 13
+Release: 14
 Summary: Xiaomi Pad 6 support meta package
 License: MIT
 
 Requires: kernel
 Requires: xiaomi-pipa-firmware
-Requires: qbootctl
+Requires: limine
 Requires: pipa-dracut
-Requires: pipa-grub-config
+Requires: pipa-limine-config
 Requires: pipa-sound-conf
 Requires: swclock-offset
 Requires: bootmac

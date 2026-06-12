@@ -86,6 +86,20 @@ collect_pkg_dependencies() {
     ' _ "$pkg_dir/PKGBUILD" | awk 'NF' | sort -u
 }
 
+find_local_dependency_archives() {
+    local package_name="$1"
+
+    shopt -s nullglob
+    local matches=("$REPO_DIR"/"${package_name}"-*.pkg.tar.zst "$REPO_DIR"/"${package_name}"-*.pkg.tar.xz)
+    shopt -u nullglob
+
+    if [ ${#matches[@]} -eq 0 ]; then
+        return 1
+    fi
+
+    printf '%s\n' "${matches[@]}" | xargs -r ls -1t | head -n1
+}
+
 mapfile -t PKGS < <(grep -vE '^[[:space:]]*(#|$)' "$CONFIG_DIR/packages.local.txt")
 
 for pkg in "${PKGS[@]}"; do
@@ -123,7 +137,29 @@ for pkg in "${PKGS[@]}"; do
         chown -R "$MAKEPKG_USER:$MAKEPKG_USER" "$pkg_dir"
         mapfile -t pkg_dependencies < <(collect_pkg_dependencies "$pkg_dir")
         if [ ${#pkg_dependencies[@]} -gt 0 ]; then
-            pacman -S --needed --noconfirm "${pkg_dependencies[@]}"
+            remote_dependencies=()
+            local_dependency_archives=()
+
+            for dependency in "${pkg_dependencies[@]}"; do
+                if printf '%s\n' "${PKGS[@]}" | grep -Fxq "$dependency"; then
+                    if local_archive="$(find_local_dependency_archives "$dependency")"; then
+                        local_dependency_archives+=("$local_archive")
+                    else
+                        echo "Missing local dependency package for $dependency in $REPO_DIR" >&2
+                        exit 1
+                    fi
+                else
+                    remote_dependencies+=("$dependency")
+                fi
+            done
+
+            if [ ${#remote_dependencies[@]} -gt 0 ]; then
+                pacman -S --needed --noconfirm "${remote_dependencies[@]}"
+            fi
+
+            if [ ${#local_dependency_archives[@]} -gt 0 ]; then
+                pacman -U --noconfirm --ask=4 "${local_dependency_archives[@]}"
+            fi
         fi
         su "$MAKEPKG_USER" -c "cd '$pkg_dir' && rm -f ./*.pkg.tar.* ./*.src.tar.* && makepkg --nodeps --noconfirm --nocheck"
 

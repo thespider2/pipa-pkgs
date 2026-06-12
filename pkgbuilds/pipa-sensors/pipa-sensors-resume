@@ -1,10 +1,6 @@
 #!/bin/sh
 set -eu
 
-log_debug() {
-    logger -t pipa-sleep-debug "pipa-sensors-resume: $*"
-}
-
 case "${1:-}/${2:-}" in
     post/*)
         ;;
@@ -14,19 +10,17 @@ case "${1:-}/${2:-}" in
 esac
 
 run_resume_restarts() {
-    log_debug "async restarts begin"
     sleep 2
     /usr/local/bin/pipa-prepare-sensor-persist || true
     systemctl restart hexagonrpcd-sdsp.service || true
     systemctl restart hexagonrpcd-adsp-sensorspd.service || true
     systemctl restart iio-sensor-proxy.service || true
-    log_debug "async restarts end"
 }
 
-log_debug "hook start phase=${1:-} mode=${2:-}"
 if command -v systemd-run >/dev/null 2>&1; then
     systemd-run \
         --quiet \
+        --no-block \
         --collect \
         --unit=pipa-sensors-post-resume \
         --property=After=systemd-suspend.service \
@@ -40,4 +34,3 @@ if command -v systemd-run >/dev/null 2>&1; then
 else
     run_resume_restarts >/dev/null 2>&1 &
 fi
-log_debug "hook end phase=${1:-} mode=${2:-}"

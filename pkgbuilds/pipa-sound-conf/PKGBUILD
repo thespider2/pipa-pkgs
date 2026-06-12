@@ -1,14 +1,17 @@
 pkgname=pipa-sound-conf
 pkgver=1.4
-pkgrel=4
+pkgrel=5
 pkgdesc="Sound settings for Xiaomi Mi Pad 6 (pipa)"
 arch=('any')
 license=('custom')
 depends=('alsa-ucm-conf-sm8250' 'alsa-utils' 'wireplumber')
+install='pipa-sound-conf.install'
 source=('51-pipa.conf'
         'pipa-audio-init'
-        'pipa-audio-init.service')
+        'pipa-audio-init.service'
+        'pipa-sound-conf.install')
 sha256sums=('SKIP'
+            'SKIP'
             'SKIP'
             'SKIP')
 

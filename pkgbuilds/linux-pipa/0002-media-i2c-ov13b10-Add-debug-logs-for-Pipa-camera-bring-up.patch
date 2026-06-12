@@ -5,7 +5,7 @@
  	u32 val;
  
 +	/* #region debug-point ov13b10-identify */
-+	dev_info(ov13b->dev, "ov13b10-debug: identify start identified=%d\n",
++	dev_dbg(ov13b->dev, "ov13b10-debug: identify start identified=%d\n",
 +		 ov13b->identified);
 +	/* #endregion debug-point ov13b10-identify */
 +
@@ -15,7 +15,7 @@
  	ret = ov13b10_read_reg(ov13b, OV13B10_REG_CHIP_ID,
  			       OV13B10_REG_VALUE_24BIT, &val);
 +	/* #region debug-point ov13b10-identify */
-+	dev_info(ov13b->dev, "ov13b10-debug: identify read ret=%d chip_id=0x%x\n",
++	dev_dbg(ov13b->dev, "ov13b10-debug: identify read ret=%d chip_id=0x%x\n",
 +		 ret, val);
 +	/* #endregion debug-point ov13b10-identify */
  	if (ret)
@@ -26,7 +26,7 @@
  	int ret;
  
 +	/* #region debug-point ov13b10-power */
-+	dev_info(dev,
++	dev_dbg(dev,
 +		 "ov13b10-debug: power_on start reset=%d avdd=%d dvdd=%d dovdd=%d\n",
 +		 !IS_ERR_OR_NULL(ov13b10->reset), !!ov13b10->avdd,
 +		 !!ov13b10->dvdd, !!ov13b10->dovdd);
@@ -39,13 +39,13 @@
  
  	gpiod_set_value_cansleep(ov13b10->reset, 0);
 +	/* #region debug-point ov13b10-power */
-+	dev_info(dev, "ov13b10-debug: power_on reset deasserted\n");
++	dev_dbg(dev, "ov13b10-debug: power_on reset deasserted\n");
 +	/* #endregion debug-point ov13b10-power */
  	/* 5ms to wait ready after XSHUTDN assert */
  	usleep_range(5000, 5500);
  
 +	/* #region debug-point ov13b10-power */
-+	dev_info(dev, "ov13b10-debug: power_on complete\n");
++	dev_dbg(dev, "ov13b10-debug: power_on complete\n");
 +	/* #endregion debug-point ov13b10-power */
  	return 0;
  }
@@ -53,7 +53,7 @@
  static int ov13b10_start_streaming(struct ov13b10 *ov13b)
  {
 +	/* #region debug-point ov13b10-stream */
-+	dev_info(ov13b->dev, "ov13b10-debug: start_streaming mode=%ux%u lanes=%u\n",
++	dev_dbg(ov13b->dev, "ov13b10-debug: start_streaming mode=%ux%u lanes=%u\n",
 +		 ov13b->cur_mode->width, ov13b->cur_mode->height, ov13b->data_lanes);
 +	/* #endregion debug-point ov13b10-stream */
  	const struct ov13b10_reg_list *reg_list;
@@ -64,7 +64,7 @@
  		return ret;
  
 +	/* #region debug-point ov13b10-stream */
-+	dev_info(ov13b->dev, "ov13b10-debug: start_streaming controls applied\n");
++	dev_dbg(ov13b->dev, "ov13b10-debug: start_streaming controls applied\n");
 +	/* #endregion debug-point ov13b10-stream */
 +
  	return ov13b10_write_reg(ov13b, OV13B10_REG_MODE_SELECT,
@@ -75,7 +75,7 @@
  
  	mutex_lock(&ov13b->mutex);
 +	/* #region debug-point ov13b10-stream */
-+	dev_info(ov13b->dev, "ov13b10-debug: set_stream enable=%d\n", enable);
++	dev_dbg(ov13b->dev, "ov13b10-debug: set_stream enable=%d\n", enable);
 +	/* #endregion debug-point ov13b10-stream */
  
  	if (enable) {
@@ -85,7 +85,7 @@
  	}
  
 +	/* #region debug-point ov13b10-stream */
-+	dev_info(ov13b->dev, "ov13b10-debug: set_stream done enable=%d ret=%d\n",
++	dev_dbg(ov13b->dev, "ov13b10-debug: set_stream done enable=%d ret=%d\n",
 +		 enable, ret);
 +	/* #endregion debug-point ov13b10-stream */
  	mutex_unlock(&ov13b->mutex);
@@ -96,7 +96,7 @@
  	pm_runtime_put(ov13b->dev);
  err_unlock:
 +	/* #region debug-point ov13b10-stream */
-+	dev_info(ov13b->dev, "ov13b10-debug: set_stream done enable=%d ret=%d\n",
++	dev_dbg(ov13b->dev, "ov13b10-debug: set_stream done enable=%d ret=%d\n",
 +		 enable, ret);
 +	/* #endregion debug-point ov13b10-stream */
  	mutex_unlock(&ov13b->mutex);
@@ -107,7 +107,7 @@
  				     "failed to get imaging clock\n");
  
 +	/* #region debug-point ov13b10-pm */
-+	dev_info(ov13b->dev, "ov13b10-debug: pm resources reset=%d\n",
++	dev_dbg(ov13b->dev, "ov13b10-debug: pm resources reset=%d\n",
 +		 !IS_ERR_OR_NULL(ov13b->reset));
 +	/* #endregion debug-point ov13b10-pm */
 +
@@ -119,7 +119,7 @@
  	}
  
 +	/* #region debug-point ov13b10-pm */
-+	dev_info(ov13b->dev,
++	dev_dbg(ov13b->dev,
 +		 "ov13b10-debug: pm resources clk=%lu avdd=%d dvdd=%d dovdd=%d\n",
 +		 freq, !!ov13b->avdd, !!ov13b->dvdd, !!ov13b->dovdd);
 +	/* #endregion debug-point ov13b10-pm */
@@ -132,14 +132,14 @@
  
  	ov13b->data_lanes = dlane;
 +	/* #region debug-point ov13b10-hwcfg */
-+	dev_info(dev, "ov13b10-debug: hwcfg lanes=%u link_freq_count=%u\n",
++	dev_dbg(dev, "ov13b10-debug: hwcfg lanes=%u link_freq_count=%u\n",
 +		 dlane, bus_cfg.nr_of_link_frequencies);
 +	/* #endregion debug-point ov13b10-hwcfg */
  	ov13b->cur_mode = ov13b->supported_modes;
  	dev_dbg(dev, "%u lanes with %u modes selected\n",
  		ov13b->data_lanes, ov13b->supported_modes_num);
 +	/* #region debug-point ov13b10-hwcfg */
-+	dev_info(dev, "ov13b10-debug: hwcfg mode_count=%u\n", ov13b->supported_modes_num);
++	dev_dbg(dev, "ov13b10-debug: hwcfg mode_count=%u\n", ov13b->supported_modes_num);
 +	/* #endregion debug-point ov13b10-hwcfg */
  
  	if (!bus_cfg.nr_of_link_frequencies) {
@@ -149,7 +149,7 @@
  	int ret;
  
 +	/* #region debug-point ov13b10-probe */
-+	dev_info(&client->dev, "ov13b10-debug: probe start addr=0x%02x\n", client->addr);
++	dev_dbg(&client->dev, "ov13b10-debug: probe start addr=0x%02x\n", client->addr);
 +	/* #endregion debug-point ov13b10-probe */
 +
  	ov13b = devm_kzalloc(&client->dev, sizeof(*ov13b), GFP_KERNEL);
@@ -160,7 +160,7 @@
  
  	full_power = acpi_dev_state_d0(ov13b->dev);
 +	/* #region debug-point ov13b10-probe */
-+	dev_info(ov13b->dev, "ov13b10-debug: probe full_power=%d\n", full_power);
++	dev_dbg(ov13b->dev, "ov13b10-debug: probe full_power=%d\n", full_power);
 +	/* #endregion debug-point ov13b10-probe */
  	if (full_power) {
  		ret = ov13b10_power_on(ov13b->dev);
@@ -170,7 +170,7 @@
  
  	ret = v4l2_async_register_subdev_sensor(&ov13b->sd);
 +	/* #region debug-point ov13b10-probe */
-+	dev_info(ov13b->dev, "ov13b10-debug: async register ret=%d\n", ret);
++	dev_dbg(ov13b->dev, "ov13b10-debug: async register ret=%d\n", ret);
 +	/* #endregion debug-point ov13b10-probe */
  	if (ret < 0)
  		goto error_media_entity_runtime_pm;

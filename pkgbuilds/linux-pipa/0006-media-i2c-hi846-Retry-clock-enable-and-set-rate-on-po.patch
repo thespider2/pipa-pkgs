@@ -12,6 +12,11 @@ MCLK3 RCG divider is configured for 19.2MHz, since the hardware reset
 state may not match what the sensor expects after a CAMCC power domain
 cycle.
 
+Call clk_disable_unprepare() before retrying to reset the clock
+framework's enable count, allowing the next clk_prepare_enable() to
+properly re-initialize the clock from scratch after a power domain
+cycle corrupts the hardware branch state.
+
 Signed-off-by: Ayman <ayman@aymanrgab.com>
 
 --- a/drivers/media/i2c/hi846.c
@@ -25,7 +30,7 @@ Signed-off-by: Ayman <ayman@aymanrgab.com>
  
  	dev_dbg(&client->dev, "hi846-debug: power_on start rst=%d shdn=%d\n",
  		!!hi846->rst_gpio, !!hi846->shutdown_gpio);
-@@ -1641,7 +1643,17 @@
+@@ -1641,7 +1643,18 @@
  	if (ret < 0)
  		return ret;
  
@@ -39,6 +44,7 @@ Signed-off-by: Ayman <ayman@aymanrgab.com>
 +		if (ret != -EBUSY)
 +			break;
 +		dev_dbg(&client->dev, "hi846-debug: power_on clock busy, retrying...\n");
++		clk_disable_unprepare(hi846->clock);
 +		usleep_range(5000, 10000);
 +	}
  	dev_dbg(&client->dev, "hi846-debug: power_on clock ret=%d\n", ret);

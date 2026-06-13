@@ -21,7 +21,7 @@ Signed-off-by: Ayman <ayman@aymanrgab.com>
  	struct i2c_client *client = v4l2_get_subdevdata(&hi846->sd);
  	int ret;
 +	int retries;
-+	struct device *dev = &hi846->sd.dev;
++	struct device *dev = hi846->sd.dev;
  
  	dev_dbg(&client->dev, "hi846-debug: power_on start rst=%d shdn=%d\n",
  		!!hi846->rst_gpio, !!hi846->shutdown_gpio);

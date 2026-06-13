@@ -31,7 +31,7 @@ diff --git a/drivers/media/i2c/ov13b10.c b/drivers/media/i2c/ov13b10.c
 +	 * We need to force full power initialization on such systems to ensure
 +	 * the sensor is properly powered and identified during probe.
 +	 */
-+	if (!acpi_device_is_present(ACPI_COMPANION(ov13b->dev)))
++	if (!ACPI_COMPANION(ov13b->dev))
 +		full_power = true;  /* Force power-on for device-tree systems */
  	/* #region debug-point ov13b10-probe */
  	dev_dbg(ov13b->dev, "ov13b10-debug: probe full_power=%d\n", full_power);

@@ -1,0 +1,38 @@
+From: Trae <trae@example.com>
+Date: Fri, 13 Jun 2026 00:00:00 +0000
+Subject: [PATCH] media: i2c: ov13b10: Fix ACPI PM handling for device-tree systems
+
+The OV13B10 driver uses acpi_dev_state_d0() to determine if full power
+initialization should be performed during probe. On device-tree based systems
+(non-ACPI), this function always returns false, causing the sensor to skip
+power-on and chip identification during probe.
+
+This patch modifies the logic to:
+1. Check if the system is ACPI or device-tree based
+2. Force full power initialization for device-tree systems
+
+This ensures that the rear camera (OV13B10) on Xiaomi Pad 6 (Pipa) is properly
+powered and identified during probe, allowing it to register with the media
+controller and libcamera.
+
+---
+ drivers/media/i2c/ov13b10.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/drivers/media/i2c/ov13b10.c b/drivers/media/i2c/ov13b10.c
+--- a/drivers/media/i2c/ov13b10.c
++++ b/drivers/media/i2c/ov13b10.c
+@@ -1712,6 +1712,13 @@ static int ov13b10_probe(struct i2c_client *client)
+ 		return ret;
+ 
+ 	full_power = acpi_dev_state_d0(ov13b->dev);
++
++	/* For device-tree based systems, acpi_dev_state_d0() always returns false.
++	 * We need to force full power initialization on such systems to ensure
++	 * the sensor is properly powered and identified during probe.
++	 */
++	if (!acpi_device_is_present(ACPI_COMPANION(ov13b->dev)))
++		full_power = true;  /* Force power-on for device-tree systems */
+ 	/* #region debug-point ov13b10-probe */
+ 	dev_dbg(ov13b->dev, "ov13b10-debug: probe full_power=%d\n", full_power);
+ 	/* #endregion debug-point ov13b10-probe */

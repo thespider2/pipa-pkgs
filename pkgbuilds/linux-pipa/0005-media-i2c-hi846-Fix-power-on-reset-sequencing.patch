@@ -1,0 +1,29 @@
+--- a/drivers/media/i2c/hi846.c
++++ b/drivers/media/i2c/hi846.c
+@@ -1641,15 +1641,21 @@ static int hi846_power_on(struct hi846 *hi846)
+ 	if (ret < 0)
+ 		goto err_reg;
+ 
+-	if (hi846->shutdown_gpio)
+-		gpiod_set_value_cansleep(hi846->shutdown_gpio, 0);
+-
+-	/* 30us = 2400 cycles at 80Mhz */
+-	usleep_range(30, 60);
++	/* Hold sensor in reset while power and clock stabilize */
++	if (hi846->rst_gpio)
++		gpiod_set_value_cansleep(hi846->rst_gpio, 1);
++	usleep_range(1000, 2000);
++
++	/* Bring sensor out of standby */
++	if (hi846->shutdown_gpio)
++		gpiod_set_value_cansleep(hi846->shutdown_gpio, 0);
++	usleep_range(1000, 2000);
++
++	/* Release reset and wait for sensor to initialize */
+ 	if (hi846->rst_gpio)
+ 		gpiod_set_value_cansleep(hi846->rst_gpio, 0);
+-	usleep_range(30, 60);
++	usleep_range(5000, 10000);
+ 
+ 	return 0;
+ 

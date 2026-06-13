@@ -1,0 +1,96 @@
+--- a/drivers/media/i2c/hi846.c
++++ b/drivers/media/i2c/hi846.c
+@@ -1633,11 +1633,17 @@ static int hi846_set_stream(struct v4l2_subdev *sd, int enable)
+ 
+ static int hi846_power_on(struct hi846 *hi846)
+ {
++	struct i2c_client *client = v4l2_get_subdevdata(&hi846->sd);
+ 	int ret;
+ 
++	dev_dbg(&client->dev, "hi846-debug: power_on start rst=%d shdn=%d\n",
++		!!hi846->rst_gpio, !!hi846->shutdown_gpio);
++
+ 	ret = regulator_bulk_enable(HI846_NUM_SUPPLIES, hi846->supplies);
++	dev_dbg(&client->dev, "hi846-debug: power_on regulators ret=%d\n", ret);
+ 	if (ret < 0)
+ 		return ret;
+ 
+ 	ret = clk_prepare_enable(hi846->clock);
++	dev_dbg(&client->dev, "hi846-debug: power_on clock ret=%d\n", ret);
+ 	if (ret < 0)
+ 		goto err_reg;
+ 
+@@ -1648,6 +1654,7 @@ static int hi846_power_on(struct hi846 *hi846)
+ 	if (hi846->rst_gpio)
+ 		gpiod_set_value_cansleep(hi846->rst_gpio, 0);
+ 	usleep_range(30, 60);
++	dev_dbg(&client->dev, "hi846-debug: power_on complete\n");
+ 
+ 	return 0;
+ 
+@@ -1658,6 +1665,8 @@ static int hi846_power_on(struct hi846 *hi846)
+ 
+ static int hi846_power_off(struct hi846 *hi846)
+ {
++	struct i2c_client *client = v4l2_get_subdevdata(&hi846->sd);
++
+ 	if (hi846->rst_gpio)
+ 		gpiod_set_value_cansleep(hi846->rst_gpio, 1);
+ 
+@@ -1665,6 +1674,9 @@ static int hi846_power_off(struct hi846 *hi846)
+ 	if (hi846->shutdown_gpio)
+ 		gpiod_set_value_cansleep(hi846->shutdown_gpio, 1);
+ 
++	dev_dbg(&client->dev, "hi846-debug: power_off before clk\n");
+ 	clk_disable_unprepare(hi846->clock);
++	dev_dbg(&client->dev, "hi846-debug: power_off before regulators\n");
+ 	return regulator_bulk_disable(HI846_NUM_SUPPLIES, hi846->supplies);
+ }
+ 
+@@ -2052,6 +2064,7 @@ static int hi846_probe(struct i2c_client *client)
+ 	u32 mclk_freq;
+ 
+ 	hi846 = devm_kzalloc(&client->dev, sizeof(*hi846), GFP_KERNEL);
++	dev_dbg(&client->dev, "hi846-debug: probe start addr=0x%02x\n", client->addr);
+ 	if (!hi846)
+ 		return -ENOMEM;
+ 
+@@ -2073,6 +2086,8 @@ static int hi846_probe(struct i2c_client *client)
+ 			 "External clock freq %u is non-standard (expected 19.2M or 25M).\n",
+ 			 mclk_freq);
+ 
++	dev_dbg(&client->dev, "hi846-debug: probe mclk=%u supplies=%d\n",
++		mclk_freq, HI846_NUM_SUPPLIES);
++
+ 	for (i = 0; i < HI846_NUM_SUPPLIES; i++)
+ 		hi846->supplies[i].supply = hi846_supply_names[i];
+ 
+@@ -2080,13 +2095,17 @@ static int hi846_probe(struct i2c_client *client)
+ 				      hi846->supplies);
+ 	if (ret < 0)
+ 		return ret;
++	dev_dbg(&client->dev, "hi846-debug: probe regulators_get ret=%d\n", ret);
+ 
+ 	ret = hi846_power_on(hi846);
+ 	if (ret)
+ 		goto err_mutex;
++	dev_dbg(&client->dev, "hi846-debug: probe power_on ok\n");
+ 
+ 	ret = hi846_identify_module(hi846);
++	dev_dbg(&client->dev, "hi846-debug: probe identify ret=%d\n", ret);
+ 	if (ret)
+ 		goto err_power_off;
+ 
+ 	hi846->cur_mode = &supported_modes[0];
++	dev_dbg(&client->dev, "hi846-debug: probe controls\n");
+ 
+ 	ret = hi846_init_controls(hi846);
+ 	if (ret) {
+@@ -2109,6 +2128,7 @@ static int hi846_probe(struct i2c_client *client)
+ 	pm_runtime_enable(&client->dev);
+ 	pm_runtime_idle(&client->dev);
+ 
++	dev_dbg(&client->dev, "hi846-debug: probe success\n");
+ 	return 0;
+ 
+ err_media_entity_cleanup:

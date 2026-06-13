@@ -3,7 +3,7 @@ pkgname=(linux-pipa linux-pipa-headers)
 _srcname=linux
 _commit=dba2f27e87cfa398cc5e5eb76e4beac30c2ecc71
 pkgver=7.0.8
-pkgrel=5
+pkgrel=6
 pkgdesc='Linux kernel for Xiaomi Pad 6 (Pipa)'
 arch=('aarch64')
 url="https://github.com/aymanrgab/linux"
@@ -20,8 +20,10 @@ source=(
   '0001-media-i2c-hi846-Accept-19.2MHz-clock-for-Xiaomi-Pipa.patch'
   '0002-media-i2c-ov13b10-Add-debug-logs-for-Pipa-camera-bring-up.patch'
   '0003-media-i2c-ov13b10-Fix-ACPI-PM-for-device-tree-systems.patch'
+  '0004-media-i2c-hi846-Add-debug-logs-for-Pipa-camera-bring-up.patch'
+  '0005-media-i2c-hi846-Fix-power-on-reset-sequencing.patch'
 )
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 prepare() {
   cd $_srcname-${_commit}
@@ -30,6 +32,8 @@ prepare() {
   patch -p1 < ../0001-media-i2c-hi846-Accept-19.2MHz-clock-for-Xiaomi-Pipa.patch
   patch -p1 < ../0002-media-i2c-ov13b10-Add-debug-logs-for-Pipa-camera-bring-up.patch
   patch -p1 < ../0003-media-i2c-ov13b10-Fix-ACPI-PM-for-device-tree-systems.patch
+  patch -p1 < ../0004-media-i2c-hi846-Add-debug-logs-for-Pipa-camera-bring-up.patch
+  patch -p1 < ../0005-media-i2c-hi846-Fix-power-on-reset-sequencing.patch
 
   make EXTRAVERSION="-${pkgrel}-pipa" olddefconfig
 }

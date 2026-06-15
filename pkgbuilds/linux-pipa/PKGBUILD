@@ -3,7 +3,7 @@ pkgname=(linux-pipa linux-pipa-headers)
 _srcname=linux
 _commit=dba2f27e87cfa398cc5e5eb76e4beac30c2ecc71
 pkgver=7.0.8
-pkgrel=11
+pkgrel=12
 pkgdesc='Linux kernel for Xiaomi Pad 6 (Pipa)'
 arch=('aarch64')
 url="https://github.com/aymanrgab/linux"
@@ -17,7 +17,6 @@ options=('!strip')
 source=(
   "linux-${_commit}.tar.gz::https://github.com/aymanrgab/linux/archive/${_commit}.tar.gz"
   'pipa.config'
-  '0001-media-i2c-hi846-Accept-19.2MHz-clock-for-Xiaomi-Pipa.patch'
   '0002-media-i2c-ov13b10-Add-debug-logs-for-Pipa-camera-bring-up.patch'
   '0003-media-i2c-ov13b10-Fix-ACPI-PM-for-device-tree-systems.patch'
   '0004-media-i2c-hi846-Add-debug-logs-for-Pipa-camera-bring-up.patch'
@@ -27,13 +26,12 @@ source=(
    '0008-clk-qcom-clk-rcg2-Keep-force-enable-in-shared_enable-t.patch'
    '0009-media-i2c-ov13b10-Add-get_selection-pad-operation.patch'
 )
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 prepare() {
   cd $_srcname-${_commit}
   cp ../pipa.config .config
   
-  patch -p1 < ../0001-media-i2c-hi846-Accept-19.2MHz-clock-for-Xiaomi-Pipa.patch
   patch -p1 < ../0002-media-i2c-ov13b10-Add-debug-logs-for-Pipa-camera-bring-up.patch
   patch -p1 < ../0003-media-i2c-ov13b10-Fix-ACPI-PM-for-device-tree-systems.patch
   patch -p1 < ../0004-media-i2c-hi846-Add-debug-logs-for-Pipa-camera-bring-up.patch

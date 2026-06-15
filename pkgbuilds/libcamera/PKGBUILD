@@ -21,6 +21,7 @@ prepare() {
 }
 
 build() {
+  cd "$pkgname"
   meson setup build \
     --prefix=/usr \
     -Ddocumentation=enabled \
@@ -37,5 +38,6 @@ build() {
 }
 
 package() {
+  cd "$pkgname"
   DESTDIR="$pkgdir" meson install -C build
 }

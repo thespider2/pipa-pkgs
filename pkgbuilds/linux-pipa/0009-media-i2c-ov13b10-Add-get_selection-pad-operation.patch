@@ -1,0 +1,55 @@
+From: Ayman <ayman@aymanrgab.com>
+Date: Mon, 15 Jun 2026 05:40:00 +0300
+Subject: [PATCH 9/9] media: i2c: ov13b10: Add get_selection pad operation
+
+libcamera requires the get_selection pad operation to determine the
+physical pixel array size and the active crop area. Without this,
+libcamera throws "Inappropriate ioctl for device" errors and warns
+that the sensor driver needs to be fixed.
+
+Implement ov13b10_get_selection to report the native bounds and
+active crop areas.
+
+Signed-off-by: Ayman <ayman@aymanrgab.com>
+
+--- a/drivers/media/i2c/ov13b10.c
++++ b/drivers/media/i2c/ov13b10.c
+@@ -1165,6 +1165,30 @@ static int ov13b10_set_pad_format(struct v4l2_subdev *sd,
+ 	return 0;
+ }
+ 
++static int ov13b10_get_selection(struct v4l2_subdev *sd,
++				 struct v4l2_subdev_state *sd_state,
++				 struct v4l2_subdev_selection *sel)
++{
++	switch (sel->target) {
++	case V4L2_SEL_TGT_CROP_DEFAULT:
++	case V4L2_SEL_TGT_CROP_BOUNDS:
++	case V4L2_SEL_TGT_NATIVE_SIZE:
++		sel->r.left = 0;
++		sel->r.top = 0;
++		sel->r.width = 4208;
++		sel->r.height = 3120;
++		return 0;
++	case V4L2_SEL_TGT_CROP:
++		if (sel->which == V4L2_SUBDEV_FORMAT_TRY)
++			sel->r = *v4l2_subdev_state_get_crop(sd_state, sel->pad);
++		else
++			sel->r = (struct v4l2_rect){0, 0, 4208, 3120};
++		return 0;
++	default:
++		return -EINVAL;
++	}
++}
++
+ /* Verify chip ID */
+ static int ov13b10_identify_module(struct ov13b10 *ov13b)
+ {
+@@ -1414,6 +1438,7 @@ static const struct v4l2_subdev_pad_ops ov13b10_pad_ops = {
+ 	.enum_mbus_code = ov13b10_enum_mbus_code,
+ 	.get_fmt = ov13b10_get_pad_format,
+ 	.set_fmt = ov13b10_set_pad_format,
++	.get_selection = ov13b10_get_selection,
+ 	.enum_frame_size = ov13b10_enum_frame_size,
+ };
+ 

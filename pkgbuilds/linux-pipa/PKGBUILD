@@ -3,7 +3,7 @@ pkgname=(linux-pipa linux-pipa-headers)
 _srcname=linux
 _commit=afac0607a1046fe1dcdd341297a2144d5013272a
 pkgver=7.0.8
-pkgrel=12
+pkgrel=13
 pkgdesc='Linux kernel for Xiaomi Pad 6 (Pipa)'
 arch=('aarch64')
 url="https://github.com/aymanrgab/linux"
@@ -20,13 +20,14 @@ source=(
   '0002-media-i2c-ov13b10-Add-debug-logs-for-Pipa-camera-bring-up.patch'
   '0003-media-i2c-ov13b10-Fix-ACPI-PM-for-device-tree-systems.patch'
   '0004-media-i2c-hi846-Add-debug-logs-for-Pipa-camera-bring-up.patch'
-   '0005-media-i2c-hi846-Fix-power-on-reset-sequencing.patch'
-   '0006-media-i2c-hi846-Retry-clock-enable-and-set-rate-on-po.patch'
-   '0007-media-i2c-ov13b10-Retry-clock-enable-and-set-rate-on-power_on.patch'
-   '0008-clk-qcom-clk-rcg2-Keep-force-enable-in-shared_enable-t.patch'
-   '0009-media-i2c-ov13b10-Add-get_selection-pad-operation.patch'
+  '0005-media-i2c-hi846-Fix-power-on-reset-sequencing.patch'
+  '0006-media-i2c-hi846-Retry-clock-enable-and-set-rate-on-po.patch'
+  '0007-media-i2c-ov13b10-Retry-clock-enable-and-set-rate-on-power_on.patch'
+  '0008-clk-qcom-clk-rcg2-Keep-force-enable-in-shared_enable-t.patch'
+  '0009-media-i2c-ov13b10-Add-get_selection-pad-operation.patch'
+  '0010-media-hi846-Set-clock-to-24MHz.patch'
 )
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 prepare() {
   cd $_srcname-${_commit}
@@ -40,6 +41,7 @@ prepare() {
   patch -p1 < ../0007-media-i2c-ov13b10-Retry-clock-enable-and-set-rate-on-power_on.patch
   patch -p1 < ../0008-clk-qcom-clk-rcg2-Keep-force-enable-in-shared_enable-t.patch
   patch -p1 < ../0009-media-i2c-ov13b10-Add-get_selection-pad-operation.patch
+  patch -p1 < ../0010-media-hi846-Set-clock-to-24MHz.patch
 
   make EXTRAVERSION="-${pkgrel}-pipa" olddefconfig
 }

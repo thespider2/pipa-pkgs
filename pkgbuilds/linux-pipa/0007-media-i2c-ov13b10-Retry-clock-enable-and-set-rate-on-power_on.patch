@@ -5,8 +5,8 @@ Subject: [PATCH 7/7] media: i2c: ov13b10: Retry clock enable and set rate on
 
 The CAMCC MCLK0 branch clock's hardware state can be corrupted after a
 camss module reload cycle, causing clk_prepare_enable to return -EBUSY.
-Add a retry loop with a delay, calling clk_disable_unprepare before
-each retry to reset the clock framework's software enable count.
+Add a retry loop with a delay. Do not call clk_disable_unprepare on
+-EBUSY -- the CCF already unprepares internally on failure.
 
 Also call clk_set_rate() to ensure the MCLK0 RCG divider is configured
 for 19.2MHz after a power domain cycle.
@@ -37,7 +37,6 @@ Signed-off-by: Ayman <ayman@aymanrgab.com>
 +		if (ret != -EBUSY)
 +			break;
 +		dev_dbg(dev, "ov13b10-debug: power_on clock busy, retrying...\n");
-+		clk_disable_unprepare(ov13b10->img_clk);
 +		usleep_range(5000, 10000);
 +	}
  	if (ret < 0) {

@@ -20,3 +20,4 @@ swclock-offset
 plasma-keyboard-git
 grub2-theme-endeavouros-classic
 pipa-metapkg
+libcamera

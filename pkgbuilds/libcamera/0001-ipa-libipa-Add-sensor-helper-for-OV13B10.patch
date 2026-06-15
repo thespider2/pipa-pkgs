@@ -1,0 +1,24 @@
+Add camera sensor helper for the Omnivision OV13B10 sensor.
+
+The OV13B10 uses the standard Omnivision linear gain model with
+{ 1, 0, 0, 128 } constants, matching other OV family sensors.
+
+--- a/src/ipa/libipa/camera_sensor_helper.cpp
++++ b/src/ipa/libipa/camera_sensor_helper.cpp
+@@ -788,6 +788,16 @@
+ 	}
+ };
+ REGISTER_CAMERA_SENSOR_HELPER("ov13858", CameraSensorHelperOv13858)
++class CameraSensorHelperOv13b10 : public CameraSensorHelper
++{
++public:
++	CameraSensorHelperOv13b10()
++	{
++		gain_ = AnalogueGainLinear{ 1, 0, 0, 128 };
++	}
++};
++REGISTER_CAMERA_SENSOR_HELPER("ov13b10", CameraSensorHelperOv13b10)
++
+ 
+ class CameraSensorHelperVd55g1 : public CameraSensorHelper
+ {

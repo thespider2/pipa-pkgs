@@ -1,0 +1,41 @@
+pkgname=libcamera
+pkgver=0.7.1
+pkgrel=1
+pkgdesc="A complex camera support library for Linux, Android, and ChromeOS"
+arch=('x86_64' 'aarch64')
+url="https://libcamera.org/"
+license=('LGPL2.1' 'GPL2')
+depends=('glibc' 'gnutls' 'libelf' 'libglvnd' 'libstdc++' 'libunwind' 'libyaml' 'systemd-libs')
+makedepends=('cmake' 'doxygen' 'git' 'glib2' 'graphviz' 'gst-plugins-base' 'gtest' 'libdrm' 'libjpeg-turbo'
+             'libtiff' 'meson' 'ninja' 'pybind11' 'python-jinja' 'python-ply' 'python-pyyaml'
+             'python-sphinx' 'python-sphinx-book-theme' 'python-sphinxcontrib-doxylink'
+             'qt6-base' 'qt6-tools' 'sdl2' 'systemd' 'texlive-core')
+source=("git+https://git.libcamera.org/libcamera/libcamera.git#tag=v${pkgver}"
+        '0001-ipa-libipa-Add-sensor-helper-for-OV13B10.patch')
+sha256sums=('SKIP'
+            'SKIP')
+
+prepare() {
+  cd "$pkgname"
+  patch -p1 < ../0001-ipa-libipa-Add-sensor-helper-for-OV13B10.patch
+}
+
+build() {
+  meson setup build \
+    --prefix=/usr \
+    -Ddocumentation=enabled \
+    -Dpipelines=auto \
+    -Dipas=all \
+    -Dv4l2=enabled \
+    -Dgstreamer=enabled \
+    -Dcam=enabled \
+    -Dlc-compliance=enabled \
+    -Dqcam=enabled \
+    -Dpycamera=enabled \
+    -Dtest=false
+  meson compile -C build
+}
+
+package() {
+  DESTDIR="$pkgdir" meson install -C build
+}

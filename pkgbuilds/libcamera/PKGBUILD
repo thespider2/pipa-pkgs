@@ -66,10 +66,13 @@ package_libcamera() {
   cd "$pkgname"
   DESTDIR="$pkgdir" meson install -C build
 
+  # remove bundled libpisp (provided by separate system package)
+  rm -rf "$pkgdir"/usr/{include/libpisp,lib/libpisp.so*,lib/pkgconfig/libpisp.pc,share/libpisp}
+
   cd "$pkgdir"
   _pick libcamera-docs usr/share/doc
   _pick libcamera-ipa usr/lib/libcamera/
-  _pick libcamera-tools usr/bin/cam usr/bin/qcam usr/bin/lc-compliance
+  _pick libcamera-tools usr/bin/cam usr/bin/qcam usr/bin/lc-compliance usr/bin/libcamera-bug-report
   _pick gst-plugin-libcamera usr/lib/gstreamer-1.0/
   _pick python-libcamera usr/lib/python*
 }

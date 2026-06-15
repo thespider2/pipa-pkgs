@@ -24,6 +24,7 @@ build() {
   cd "$pkgname"
   meson setup build \
     --prefix=/usr \
+    -Dcpp_args=-Wno-array-bounds \
     -Ddocumentation=enabled \
     -Dpipelines=auto \
     -Dipas=ipu3,mali-c55,rkisp1,rpi/pisp,rpi/vc4,simple,vimc \

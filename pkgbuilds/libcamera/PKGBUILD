@@ -26,7 +26,7 @@ build() {
     --prefix=/usr \
     -Ddocumentation=enabled \
     -Dpipelines=auto \
-    -Dipas=all \
+    -Dipas=ipu3,mali-c55,rkisp1,rpi/pisp,rpi/vc4,simple,vimc \
     -Dv4l2=enabled \
     -Dgstreamer=enabled \
     -Dcam=enabled \

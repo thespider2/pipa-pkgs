@@ -29,7 +29,7 @@ Signed-off-by: Ayman <ayman@aymanrgab.com>
  
  	dev_dbg(&client->dev, "hi846-debug: power_on start rst=%d shdn=%d\n",
  		!!hi846->rst_gpio, !!hi846->shutdown_gpio);
-@@ -1641,7 +1643,18 @@
+@@ -1641,7 +1643,17 @@
  	if (ret < 0)
  		return ret;
  

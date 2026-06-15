@@ -23,7 +23,7 @@ Signed-off-by: Ayman <ayman@aymanrgab.com>
  
  	/* #region debug-point ov13b10-power */
  	dev_dbg(dev,
-@@ -1230,7 +1231,18 @@
+@@ -1230,7 +1231,17 @@
  		 !IS_ERR_OR_NULL(ov13b10->reset), !!ov13b10->avdd,
  		 !!ov13b10->dvdd, !!ov13b10->dovdd);
  	/* #endregion debug-point ov13b10-power */

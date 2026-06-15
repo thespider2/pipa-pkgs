@@ -8,7 +8,7 @@ camss module reload cycle, causing clk_prepare_enable to return -EBUSY.
 Add a retry loop with a delay to handle this transient state.
 
 Also call clk_set_rate() before clk_prepare_enable() to ensure the
-MCLK3 RCG divider is configured for 19.2MHz, since the hardware reset
+MCLK3 RCG divider is configured for 24MHz, since the hardware reset
 state may not match what the sensor expects after a CAMCC power domain
 cycle.
 
@@ -34,9 +34,9 @@ Signed-off-by: Ayman <ayman@aymanrgab.com>
  		return ret;
  
 -	ret = clk_prepare_enable(hi846->clock);
-+	ret = clk_set_rate(hi846->clock, 19200000);
++	ret = clk_set_rate(hi846->clock, 24000000);
 +	if (ret < 0)
-+		dev_warn(dev, "Failed to set MCLK rate to 19.2MHz: %d\n", ret);
++		dev_warn(dev, "Failed to set MCLK rate to 24MHz: %d\n", ret);
 +
 +	for (retries = 3; retries > 0; retries--) {
 +		ret = clk_prepare_enable(hi846->clock);

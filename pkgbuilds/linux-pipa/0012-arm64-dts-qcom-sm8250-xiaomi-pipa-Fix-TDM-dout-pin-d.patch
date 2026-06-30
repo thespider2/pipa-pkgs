@@ -1,0 +1,50 @@
+From f00f35b43188b7be4e7bd114b7939dfdabef9acd Mon Sep 17 00:00:00 2001
+From: Ayman Ragab <aymanrar2c@gmail.com>
+Date: Tue, 30 Jun 2026 21:08:38 +0300
+Subject: [PATCH 12/13] arm64: dts: qcom: sm8250-xiaomi-pipa: Fix TDM dout pin
+ direction and config improvements
+
+- Add output-high to tert_tdm dout-pins (gpio137/mi2s2_data1) to properly
+  drive TDM data output line to AW88261 speaker amps. Missing output-high
+  causes floating data line resulting in audio noise/crackling.
+- Enable CONFIG_CPUSETS_V1 for Android cgroup v1 cpuset hierarchy
+  compatibility. Fixes all createProcessGroup failures at boot.
+- Enable CONFIG_HW_RANDOM_ARM_SMCCC_TRNG=y (builtin) for early hwrng
+  availability at boot.
+---
+ arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts | 1 +
+ arch/arm64/configs/sm8250.config                | 6 ++++++
+ 2 files changed, 7 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts b/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts
+index a1b71bbafd2b..a582c09d59d8 100644
+--- a/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts
++++ b/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts
+@@ -1482,6 +1482,7 @@ dout-pins {
+ 			function = "mi2s2_data1";
+ 			drive-strength = <8>;
+ 			bias-disable;
++			output-high;
+ 		};
+ 	};
+ 
+diff --git a/arch/arm64/configs/sm8250.config b/arch/arm64/configs/sm8250.config
+index eeebb266adb6..ee38a178dedc 100644
+--- a/arch/arm64/configs/sm8250.config
++++ b/arch/arm64/configs/sm8250.config
+@@ -256,6 +256,12 @@ CONFIG_CIFS=y
+ 
+ CONFIG_DRM_GUD=m
+ 
++# Android cgroup compatibility (cgroup v1 cpuset hierarchy)
++CONFIG_CPUSETS_V1=y
++
++# Built-in hwrng for early boot availability
++CONFIG_HW_RANDOM_ARM_SMCCC_TRNG=y
++
+ # pmos containers kconfig
+ CONFIG_CGROUP_FREEZER=y
+ CONFIG_NETFILTER_XT_MATCH_IPVS=m
+-- 
+2.54.0
+

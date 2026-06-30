@@ -1,0 +1,83 @@
+From bacbce3a710be2b8eeae8a37fa915391c5d0a02b Mon Sep 17 00:00:00 2001
+From: Ayman Ragab <aymanrar2c@gmail.com>
+Date: Tue, 30 Jun 2026 21:12:20 +0300
+Subject: [PATCH 13/13] arm64: dts: qcom: sm8250-xiaomi-pipa: Fix OV13B10 rear
+ camera configuration
+
+Add missing assigned-clocks/assigned-clock-rates for MCLK0 to ensure
+proper 19.2 MHz clock rate is applied to the rear camera sensor.
+
+Add camera_wide_active and camera_wide_suspend pinctrl states for
+GPIO93 (reset) and GPIO31 (VANA enable), matching the pattern used
+by the front camera. Previously only mclk0_active was configured,
+leaving the reset and power GPIOs in unknown states.
+
+Add mclk0_suspend state and increase mclk0_active drive-strength
+from 2 to 4 for better signal integrity, matching mclk3 config.
+
+Update sensor node to use both default and suspend pinctrl states.
+---
+ .../boot/dts/qcom/sm8250-xiaomi-pipa.dts      | 31 +++++++++++++++++--
+ 1 file changed, 28 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts b/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts
+index a582c09d59d8..cd62403d2924 100644
+--- a/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts
++++ b/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts
+@@ -639,10 +639,13 @@ camera_wide: camera@10 {
+ 
+ 		clocks = <&camcc CAM_CC_MCLK0_CLK>;
+ 		clock-frequency = <19200000>;
++		assigned-clocks = <&camcc CAM_CC_MCLK0_CLK>;
++		assigned-clock-rates = <19200000>;
+ 
+ 		reset-gpios = <&tlmm 93 GPIO_ACTIVE_LOW>;
+-		pinctrl-0 = <&mclk0_active>;
+-		pinctrl-names = "default";
++		pinctrl-0 = <&mclk0_active &camera_wide_active>;
++		pinctrl-1 = <&mclk0_suspend &camera_wide_suspend>;
++		pinctrl-names = "default", "suspend";
+ 
+ 		orientation = <1>; /* Rear facing */
+ 		rotation = <0>;
+@@ -1421,7 +1424,14 @@ mclk0_active: mclk0-active-state {
+ 		pins = "gpio94";
+ 		function = "cam_mclk";
+ 		bias-disable;
+-		drive-strength = <2>;
++		drive-strength = <4>;
++	};
++
++	mclk0_suspend: mclk0-suspend-state {
++		pins = "gpio94";
++		function = "cam_mclk";
++		bias-pull-down;
++		drive-strength = <4>;
+ 	};
+ 
+ 	mclk3_active: mclk3-active-state {
+@@ -1453,6 +1463,21 @@ camera_front_suspend: camera-front-suspend-state {
+ 		output-low;
+ 	};
+ 
++	camera_wide_active: camera-wide-active-state {
++		pins = "gpio93", "gpio31";
++		function = "gpio";
++		bias-disable;
++		drive-strength = <2>;
++	};
++
++	camera_wide_suspend: camera-wide-suspend-state {
++		pins = "gpio93", "gpio31";
++		function = "gpio";
++		bias-pull-down;
++		drive-strength = <2>;
++		output-low;
++	};
++
+ 	tert_tdm_active: tert-tdm-active-state {
+ 		sck-pins {
+ 			pins = "gpio133";
+-- 
+2.54.0
+

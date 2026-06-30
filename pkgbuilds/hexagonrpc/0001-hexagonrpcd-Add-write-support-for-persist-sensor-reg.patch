@@ -1,0 +1,108 @@
+diff --git a/hexagonrpcd/apps_std.c b/hexagonrpcd/apps_std.c
+index 06519f8..08951c3 100644
+--- a/hexagonrpcd/apps_std.c
++++ b/hexagonrpcd/apps_std.c
+@@ -166,11 +166,6 @@ static uint32_t apps_std_fopen_with_env(void *data,
+ 		return AEE_EBADPARM;
+ 
+ 	rw_mode = ((const char *) inbufs[4].p)[0];
+-	if (rw_mode == 'w' || rw_mode == 'a') {
+-		fprintf(stderr, "Tried to open %s for writing\n",
+-				(const char *) inbufs[3].p);
+-		return AEE_EUNSUPPORTED;
+-	}
+ 
+ 	if (!strcmp(inbufs[1].p, "ADSP_LIBRARY_PATH")) {
+ 		dirfd = ctx->adsp_library_dirfd;
+diff --git a/hexagonrpcd/hexagonfs.h b/hexagonrpcd/hexagonfs.h
+index 7682604..3a8debd 100644
+--- a/hexagonrpcd/hexagonfs.h
++++ b/hexagonrpcd/hexagonfs.h
+@@ -41,6 +41,7 @@ struct hexagonfs_file_ops {
+ 	int (*readdir)(struct hexagonfs_fd *fd, size_t size, char *out);
+ 	ssize_t (*read)(struct hexagonfs_fd *fd, size_t size, void *ptr);
+ 	int (*stat)(struct hexagonfs_fd *fd, struct stat *stats);
++	ssize_t (*write)(struct hexagonfs_fd *fd, size_t size, const void *ptr);
+ 	int (*seek)(struct hexagonfs_fd *fd, off_t off, int whence);
+ };
+ 
+diff --git a/hexagonrpcd/hexagonfs_mapped.c b/hexagonrpcd/hexagonfs_mapped.c
+index fd28c8c..8841804 100644
+--- a/hexagonrpcd/hexagonfs_mapped.c
++++ b/hexagonrpcd/hexagonfs_mapped.c
+@@ -51,7 +51,7 @@ static int mapped_from_dirent(const void *dirent_data, bool dir, void **fd_data)
+ {
+ 	struct mapped_ctx *ctx;
+ 	const char *name = dirent_data;
+-	int flags = O_RDONLY;
++	int flags = O_RDWR;
+ 	int ret;
+ 
+ 	ctx = malloc(sizeof(struct mapped_ctx));
+@@ -86,7 +86,7 @@ static int mapped_openat(struct hexagonfs_fd *dir,
+ 	struct mapped_ctx *dir_ctx = dir->data;
+ 	struct hexagonfs_fd *fd;
+ 	struct mapped_ctx *ctx;
+-	int flags = O_RDONLY;
++	int flags = O_RDWR;
+ 	int ret;
+ 
+ 	ctx = malloc(sizeof(struct mapped_ctx));
+@@ -138,6 +138,18 @@ static ssize_t mapped_read(struct hexagonfs_fd *fd, size_t size, void *out)
+ 	return ret;
+ }
+ 
++static ssize_t mapped_write(struct hexagonfs_fd *fd, size_t size, const void *in)
++{
++	struct mapped_ctx *ctx = fd->data;
++	ssize_t ret;
++
++	ret = write(ctx->fd, in, size);
++	if (ret < 0)
++		return -errno;
++
++	return ret;
++}
++
+ static int mapped_readdir(struct hexagonfs_fd *fd, size_t size, char *out)
+ {
+ 	struct mapped_ctx *ctx = fd->data;
+@@ -253,6 +265,15 @@ static ssize_t mapped_or_empty_read(struct hexagonfs_fd *fd,
+ 	return 0;
+ }
+ 
++static ssize_t mapped_or_empty_write(struct hexagonfs_fd *fd,
++				     size_t size, const void *in)
++{
++	if (fd->data)
++		return mapped_write(fd, size, in);
++
++	return 0;
++}
++
+ static int mapped_or_empty_readdir(struct hexagonfs_fd *fd,
+ 				   size_t size, char *out)
+ {
+@@ -329,6 +350,7 @@ struct hexagonfs_file_ops hexagonfs_mapped_ops = {
+ 	.read = mapped_read,
+ 	.readdir = mapped_readdir,
+ 	.seek = mapped_seek,
++	.write = mapped_write,
+ 	.stat = mapped_stat,
+ };
+ 
+@@ -339,6 +361,7 @@ struct hexagonfs_file_ops hexagonfs_mapped_or_empty_ops = {
+ 	.read = mapped_or_empty_read,
+ 	.readdir = mapped_or_empty_readdir,
+ 	.seek = mapped_or_empty_seek,
++	.write = mapped_or_empty_write,
+ 	.stat = mapped_or_empty_stat,
+ };
+ 
+@@ -349,5 +372,6 @@ struct hexagonfs_file_ops hexagonfs_mapped_sysfs_ops = {
+ 	.read = mapped_read,
+ 	.readdir = mapped_readdir,
+ 	.seek = mapped_seek,
++	.write = mapped_write,
+ 	.stat = mapped_sysfs_stat,
+ };

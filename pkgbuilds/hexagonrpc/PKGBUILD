@@ -1,6 +1,6 @@
 pkgname=hexagonrpc
 pkgver=0.4.0
-pkgrel=2
+pkgrel=3
 pkgdesc="FastRPC ioctl wrapper and a reverse tunnel"
 arch=('x86_64' 'aarch64')
 url="https://github.com/linux-msm/hexagonrpc"
@@ -14,8 +14,14 @@ source=("git+https://github.com/linux-msm/hexagonrpc.git#tag=v${pkgver}"
         "hexagonrpcd-adsp-sensorspd.service"
         "hexagonrpcd-sdsp.service"
         "sysusers.conf"
-        "10-fastrpc.rules")
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+        "10-fastrpc.rules"
+        "0001-hexagonrpcd-Add-write-support-for-persist-sensor-reg.patch")
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+prepare() {
+  cd "$pkgname"
+  patch -p1 < ../0001-hexagonrpcd-Add-write-support-for-persist-sensor-reg.patch
+}
 
 build() {
   cd "$pkgname"

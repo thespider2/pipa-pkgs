@@ -1,6 +1,6 @@
 diff -ruN iio-fix/iio-sensor-proxy-0085ddf8ecb1/src/drv-ssc-accel.c iio-patched/src/drv-ssc-accel.c
 --- iio-fix/iio-sensor-proxy-0085ddf8ecb1/src/drv-ssc-accel.c	2026-03-02 21:19:51.000000000 +0200
-+++ iio-patched/src/drv-ssc-accel.c	2026-07-02 02:23:06.315662107 +0300
++++ iio-patched/src/drv-ssc-accel.c	2026-07-02 02:24:46.702009313 +0300
 @@ -83,18 +83,33 @@
  
  	drv_data = (DrvData *) sensor_device->priv;

@@ -1,6 +1,6 @@
 diff -ruN original/hexagonrpcd/apps_std.c patched/hexagonrpcd/apps_std.c
 --- original/hexagonrpcd/apps_std.c	2026-07-01 16:21:51.529729024 +0300
-+++ patched/hexagonrpcd/apps_std.c	2026-07-01 16:22:17.199992193 +0300
++++ patched/hexagonrpcd/apps_std.c	2026-07-01 20:50:12.336359570 +0300
 @@ -20,6 +20,7 @@
   */
  
@@ -9,7 +9,7 @@ diff -ruN original/hexagonrpcd/apps_std.c patched/hexagonrpcd/apps_std.c
  #include <stdio.h>
  #include <stdint.h>
  #include <string.h>
-@@ -150,14 +151,74 @@
+@@ -150,14 +151,72 @@
  	return 0;
  }
  
@@ -55,14 +55,12 @@ diff -ruN original/hexagonrpcd/apps_std.c patched/hexagonrpcd/apps_std.c
 +	ret = hexagonfs_write(ctx->fds, first_in->fd,
 +			      inbufs[1].s, inbufs[1].p);
 +	if (ret < 0) {
-+		fprintf(stderr, "Could not write file: %s
-+", strerror(-ret));
++		fprintf(stderr, "Could not write file: %s\n", strerror(-ret));
 +		return AEE_EFAILED;
 +	}
 +
 +#ifdef HEXAGONRPC_VERBOSE
-+	printf("write(%u, %u) -> %ld
-+", first_in->fd,
++	printf("write(%u, %u) -> %ld\n", first_in->fd,
 +					first_in->buf_len,
 +					ret);
 +#endif
@@ -85,7 +83,21 @@ diff -ruN original/hexagonrpcd/apps_std.c patched/hexagonrpcd/apps_std.c
  
  	// The name and environment variable must also be NULL-terminated
  	if (((const char *) inbufs[1].p)[inbufs[1].s - 1] != 0
-@@ -188,11 +249,11 @@
+@@ -165,12 +224,7 @@
+ 	 || ((const char *) inbufs[4].p)[inbufs[4].s - 1] != 0)
+ 		return AEE_EBADPARM;
+ 
+-	rw_mode = ((const char *) inbufs[4].p)[0];
+-	if (rw_mode == 'w' || rw_mode == 'a') {
+-		fprintf(stderr, "Tried to open %s for writing\n",
+-				(const char *) inbufs[3].p);
+-		return AEE_EUNSUPPORTED;
+-	}
++	open_flags = fopen_mode_to_flags(inbufs[4].p);
+ 
+ 	if (!strcmp(inbufs[1].p, "ADSP_LIBRARY_PATH")) {
+ 		dirfd = ctx->adsp_library_dirfd;
+@@ -188,18 +242,19 @@
  		return AEE_EFAILED;
  	}
  
@@ -99,7 +111,18 @@ diff -ruN original/hexagonrpcd/apps_std.c patched/hexagonrpcd/apps_std.c
  		return AEE_EFAILED;
  	}
  
-@@ -219,7 +280,7 @@
+ #ifdef HEXAGONRPC_VERBOSE
+-	printf("openat($%s, %s) -> %d\n", (const char *) inbufs[1].p,
+-					  (const char *) inbufs[3].p,
+-					  fd);
++	printf("openat($%s, %s, %s) -> %d\n", (const char *) inbufs[1].p,
++					      (const char *) inbufs[3].p,
++					      (const char *) inbufs[4].p,
++					      fd);
+ #endif
+ 
+ 	*out = fd;
+@@ -219,7 +274,7 @@
  	if (((const char *) inbufs[1].p)[inbufs[1].s - 1] != 0)
  		return AEE_EBADPARM;
  
@@ -108,7 +131,7 @@ diff -ruN original/hexagonrpcd/apps_std.c patched/hexagonrpcd/apps_std.c
  	if (ret < 0) {
  		fprintf(stderr, "Could not open %s: %s\n",
  				(const char *) inbufs[1].p,
-@@ -312,7 +373,7 @@
+@@ -312,7 +367,7 @@
  	if (((const char *) inbufs[1].p)[inbufs[1].s - 1] != 0)
  		return AEE_EBADPARM;
  
@@ -117,7 +140,7 @@ diff -ruN original/hexagonrpcd/apps_std.c patched/hexagonrpcd/apps_std.c
  	if (fd < 0) {
  		fprintf(stderr, "Could not open %s: %s\n",
  				pathname, strerror(-fd));
-@@ -372,11 +433,13 @@
+@@ -372,11 +427,13 @@
  	ctx->adsp_avs_cfg_dirfd = hexagonfs_openat(ctx->fds,
  						   ctx->rootfd,
  						   ctx->rootfd,
@@ -133,13 +156,13 @@ diff -ruN original/hexagonrpcd/apps_std.c patched/hexagonrpcd/apps_std.c
  
  	iface->data = ctx;
  
-@@ -405,7 +468,10 @@
+@@ -405,7 +462,10 @@
  }
  
  static const struct fastrpc_function_impl apps_std_procs[] = {
 -	{ .def = NULL, .impl = NULL, },
 +	{
-+		.def = \&apps_std_fwrite_def,
++		.def = &apps_std_fwrite_def,
 +		.impl = apps_std_fwrite,
 +	},
  	{ .def = NULL, .impl = NULL, },
@@ -147,7 +170,7 @@ diff -ruN original/hexagonrpcd/apps_std.c patched/hexagonrpcd/apps_std.c
  		.def = &apps_std_fflush_def,
 diff -ruN original/hexagonrpcd/hexagonfs.c patched/hexagonrpcd/hexagonfs.c
 --- original/hexagonrpcd/hexagonfs.c	2026-07-01 16:21:51.529729024 +0300
-+++ patched/hexagonrpcd/hexagonfs.c	2026-07-01 16:23:17.506294364 +0300
++++ patched/hexagonrpcd/hexagonfs.c	2026-07-01 20:50:12.336448351 +0300
 @@ -20,6 +20,7 @@
   */
  
@@ -202,7 +225,7 @@ diff -ruN original/hexagonrpcd/hexagonfs.c patched/hexagonrpcd/hexagonfs.c
  	struct hexagonfs_fd *fd;
 diff -ruN original/hexagonrpcd/hexagonfs.h patched/hexagonrpcd/hexagonfs.h
 --- original/hexagonrpcd/hexagonfs.h	2026-07-01 16:21:51.529729024 +0300
-+++ patched/hexagonrpcd/hexagonfs.h	2026-07-01 16:23:17.506342596 +0300
++++ patched/hexagonrpcd/hexagonfs.h	2026-07-01 20:50:12.336489783 +0300
 @@ -37,10 +37,12 @@
  	int (*openat)(struct hexagonfs_fd *dir,
  		      const char *segment,
@@ -233,7 +256,7 @@ diff -ruN original/hexagonrpcd/hexagonfs.h patched/hexagonrpcd/hexagonfs.h
  #endif
 diff -ruN original/hexagonrpcd/hexagonfs_mapped.c patched/hexagonrpcd/hexagonfs_mapped.c
 --- original/hexagonrpcd/hexagonfs_mapped.c	2026-07-01 16:21:51.529729024 +0300
-+++ patched/hexagonrpcd/hexagonfs_mapped.c	2026-07-01 16:23:17.506417912 +0300
++++ patched/hexagonrpcd/hexagonfs_mapped.c	2026-07-01 20:51:11.692072311 +0300
 @@ -51,17 +51,16 @@
  {
  	struct mapped_ctx *ctx;
@@ -296,7 +319,23 @@ diff -ruN original/hexagonrpcd/hexagonfs_mapped.c patched/hexagonrpcd/hexagonfs_
  	else
  		return -ENOENT;
  }
-@@ -326,6 +339,7 @@
+@@ -253,6 +266,15 @@
+ 	return 0;
+ }
+ 
++static ssize_t mapped_or_empty_write(struct hexagonfs_fd *fd,
++				     size_t size, const void *in)
++{
++	if (fd->data)
++		return mapped_write(fd, size, in);
++
++	return 0;
++}
++
+ static int mapped_or_empty_readdir(struct hexagonfs_fd *fd,
+ 				   size_t size, char *out)
+ {
+@@ -326,6 +348,7 @@
  	.close = mapped_close,
  	.from_dirent = mapped_from_dirent,
  	.openat = mapped_openat,
@@ -304,7 +343,7 @@ diff -ruN original/hexagonrpcd/hexagonfs_mapped.c patched/hexagonrpcd/hexagonfs_
  	.read = mapped_read,
  	.readdir = mapped_readdir,
  	.seek = mapped_seek,
-@@ -336,6 +350,7 @@
+@@ -336,6 +359,7 @@
  	.close = mapped_or_empty_close,
  	.from_dirent = mapped_or_empty_from_dirent,
  	.openat = mapped_or_empty_openat,
@@ -312,7 +351,7 @@ diff -ruN original/hexagonrpcd/hexagonfs_mapped.c patched/hexagonrpcd/hexagonfs_
  	.read = mapped_or_empty_read,
  	.readdir = mapped_or_empty_readdir,
  	.seek = mapped_or_empty_seek,
-@@ -346,6 +361,7 @@
+@@ -346,6 +370,7 @@
  	.close = mapped_close,
  	.from_dirent = mapped_from_dirent,
  	.openat = mapped_openat,
@@ -322,7 +361,7 @@ diff -ruN original/hexagonrpcd/hexagonfs_mapped.c patched/hexagonrpcd/hexagonfs_
  	.seek = mapped_seek,
 diff -ruN original/hexagonrpcd/hexagonfs_plat_subtype_name.c patched/hexagonrpcd/hexagonfs_plat_subtype_name.c
 --- original/hexagonrpcd/hexagonfs_plat_subtype_name.c	2026-07-01 16:21:51.529729024 +0300
-+++ patched/hexagonrpcd/hexagonfs_plat_subtype_name.c	2026-07-01 16:23:17.506449511 +0300
++++ patched/hexagonrpcd/hexagonfs_plat_subtype_name.c	2026-07-01 20:50:12.336589550 +0300
 @@ -68,6 +68,7 @@
  static int plat_subtype_name_openat(struct hexagonfs_fd *dir,
  			const char *segment,
@@ -333,7 +372,7 @@ diff -ruN original/hexagonrpcd/hexagonfs_plat_subtype_name.c patched/hexagonrpcd
  	return -ENOTDIR;
 diff -ruN original/hexagonrpcd/hexagonfs_virt_dir.c patched/hexagonrpcd/hexagonfs_virt_dir.c
 --- original/hexagonrpcd/hexagonfs_virt_dir.c	2026-07-01 16:21:51.529729024 +0300
-+++ patched/hexagonrpcd/hexagonfs_virt_dir.c	2026-07-01 16:23:17.506491976 +0300
++++ patched/hexagonrpcd/hexagonfs_virt_dir.c	2026-07-01 20:50:12.336642027 +0300
 @@ -46,16 +46,22 @@
  	return *curr;
  }
@@ -418,7 +457,7 @@ diff -ruN original/hexagonrpcd/hexagonfs_virt_dir.c patched/hexagonrpcd/hexagonf
  };
 diff -ruN original/hexagonrpcd/interfaces/apps_std.def patched/hexagonrpcd/interfaces/apps_std.def
 --- original/hexagonrpcd/interfaces/apps_std.def	2026-07-01 16:21:51.530014922 +0300
-+++ patched/hexagonrpcd/interfaces/apps_std.def	2026-07-01 16:23:17.506519066 +0300
++++ patched/hexagonrpcd/interfaces/apps_std.def	2026-07-01 20:50:12.336672684 +0300
 @@ -28,6 +28,7 @@
  HEXAGONRPC_DEFINE_REMOTE_METHOD(2, apps_std_fflush, 8, 0, 0, 0)
  HEXAGONRPC_DEFINE_REMOTE_METHOD(3, apps_std_fclose, 1, 0, 0, 0)
@@ -429,7 +468,7 @@ diff -ruN original/hexagonrpcd/interfaces/apps_std.def patched/hexagonrpcd/inter
  HEXAGONRPC_DEFINE_REMOTE_METHOD(26, apps_std_opendir, 0, 1, 2, 0)
 diff -ruN original/hexagonrpcd/rpcd_builder.c patched/hexagonrpcd/rpcd_builder.c
 --- original/hexagonrpcd/rpcd_builder.c	2026-07-01 16:21:51.530014922 +0300
-+++ patched/hexagonrpcd/rpcd_builder.c	2026-07-01 16:23:17.506558530 +0300
++++ patched/hexagonrpcd/rpcd_builder.c	2026-07-01 20:50:12.336756636 +0300
 @@ -111,7 +111,7 @@
   */
  struct hexagonfs_dirent *construct_root_dir(const char *prefix, const char *dsp)

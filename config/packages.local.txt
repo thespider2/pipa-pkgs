@@ -17,7 +17,6 @@ pipa-grub-config
 pipa-sensors
 pipa-sound-conf
 swclock-offset
-plasma-keyboard-git
 grub2-theme-endeavouros-classic
 pipa-metapkg
 libcamera

@@ -503,7 +503,7 @@ index 2fbbdb1..35441e1 100644
  HEXAGONRPC_DEFINE_REMOTE_METHOD(19, apps_std_fopen_with_env, 0, 4, 1, 0)
  HEXAGONRPC_DEFINE_REMOTE_METHOD(26, apps_std_opendir, 0, 1, 2, 0)
 diff --git a/hexagonrpcd/listener.c b/hexagonrpcd/listener.c
-index 932c54d..157bfc1 100644
+index 932c54d..6e9ae6c 100644
 --- a/hexagonrpcd/listener.c
 +++ b/hexagonrpcd/listener.c
 @@ -142,7 +142,7 @@ static int return_for_next_invoke(int fd,
@@ -598,6 +598,24 @@ index 932c54d..157bfc1 100644
  	}
  
  	*result = impl->impl(ifaces[handle]->data, decoded, *returned);
+@@ -315,6 +322,17 @@ int run_fastrpc_listener(int fd,
+ 		if (decoded != NULL)
+ 			iobuf_free(REMOTE_SCALARS_INBUFS(sc), decoded);
+ 
++		/*
++		 * invoke_requested_procedure() may reject the request (bad
++		 * handle/method/params) without producing any output
++		 * buffers, even though the original sc still advertises
++		 * some. Clear the outbufs field so the next
++		 * return_for_next_invoke() call doesn't try to encode
++		 * buffers out of a NULL returned array.
++		 */
++		if (returned == NULL)
++			sc &= ~(0xffu << 8);
++
+ 		n_outbufs = REMOTE_SCALARS_OUTBUFS(sc);
+ 	}
+ 
 diff --git a/hexagonrpcd/rpcd_builder.c b/hexagonrpcd/rpcd_builder.c
 index d374958..37c377a 100644
 --- a/hexagonrpcd/rpcd_builder.c

@@ -1,6 +1,6 @@
 pkgname=libssc
-pkgver=0.4.3
-pkgrel=2
+pkgver=0.4.1
+pkgrel=1
 pkgdesc="Library to expose Qualcomm Sensor Core sensors"
 arch=('x86_64' 'aarch64')
 url="https://codeberg.org/DylanVanAssche/libssc"
@@ -19,7 +19,4 @@ build() {
 package() {
   cd "$pkgname"
   DESTDIR="$pkgdir" ninja -C build install
-
-  # Keep older SSC consumers working until all reverse deps are rebuilt.
-  ln -sf libssc.so.2 "$pkgdir/usr/lib/libssc.so.0"
 }

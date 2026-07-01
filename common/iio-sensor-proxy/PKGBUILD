@@ -1,51 +1,31 @@
 pkgname=iio-sensor-proxy-pipa
+_commit=0085ddf8ecb173a1c5fcf2344aa40e561125354f
 pkgver=3.9
-pkgrel=9
+pkgrel=1
 pkgdesc="IIO accelerometer sensor to input device proxy (with libssc support)"
 arch=('x86_64' 'aarch64')
 url="https://gitlab.freedesktop.org/hadess/iio-sensor-proxy"
 license=('GPL3')
-depends=('dbus' 'glib2' 'hexagonrpc' 'libgudev' 'libssc>=0.2.2' 'polkit' 'systemd')
+depends=('dbus' 'glib2' 'libgudev' 'libssc>=0.2.2' 'polkit' 'systemd')
 makedepends=('meson' 'gcc' 'gtk-doc' 'umockdev')
 provides=('iio-sensor-proxy')
 conflicts=('iio-sensor-proxy')
-source=("https://gitlab.freedesktop.org/hadess/iio-sensor-proxy/-/archive/${pkgver}/iio-sensor-proxy-${pkgver}.tar.gz"
-        "0001-data-meson.build-install-libssc-udev-rules.patch"
-        "0002-drv-ssc-fix-polling-lifecycle.patch"
-        "iio-sensor-proxy-resume")
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
+source=("${url}/-/archive/${_commit}/iio-sensor-proxy-${_commit}.tar.gz"
+        "0001-iio-sensor-proxy-Do-not-exit-based-on-sensor-events.patch")
+sha256sums=('SKIP' 'SKIP')
 
 prepare() {
-  cd "iio-sensor-proxy-$pkgver"
-  patch -p1 < ../0001-data-meson.build-install-libssc-udev-rules.patch
-  patch -p1 < ../0002-drv-ssc-fix-polling-lifecycle.patch
+  cd "iio-sensor-proxy-${_commit}"
+  patch -p1 < ../0001-iio-sensor-proxy-Do-not-exit-based-on-sensor-events.patch
 }
 
 build() {
-  cd "iio-sensor-proxy-$pkgver"
+  cd "iio-sensor-proxy-${_commit}"
   meson setup build --prefix=/usr -Dgtk-tests=false -Dssc-support=enabled
   ninja -C build
 }
 
 package() {
-  cd "iio-sensor-proxy-$pkgver"
+  cd "iio-sensor-proxy-${_commit}"
   DESTDIR="$pkgdir" ninja -C build install
-
-  install -d "$pkgdir/usr/lib/systemd/system/iio-sensor-proxy.service.d"
-  cat > "$pkgdir/usr/lib/systemd/system/iio-sensor-proxy.service.d/hexagonrpcd.conf" <<'EOF'
-[Unit]
-Wants=hexagonrpcd-sdsp.service
-After=hexagonrpcd-sdsp.service
-PartOf=hexagonrpcd-sdsp.service
-EOF
-
-  install -d "$pkgdir/etc/systemd/system/iio-sensor-proxy.service.d"
-  cat > "$pkgdir/etc/systemd/system/iio-sensor-proxy.service.d/override.conf" <<'EOF'
-[Service]
-Restart=always
-RestartSec=5
-EOF
-
-  install -Dm755 ../iio-sensor-proxy-resume \
-    "$pkgdir/usr/lib/systemd/system-sleep/iio-sensor-proxy-resume"
 }

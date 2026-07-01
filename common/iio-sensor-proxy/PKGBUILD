@@ -1,4 +1,4 @@
-pkgname=iio-sensor-proxy-pipa
+pkgname=iio-sensor-proxy
 _commit=0085ddf8ecb173a1c5fcf2344aa40e561125354f
 pkgver=3.9
 pkgrel=1
@@ -8,8 +8,6 @@ url="https://gitlab.freedesktop.org/hadess/iio-sensor-proxy"
 license=('GPL3')
 depends=('dbus' 'glib2' 'libgudev' 'libssc>=0.2.2' 'polkit' 'systemd')
 makedepends=('meson' 'gcc' 'gtk-doc' 'umockdev')
-provides=('iio-sensor-proxy')
-conflicts=('iio-sensor-proxy')
 source=("${url}/-/archive/${_commit}/iio-sensor-proxy-${_commit}.tar.gz"
         "0001-iio-sensor-proxy-Do-not-exit-based-on-sensor-events.patch")
 sha256sums=('SKIP' 'SKIP')

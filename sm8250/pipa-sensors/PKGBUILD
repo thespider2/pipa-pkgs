@@ -4,7 +4,7 @@ pkgrel=1
 pkgdesc="Sensors configs for the Xiaomi Pad 6"
 arch=('any')
 license=('MIT')
-depends=('xiaomi-pipa-firmware' 'iio-sensor-proxy-pipa' 'hexagonrpc')
+depends=('xiaomi-pipa-firmware' 'iio-sensor-proxy' 'hexagonrpc')
 source=('81-libssc-xiaomi-pipa.rules'
         'hexagonrpcd-sdsp.conf')
 sha256sums=('SKIP' 'SKIP')

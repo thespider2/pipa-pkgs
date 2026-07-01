@@ -10,33 +10,15 @@ makedepends=('meson' 'gcc' 'gtk-doc' 'umockdev')
 provides=('iio-sensor-proxy')
 conflicts=('iio-sensor-proxy')
 source=("https://gitlab.freedesktop.org/hadess/iio-sensor-proxy/-/archive/${pkgver}/iio-sensor-proxy-${pkgver}.tar.gz"
-        "0001-iio-sensor-proxy-depend-on-libssc.patch"
-        "0002-proximity-support-SSC-proximity-sensor.patch"
-        "0003-light-support-SSC-light-sensor.patch"
-        "0004-accelerometer-support-SSC-accelerometer-sensor.patch"
-        "0005-compass-support-SSC-compass-sensor.patch"
-        "0006-data-add-libssc-udev-rules.patch"
-        "0007-data-iio-sensor-proxy.service.in-add-AF_QIPCRTR.patch"
-        "0008-drv-ssc-implement-set_polling.patch"
-        "0010-drv-ssc-fix-polling-lifecycle.patch"
-        "iio-sensor-proxy-resume"
-        "0009-tests-integration-test-add-SSC-sensors.patch"
-        "0011-iio-sensor-proxy-fix-crash-in-client_vanished_cb-during-initialization.patch")
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+        "0001-data-meson.build-install-libssc-udev-rules.patch"
+        "0002-drv-ssc-fix-polling-lifecycle.patch"
+        "iio-sensor-proxy-resume")
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 prepare() {
   cd "iio-sensor-proxy-$pkgver"
-  patch -p1 < ../0001-iio-sensor-proxy-depend-on-libssc.patch
-  patch -p1 < ../0002-proximity-support-SSC-proximity-sensor.patch
-  patch -p1 < ../0003-light-support-SSC-light-sensor.patch
-  patch -p1 < ../0004-accelerometer-support-SSC-accelerometer-sensor.patch
-  patch -p1 < ../0005-compass-support-SSC-compass-sensor.patch
-  patch -p1 < ../0006-data-add-libssc-udev-rules.patch
-  patch -p1 < ../0007-data-iio-sensor-proxy.service.in-add-AF_QIPCRTR.patch
-  patch -p1 < ../0008-drv-ssc-implement-set_polling.patch
-  patch -p1 < ../0010-drv-ssc-fix-polling-lifecycle.patch
-  patch -p1 < ../0009-tests-integration-test-add-SSC-sensors.patch
-  patch -p1 < ../0011-iio-sensor-proxy-fix-crash-in-client_vanished_cb-during-initialization.patch
+  patch -p1 < ../0001-data-meson.build-install-libssc-udev-rules.patch
+  patch -p1 < ../0002-drv-ssc-fix-polling-lifecycle.patch
 }
 
 build() {

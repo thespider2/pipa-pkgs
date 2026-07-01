@@ -1,0 +1,21 @@
+From: maintainer@example.com
+Date: Wed, 01 Jul 2026 16:05:38 +0300
+Subject: [PATCH 1/2] data: meson.build: install libssc udev rules
+
+--- iio-sensor-proxy-3.9/data/meson.build	2026-03-02 21:19:51.000000000 +0200
++++ iio-3.9-patched/data/meson.build	2026-07-01 16:03:42.801417446 +0300
+@@ -2,8 +2,12 @@
+   '80-iio-sensor-proxy.rules'
+ )
+ 
++if get_option('ssc-support').enabled()
++  rules += files('80-iio-sensor-proxy-libssc.rules')
++endif
++
+ install_data(
+-  '80-iio-sensor-proxy.rules',
++  rules,
+   install_dir: udev_rules_dir
+ )
+ 
+

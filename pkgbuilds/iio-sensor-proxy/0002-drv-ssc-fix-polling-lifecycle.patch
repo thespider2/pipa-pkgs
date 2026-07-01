@@ -1,0 +1,125 @@
+From: maintainer@example.com
+Date: Wed, 01 Jul 2026 16:05:38 +0300
+Subject: [PATCH 2/2] drv-ssc: fix polling lifecycle cleanup
+
+--- iio-sensor-proxy-3.9/src/drv-ssc-accel.c	2026-07-01 16:03:00.201792164 +0300
++++ iio-3.9-patched/src/drv-ssc-accel.c	2026-07-01 16:04:43.931461535 +0300
+@@ -119,6 +119,8 @@
+ 		/* Enable sensor */
+ 		if (!ssc_sensor_accelerometer_open_sync (drv_data->sensor, NULL, &error)) {
+ 			g_warning ("Opening SSC accelerometer sensor failed: %s", error->message);
++			g_clear_signal_handler (&drv_data->measurement_id, drv_data->sensor);
++			g_clear_object (&drv_data->sensor);
+ 			return;
+ 		}
+ 	} else {
+@@ -131,6 +133,8 @@
+ 		/* Disable sensor */
+ 		if (!ssc_sensor_accelerometer_close_sync (drv_data->sensor, NULL, &error))
+ 			g_warning ("Closing SSC accelerometer sensor failed: %s", error->message);
++
++		g_clear_object (&drv_data->sensor);
+ 	}
+ }
+ 
+@@ -140,6 +144,12 @@
+ 	g_autoptr(GError) error = NULL;
+ 	DrvData *drv_data = (DrvData *) sensor_device->priv;
+ 
++	if (drv_data->sensor) {
++		g_clear_signal_handler (&drv_data->measurement_id, drv_data->sensor);
++		if (!ssc_sensor_accelerometer_close_sync (drv_data->sensor, NULL, &error))
++			g_warning ("Closing SSC accelerometer sensor failed: %s", error->message);
++	}
++
+ 	g_clear_object (&drv_data->sensor);
+ 	g_clear_pointer (&drv_data->mount_matrix, g_free);
+ 	g_clear_pointer (&sensor_device->priv, g_free);
+
+--- iio-sensor-proxy-3.9/src/drv-ssc-compass.c	2026-03-02 21:19:51.000000000 +0200
++++ iio-3.9-patched/src/drv-ssc-compass.c	2026-07-01 16:05:13.485903592 +0300
+@@ -94,8 +94,11 @@
+ 							     sensor_device);
+ 
+ 		/* Enable sensor */
+-		if (!ssc_sensor_compass_open_sync (drv_data->sensor, NULL, &error))
++		if (!ssc_sensor_compass_open_sync (drv_data->sensor, NULL, &error)) {
+ 			g_warning ("Opening SSC compass sensor failed: %s", error->message);
++			g_clear_signal_handler (&drv_data->measurement_id, drv_data->sensor);
++			return;
++		}
+ 	} else {
+ 		if (!drv_data->measurement_id)
+ 			return;
+@@ -112,8 +115,15 @@
+ static void
+ ssc_compass_close (SensorDevice *sensor_device)
+ {
++	g_autoptr(GError) error = NULL;
+ 	DrvData *drv_data = (DrvData *) sensor_device->priv;
+ 
++	if (drv_data->sensor) {
++		g_clear_signal_handler (&drv_data->measurement_id, drv_data->sensor);
++		if (!ssc_sensor_compass_close_sync (drv_data->sensor, NULL, &error))
++			g_warning ("Closing SSC compass sensor failed: %s", error->message);
++	}
++
+ 	g_clear_object (&drv_data->sensor);
+ 	g_clear_pointer (&sensor_device->name, g_free);
+ 	g_clear_pointer (&sensor_device->priv, g_free);
+
+--- iio-sensor-proxy-3.9/src/drv-ssc-light.c	2026-03-02 21:19:51.000000000 +0200
++++ iio-3.9-patched/src/drv-ssc-light.c	2026-07-01 16:05:13.503151731 +0300
+@@ -91,8 +91,11 @@
+ 							     G_CALLBACK (measurement_cb),
+ 							     sensor_device);
+ 		/* Enable sensor */
+-		if (!ssc_sensor_light_open_sync (drv_data->sensor, NULL, &error))
++		if (!ssc_sensor_light_open_sync (drv_data->sensor, NULL, &error)) {
+ 			g_warning ("Opening SSC light sensor failed: %s", error->message);
++			g_clear_signal_handler (&drv_data->measurement_id, drv_data->sensor);
++			return;
++		}
+ 	} else {
+ 		if (!drv_data->measurement_id)
+ 			return;
+@@ -112,6 +115,12 @@
+ 	g_autoptr(GError) error = NULL;
+ 	DrvData *drv_data = (DrvData *) sensor_device->priv;
+ 
++	if (drv_data->sensor) {
++		g_clear_signal_handler (&drv_data->measurement_id, drv_data->sensor);
++		if (!ssc_sensor_light_close_sync (drv_data->sensor, NULL, &error))
++			g_warning ("Closing SSC light sensor failed: %s", error->message);
++	}
++
+ 	g_clear_object (&drv_data->sensor);
+ 	g_clear_pointer (&sensor_device->priv, g_free);
+ 	g_free (sensor_device);
+
+--- iio-sensor-proxy-3.9/src/drv-ssc-proximity.c	2026-03-02 21:19:51.000000000 +0200
++++ iio-3.9-patched/src/drv-ssc-proximity.c	2026-07-01 16:05:13.520152367 +0300
+@@ -96,6 +96,7 @@
+ 		/* Enable sensor */
+ 		if (!ssc_sensor_proximity_open_sync (drv_data->sensor, NULL, &error)) {
+ 			g_warning ("Opening SSC proximity sensor failed: %s", error ? error->message : "UNKNOWN");
++			g_clear_signal_handler (&drv_data->measurement_id, drv_data->sensor);
+ 			return;
+ 		}
+ 	} else {
+@@ -112,8 +113,15 @@
+ static void
+ ssc_proximity_close (SensorDevice *sensor_device)
+ {
++	g_autoptr(GError) error = NULL;
+ 	DrvData *drv_data = (DrvData *) sensor_device->priv;
+ 
++	if (drv_data->sensor) {
++		g_clear_signal_handler (&drv_data->measurement_id, drv_data->sensor);
++		if (!ssc_sensor_proximity_close_sync (drv_data->sensor, NULL, &error))
++			g_warning ("Closing SSC proximity sensor failed: %s", error->message);
++	}
++
+ 	g_clear_object (&drv_data->sensor);
+ 	g_clear_pointer (&sensor_device->priv, g_free);
+ 	g_free (sensor_device);

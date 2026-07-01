@@ -23,7 +23,7 @@ prepare() {
 
 build() {
   cd "iio-sensor-proxy-$pkgver"
-  meson setup build --prefix=/usr -Dgtk-tests=false -Dssc-support=true
+  meson setup build --prefix=/usr -Dgtk-tests=false -Dssc-support=enabled
   ninja -C build
 }
 

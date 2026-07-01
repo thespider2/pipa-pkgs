@@ -1,6 +1,6 @@
 pkgname=iio-sensor-proxy-pipa
 pkgver=3.7
-pkgrel=8
+pkgrel=9
 pkgdesc="IIO accelerometer sensor to input device proxy (with libssc support)"
 arch=('x86_64' 'aarch64')
 url="https://gitlab.freedesktop.org/hadess/iio-sensor-proxy"
@@ -20,8 +20,9 @@ source=("https://gitlab.freedesktop.org/hadess/iio-sensor-proxy/-/archive/${pkgv
         "0008-drv-ssc-implement-set_polling.patch"
         "0010-drv-ssc-fix-polling-lifecycle.patch"
         "iio-sensor-proxy-resume"
-        "0009-tests-integration-test-add-SSC-sensors.patch")
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+        "0009-tests-integration-test-add-SSC-sensors.patch"
+        "0011-iio-sensor-proxy-fix-crash-in-client_vanished_cb-during-initialization.patch")
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 prepare() {
   cd "iio-sensor-proxy-$pkgver"
@@ -35,6 +36,7 @@ prepare() {
   patch -p1 < ../0008-drv-ssc-implement-set_polling.patch
   patch -p1 < ../0010-drv-ssc-fix-polling-lifecycle.patch
   patch -p1 < ../0009-tests-integration-test-add-SSC-sensors.patch
+  patch -p1 < ../0011-iio-sensor-proxy-fix-crash-in-client_vanished_cb-during-initialization.patch
 }
 
 build() {

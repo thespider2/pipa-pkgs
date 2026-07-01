@@ -8,6 +8,8 @@ url="https://gitlab.freedesktop.org/hadess/iio-sensor-proxy"
 license=('GPL3')
 depends=('dbus' 'glib2' 'libgudev' 'libssc>=0.2.2' 'polkit' 'systemd')
 makedepends=('meson' 'gcc' 'gtk-doc' 'umockdev')
+provides=('iio-sensor-proxy-pipa')
+conflicts=('iio-sensor-proxy-pipa')
 source=("${url}/-/archive/${_commit}/iio-sensor-proxy-${_commit}.tar.gz"
         "0001-iio-sensor-proxy-Do-not-exit-based-on-sensor-events.patch")
 sha256sums=('SKIP' 'SKIP')

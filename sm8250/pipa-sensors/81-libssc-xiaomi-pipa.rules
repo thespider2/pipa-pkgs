@@ -1,3 +1,7 @@
-# iio-sensor-proxy with libssc: accelerometer mount matrix
+# iio-sensor-proxy with libssc: accelerometer mount matrix & sensor types
 
 SUBSYSTEM=="misc", KERNEL=="fastrpc-*", ENV{ACCEL_MOUNT_MATRIX}+="-1, 0, 0; 0, -1, 0; 0, 0, -1"
+
+# The upstream 80-iio-sensor-proxy.rules only adds ssc-light+ssc-compass.
+# Add the missing ssc-accel and ssc-proximity sensor types for pipa.
+SUBSYSTEM=="misc", KERNEL=="fastrpc-*", ENV{IIO_SENSOR_PROXY_TYPE}+="ssc-accel ssc-proximity"

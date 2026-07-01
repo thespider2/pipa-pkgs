@@ -1,0 +1,102 @@
+diff --git src/drv-ssc-accel.c b/src/drv-ssc-accel.c
+--- a/src/drv-ssc-accel.c	2026-03-02 21:19:51.000000000 +0200
++++ b/src/drv-ssc-accel.c	2026-07-02 02:42:32.569319523 +0300
+@@ -30,20 +30,11 @@
+ static gboolean
+ ssc_accelerometer_discover (GUdevDevice *device)
+ {
+-	g_autoptr(SSCSensorAccelerometer) sensor = NULL;
+ 
+ 	/* Verify presence of FastRPC device */
+ 	if (!drv_check_udev_sensor_type (device, "ssc-accel", NULL))
+ 		return FALSE;
+ 
+-	/* Open and close SSC accelerometer for discovering */
+-	sensor = ssc_sensor_accelerometer_new_sync (NULL, NULL);
+-	if (!sensor)
+-		return FALSE;
+-
+-	if (!ssc_sensor_accelerometer_close_sync (sensor, NULL, NULL))
+-		return FALSE;
+-
+ 	g_debug ("Found SSC accelerometer at %s", g_udev_device_get_sysfs_path (device));
+ 	return TRUE;
+ }
+diff --git src/drv-ssc-compass.c b/src/drv-ssc-compass.c
+--- a/src/drv-ssc-compass.c	2026-03-02 21:19:51.000000000 +0200
++++ b/src/drv-ssc-compass.c	2026-07-02 02:42:32.569450715 +0300
+@@ -26,20 +26,11 @@
+ static gboolean
+ ssc_compass_discover (GUdevDevice *device)
+ {
+-	g_autoptr(SSCSensorCompass) sensor = NULL;
+ 
+ 	/* Verify presence of FastRPC device */
+ 	if (!drv_check_udev_sensor_type (device, "ssc-compass", NULL))
+ 		return FALSE;
+ 
+-	/* Open and close SSC compass for discovering */
+-	sensor = ssc_sensor_compass_new_sync (NULL, NULL);
+-	if (!sensor)
+-		return FALSE;
+-
+-	if (!ssc_sensor_compass_close_sync (sensor, NULL, NULL))
+-		return FALSE;
+-
+ 	g_debug ("Found SSC compass at %s", g_udev_device_get_sysfs_path (device));
+ 	return TRUE;
+ }
+diff --git src/drv-ssc-light.c b/src/drv-ssc-light.c
+--- a/src/drv-ssc-light.c	2026-03-02 21:19:51.000000000 +0200
++++ b/src/drv-ssc-light.c	2026-07-02 02:42:32.569566972 +0300
+@@ -26,7 +26,6 @@
+ static gboolean
+ ssc_light_discover (GUdevDevice *device)
+ {
+-	g_autoptr(SSCSensorLight) sensor = NULL;
+ 
+ 	/* Verify presence of FastRPC device */
+ 	if (!drv_check_udev_sensor_type (device, "ssc-light", NULL))
+diff --git src/drv-ssc-proximity.c b/src/drv-ssc-proximity.c
+--- a/src/drv-ssc-proximity.c	2026-03-02 21:19:51.000000000 +0200
++++ b/src/drv-ssc-proximity.c	2026-07-02 02:44:40.062608591 +0300
+@@ -26,24 +26,11 @@
+ static gboolean
+ ssc_proximity_discover (GUdevDevice *device)
+ {
+-	SSCSensorProximity *sensor = NULL;
+ 
+ 	/* Verify presence of FastRPC device */
+ 	if (!drv_check_udev_sensor_type (device, "ssc-proximity", NULL))
+ 		return FALSE;
+ 
+-	/* Open and close SSC proximity sensor for discovering */
+-	sensor = ssc_sensor_proximity_new_sync (NULL, NULL);
+-	if (!sensor)
+-		return FALSE;
+-
+-	if (!ssc_sensor_proximity_close_sync (sensor, NULL, NULL)) {
+-		g_clear_object (&sensor);
+-		return FALSE;
+-	}
+-
+-	g_clear_object (&sensor);
+-
+ 	g_debug ("Found SSC proximity at %s", g_udev_device_get_sysfs_path (device));
+ 	return TRUE;
+ }
+@@ -112,8 +99,14 @@
+ static void
+ ssc_proximity_close (SensorDevice *sensor_device)
+ {
++	g_autoptr(GError) error = NULL;
+ 	DrvData *drv_data = (DrvData *) sensor_device->priv;
+ 
++	if (drv_data->sensor) {
++		g_clear_signal_handler (&drv_data->measurement_id, drv_data->sensor);
++		if (!ssc_sensor_proximity_close_sync (drv_data->sensor, NULL, &error))
++			g_warning ("Closing SSC proximity sensor failed: %s", error->message);
++	}
+ 	g_clear_object (&drv_data->sensor);
+ 	g_clear_pointer (&sensor_device->priv, g_free);
+ 	g_free (sensor_device);

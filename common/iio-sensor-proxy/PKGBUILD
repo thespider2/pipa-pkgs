@@ -12,13 +12,13 @@ provides=('iio-sensor-proxy-pipa')
 conflicts=('iio-sensor-proxy-pipa')
 source=("${url}/-/archive/${_commit}/iio-sensor-proxy-${_commit}.tar.gz"
         "0001-iio-sensor-proxy-Do-not-exit-based-on-sensor-events.patch"
-        "0002-drv-ssc-open-sensor-in-open-function.patch")
+        "0002-drv-ssc-skip-discover-qmi-and-fix-close.patch")
 sha256sums=('SKIP' 'SKIP' 'SKIP')
 
 prepare() {
   cd "iio-sensor-proxy-${_commit}"
   patch -p1 < ../0001-iio-sensor-proxy-Do-not-exit-based-on-sensor-events.patch
-  patch -p1 < ../0002-drv-ssc-open-sensor-in-open-function.patch
+  patch -p1 < ../0002-drv-ssc-skip-discover-qmi-and-fix-close.patch
 }
 
 build() {

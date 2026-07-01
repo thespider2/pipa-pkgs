@@ -55,7 +55,8 @@ mkdir -p repo
 docker run --rm \
   -v "$PWD/repo:/repo" \
   -v "$PWD/config:/config" \
-  -v "$PWD/pkgbuilds:/work/pkgbuilds" \
+  -v "$PWD/common:/work/common" \
+  -v "$PWD/sm8250:/work/sm8250" \
   pipa-pkgs-builder /usr/local/bin/build-local-packages.sh
 
 python scripts/fetch-upstream.py
@@ -91,7 +92,7 @@ Those packages now carry:
 - the separate DTB GRUB entry as the default boot option
 - the GRUB menu resolution set to `1800x2880`
 
-To refresh the local `pkgbuilds/` tree from your main source repo:
+To refresh the local `common/` and `sm8250/` trees from your main source repo:
 
 ```bash
 scripts/sync-pkgbuilds.sh

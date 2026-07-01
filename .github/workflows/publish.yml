@@ -34,7 +34,7 @@ jobs:
               scripts/compose-repo.sh \
               scripts/fetch-upstream.py \
               scripts/stage-pages.sh
-            find pkgbuilds -type f \
+            find common sm8250 -type f \
               ! -path '*/src/*' \
               ! -path '*/pkg/*' \
               -print0
@@ -65,7 +65,8 @@ jobs:
             -e LOCAL_BUILDER_ROOT=/work \
             -v "$PWD/repo:/repo" \
             -v "$PWD/config:/config" \
-            -v "$PWD/pkgbuilds:/work/pkgbuilds" \
+            -v "$PWD/common:/work/common" \
+            -v "$PWD/sm8250:/work/sm8250" \
             pipa-pkgs-builder /usr/local/bin/build-local-packages.sh
 
       - name: Fix repo directory ownership

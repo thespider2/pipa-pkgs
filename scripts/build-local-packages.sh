@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DEFAULT_LOCAL_BUILDER_ROOT="$ROOT_DIR"
-if [ -d /work/pkgbuilds ]; then
+if [ -d /work/common ] || [ -d /work/sm8250 ]; then
     DEFAULT_LOCAL_BUILDER_ROOT="/work"
 fi
 LOCAL_BUILDER_ROOT="${LOCAL_BUILDER_ROOT:-$DEFAULT_LOCAL_BUILDER_ROOT}"
@@ -16,12 +16,12 @@ REPO_DIR="$OUTPUT_ROOT/$REPO_SUBDIR"
 CACHE_DIR="$REPO_DIR/.build-cache"
 MAKEPKG_USER="${MAKEPKG_USER:-builder}"
 
-if [ -d "$LOCAL_BUILDER_ROOT/pkgbuilds" ]; then
+if [ -d "$LOCAL_BUILDER_ROOT/common" ] || [ -d "$LOCAL_BUILDER_ROOT/sm8250" ]; then
     BUILDER_ROOT="$LOCAL_BUILDER_ROOT"
-elif [ -d "$FALLBACK_BUILDER_ROOT/pkgbuilds" ]; then
+elif [ -d "$FALLBACK_BUILDER_ROOT/common" ] || [ -d "$FALLBACK_BUILDER_ROOT/sm8250" ]; then
     BUILDER_ROOT="$FALLBACK_BUILDER_ROOT"
 else
-    echo "Missing package sources under $LOCAL_BUILDER_ROOT/pkgbuilds and $FALLBACK_BUILDER_ROOT/pkgbuilds" >&2
+    echo "Missing package sources under $LOCAL_BUILDER_ROOT/{common,sm8250} and $FALLBACK_BUILDER_ROOT/{common,sm8250}" >&2
     exit 1
 fi
 
@@ -103,12 +103,15 @@ find_local_dependency_archives() {
 mapfile -t PKGS < <(grep -vE '^[[:space:]]*(#|$)' "$CONFIG_DIR/packages.local.txt")
 
 for pkg in "${PKGS[@]}"; do
-    pkg_dir="$BUILDER_ROOT/pkgbuilds/$pkg"
-    cache_file="$CACHE_DIR/$pkg"
-    if [ ! -d "$pkg_dir" ]; then
-        echo "Missing PKGBUILD directory for $pkg at $pkg_dir" >&2
+    if [ -d "$BUILDER_ROOT/common/$pkg" ]; then
+        pkg_dir="$BUILDER_ROOT/common/$pkg"
+    elif [ -d "$BUILDER_ROOT/sm8250/$pkg" ]; then
+        pkg_dir="$BUILDER_ROOT/sm8250/$pkg"
+    else
+        echo "Missing PKGBUILD directory for $pkg in common/ or sm8250/" >&2
         exit 1
     fi
+    cache_file="$CACHE_DIR/$pkg"
 
     pkg_source_hash="$(compute_pkg_source_hash "$pkg_dir")"
     built_packages=()

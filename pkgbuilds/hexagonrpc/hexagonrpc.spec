@@ -68,9 +68,18 @@ install -D -m 644 %{SOURCE5} %{buildroot}%{_udevrulesdir}/10-fastrpc.rules
 %systemd_post hexagonrpcd-adsp-rootpd.service
 %systemd_post hexagonrpcd-adsp-sensorspd.service
 %systemd_post hexagonrpcd-sdsp.service
+# Attaching a SENSORS_PD or plain root PD hexagonrpcd instance to
+# /dev/fastrpc-adsp conflicts with the audio/WiFi coprocessor firmware
+# sharing the ADSP on this device (pipa), breaking audio after
+# suspend/resume and WiFi connectivity. Sensors are served via SDSP
+# instead (hexagonrpcd-sdsp.service). INIT_ATTACH_SNS on
+# /dev/fastrpc-adsp also returns EPERM on this device.
 systemctl stop hexagonrpcd-adsp-rootpd.service >/dev/null 2>&1 || :
 systemctl disable hexagonrpcd-adsp-rootpd.service >/dev/null 2>&1 || :
 systemctl mask hexagonrpcd-adsp-rootpd.service >/dev/null 2>&1 || :
+systemctl stop hexagonrpcd-adsp-sensorspd.service >/dev/null 2>&1 || :
+systemctl disable hexagonrpcd-adsp-sensorspd.service >/dev/null 2>&1 || :
+systemctl mask hexagonrpcd-adsp-sensorspd.service >/dev/null 2>&1 || :
 
 %preun
 %systemd_preun hexagonrpcd-adsp-rootpd.service

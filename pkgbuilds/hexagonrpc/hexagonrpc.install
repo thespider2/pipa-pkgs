@@ -1,8 +1,19 @@
 mask_bad_adsp_service() {
   if command -v systemctl >/dev/null 2>&1; then
+    # Attaching a SENSORS_PD or plain root PD hexagonrpcd instance to
+    # /dev/fastrpc-adsp conflicts with the audio/WiFi coprocessor firmware
+    # sharing the ADSP on this device (pipa), breaking audio after
+    # suspend/resume and WiFi connectivity. Sensors are served via SDSP
+    # instead (hexagonrpcd-sdsp.service).
     systemctl stop hexagonrpcd-adsp-rootpd.service >/dev/null 2>&1 || true
     systemctl disable hexagonrpcd-adsp-rootpd.service >/dev/null 2>&1 || true
     systemctl mask hexagonrpcd-adsp-rootpd.service >/dev/null 2>&1 || true
+
+    # INIT_ATTACH_SNS on /dev/fastrpc-adsp returns EPERM on this device;
+    # SENSORS_PD is only attachable on /dev/fastrpc-sdsp.
+    systemctl stop hexagonrpcd-adsp-sensorspd.service >/dev/null 2>&1 || true
+    systemctl disable hexagonrpcd-adsp-sensorspd.service >/dev/null 2>&1 || true
+    systemctl mask hexagonrpcd-adsp-sensorspd.service >/dev/null 2>&1 || true
   fi
 }
 

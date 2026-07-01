@@ -1,5 +1,5 @@
 pkgname=iio-sensor-proxy-pipa
-pkgver=3.7
+pkgver=3.9
 pkgrel=9
 pkgdesc="IIO accelerometer sensor to input device proxy (with libssc support)"
 arch=('x86_64' 'aarch64')

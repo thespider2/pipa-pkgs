@@ -1,6 +1,6 @@
 pkgname=hexagonrpc
 pkgver=0.4.0
-pkgrel=3
+pkgrel=4
 pkgdesc="FastRPC ioctl wrapper and a reverse tunnel"
 arch=('x86_64' 'aarch64')
 url="https://github.com/linux-msm/hexagonrpc"

@@ -1,7 +1,7 @@
 pkgbase = hexagonrpc
 	pkgdesc = FastRPC ioctl wrapper and a reverse tunnel
 	pkgver = 0.4.0
-	pkgrel = 2
+	pkgrel = 4
 	url = https://github.com/linux-msm/hexagonrpc
 	install = hexagonrpc.install
 	arch = x86_64
@@ -18,6 +18,8 @@ pkgbase = hexagonrpc
 	source = hexagonrpcd-sdsp.service
 	source = sysusers.conf
 	source = 10-fastrpc.rules
+	source = 0001-hexagonrpcd-Add-write-support-for-persist-sensor-reg.patch
+	sha256sums = SKIP
 	sha256sums = SKIP
 	sha256sums = SKIP
 	sha256sums = SKIP

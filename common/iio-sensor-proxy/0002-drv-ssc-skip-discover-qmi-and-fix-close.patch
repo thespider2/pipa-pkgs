@@ -48,8 +48,8 @@ diff --git src/drv-ssc-compass.c b/src/drv-ssc-compass.c
  }
 diff --git src/drv-ssc-light.c b/src/drv-ssc-light.c
 --- a/src/drv-ssc-light.c	2026-03-02 21:19:51.000000000 +0200
-+++ b/src/drv-ssc-light.c	2026-07-02 02:42:32.569566972 +0300
-@@ -26,7 +26,6 @@
++++ b/src/drv-ssc-light.c	2026-07-02 02:46:07.300515314 +0300
+@@ -26,20 +26,11 @@
  static gboolean
  ssc_light_discover (GUdevDevice *device)
  {
@@ -57,6 +57,19 @@ diff --git src/drv-ssc-light.c b/src/drv-ssc-light.c
  
  	/* Verify presence of FastRPC device */
  	if (!drv_check_udev_sensor_type (device, "ssc-light", NULL))
+ 		return FALSE;
+ 
+-	/* Open and close SSC light sensor for discovering */
+-	sensor = ssc_sensor_light_new_sync (NULL, NULL);
+-	if (!sensor)
+-		return FALSE;
+-
+-	if (!ssc_sensor_light_close_sync (sensor, NULL, NULL))
+-		return FALSE;
+-
+ 	g_debug ("Found SSC light at %s", g_udev_device_get_sysfs_path (device));
+ 	return TRUE;
+ }
 diff --git src/drv-ssc-proximity.c b/src/drv-ssc-proximity.c
 --- a/src/drv-ssc-proximity.c	2026-03-02 21:19:51.000000000 +0200
 +++ b/src/drv-ssc-proximity.c	2026-07-02 02:44:40.062608591 +0300

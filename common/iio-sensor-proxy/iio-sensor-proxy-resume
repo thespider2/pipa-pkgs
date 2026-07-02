@@ -1,0 +1,8 @@
+#!/bin/bash
+# Restart iio-sensor-proxy after resume to re-establish QMI/QRTR
+# connections to the DSP which are lost during suspend.
+case "$1" in
+    post)
+        systemctl restart iio-sensor-proxy 2>/dev/null
+        ;;
+esac

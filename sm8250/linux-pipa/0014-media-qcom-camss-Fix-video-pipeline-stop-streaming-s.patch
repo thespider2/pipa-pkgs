@@ -2,20 +2,29 @@ From: Ayman Ragab <aymanrar2c@gmail.com>
 Date: Tue, 30 Jun 2026 22:36:36 +0300
 Subject: [PATCH] media: qcom: camss: Fix video pipeline stop streaming teardown
 
-Continue best-effort pipeline teardown in video_stop_streaming() and log
-errors instead of returning early on the first subdev stop failure.
+When switching cameras, video_stop_streaming() walks the full pipeline and
+calls s_stream(0) on every subdev. Subdevs that were never started still
+have s_stream_enabled == 0, which triggers WARN_ON in the V4L2 subdev core
+and can leave the CAMSS graph wedged (front camera black, csiphy EBUSY).
+
+Only stop subdevs that are actually streaming, log errors for real failures,
+and continue best-effort teardown instead of returning early.
 
 ---
- drivers/media/platform/qcom/camss/camss-video.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
----
+ drivers/media/platform/qcom/camss/camss-video.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
 diff --git a/drivers/media/platform/qcom/camss/camss-video.c b/drivers/media/platform/qcom/camss/camss-video.c
-index 831486e14754..baf83757e413 100644
+index 831486e14754..c4a8f1b2e3a1 100644
 --- a/drivers/media/platform/qcom/camss/camss-video.c
 +++ b/drivers/media/platform/qcom/camss/camss-video.c
-@@ -311,11 +311,9 @@ static void video_stop_streaming(struct vb2_queue *q)
+@@ -310,11 +310,13 @@ static void video_stop_streaming(struct vb2_queue *q)
+ 		entity = pad->entity;
  		subdev = media_entity_to_v4l2_subdev(entity);
  
++		if (!subdev->s_stream_enabled)
++			continue;
++
  		ret = v4l2_subdev_call(subdev, video, s_stream, 0);
 -
 -		if (ret) {

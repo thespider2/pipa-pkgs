@@ -1,0 +1,65 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Ayman Ragab <aymanrar2c@gmail.com>
+Date: Thu, 2 Jul 2026 07:30:00 +0300
+Subject: [PATCH 19/19] soc: qcom: pdr: retry service lookup on transient
+ failures
+
+pdr_notify_lookup_failure() deleted the lookup entry on ANY non-ENXIO
+error. A single QMI timeout during ADSP restart permanently removed
+the sensor PD tracking entry, requiring a full re-initialization.
+
+Fix by:
+- Adding a lookup_retries counter to pdr_service
+- Keeping the entry on transient errors and retrying up to
+  PDR_LOOKUP_MAX_RETRIES (10) times
+- Also treat -EAGAIN as a retryable error
+
+Signed-off-by: Ayman Ragab <aymanrar2c@gmail.com>
+---
+ drivers/soc/qcom/pdr_interface.c | 17 +++++++++++++----
+ 1 file changed, 13 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/soc/qcom/pdr_interface.c b/drivers/soc/qcom/pdr_interface.c
+index 72259f489075..24958171fbf1 100644
+--- a/drivers/soc/qcom/pdr_interface.c
++++ b/drivers/soc/qcom/pdr_interface.c
+@@ -29,6 +29,8 @@ struct pdr_service {
+ 	bool need_locator_lookup;
+ 	bool service_connected;
+ 
++	unsigned int lookup_retries;
++
+ 	struct list_head node;
+ };
+ 
+@@ -438,16 +440,25 @@ static int pdr_locate_service(struct pdr_handle *pdr, struct pdr_service *pds)
+ 	return ret;
+ }
+ 
++#define PDR_LOOKUP_MAX_RETRIES	10
++
+ static void pdr_notify_lookup_failure(struct pdr_handle *pdr,
+ 				      struct pdr_service *pds,
+ 				      int err)
+ {
+-	pr_err("PDR: service lookup for %s failed: %d\n",
+-	       pds->service_name, err);
++	pr_err("PDR: service lookup for %s failed: %d (retry %u)\n",
++	       pds->service_name, err, pds->lookup_retries);
+ 
+-	if (err == -ENXIO)
++	if (err == -ENXIO || err == -EAGAIN)
+ 		return;
+ 
++	pds->lookup_retries++;
++	if (pds->lookup_retries < PDR_LOOKUP_MAX_RETRIES)
++		return;
++
++	pr_err("PDR: service lookup for %s failed after %u retries, giving up\n",
++	       pds->service_name, pds->lookup_retries);
++
+ 	list_del(&pds->node);
+ 	pds->state = SERVREG_LOCATOR_ERR;
+ 	mutex_lock(&pdr->status_lock);
+-- 
+2.47.2

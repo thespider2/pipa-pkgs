@@ -1,0 +1,111 @@
+diff --git a/drivers/soc/qcom/qmi_interface.c b/drivers/soc/qcom/qmi_interface.c
+index 16e2e24b6096..48a44e490b40 100644
+--- a/drivers/soc/qcom/qmi_interface.c
++++ b/drivers/soc/qcom/qmi_interface.c
+@@ -162,7 +162,7 @@ static void qmi_recv_ctrl_pkt(struct qmi_handle *qmi,
+ 	}
+ }
+ 
+-static void qmi_send_new_lookup(struct qmi_handle *qmi, struct qmi_service *svc)
++static int qmi_send_new_lookup(struct qmi_handle *qmi, struct qmi_service *svc)
+ {
+ 	struct qrtr_ctrl_pkt pkt;
+ 	struct sockaddr_qrtr sq;
+@@ -185,10 +185,15 @@ static void qmi_send_new_lookup(struct qmi_handle *qmi, struct qmi_service *svc)
+ 	mutex_lock(&qmi->sock_lock);
+ 	if (qmi->sock) {
+ 		ret = kernel_sendmsg(qmi->sock, &msg, &iv, 1, sizeof(pkt));
+-		if (ret < 0)
++		if (ret < 0) {
+ 			pr_err("failed to send lookup registration: %d\n", ret);
++			mutex_unlock(&qmi->sock_lock);
++			return ret;
++		}
+ 	}
+ 	mutex_unlock(&qmi->sock_lock);
++
++	return 0;
+ }
+ 
+ /**
+@@ -208,6 +213,7 @@ int qmi_add_lookup(struct qmi_handle *qmi, unsigned int service,
+ 		   unsigned int version, unsigned int instance)
+ {
+ 	struct qmi_service *svc;
++	int ret;
+ 
+ 	svc = kzalloc_obj(*svc);
+ 	if (!svc)
+@@ -219,13 +225,18 @@ int qmi_add_lookup(struct qmi_handle *qmi, unsigned int service,
+ 
+ 	list_add(&svc->list_node, &qmi->lookups);
+ 
+-	qmi_send_new_lookup(qmi, svc);
++	ret = qmi_send_new_lookup(qmi, svc);
++	if (ret < 0) {
++		list_del(&svc->list_node);
++		kfree(svc);
++		return ret;
++	}
+ 
+ 	return 0;
+ }
+ EXPORT_SYMBOL_GPL(qmi_add_lookup);
+ 
+-static void qmi_send_new_server(struct qmi_handle *qmi, struct qmi_service *svc)
++static int qmi_send_new_server(struct qmi_handle *qmi, struct qmi_service *svc)
+ {
+ 	struct qrtr_ctrl_pkt pkt;
+ 	struct sockaddr_qrtr sq;
+@@ -250,10 +261,15 @@ static void qmi_send_new_server(struct qmi_handle *qmi, struct qmi_service *svc)
+ 	mutex_lock(&qmi->sock_lock);
+ 	if (qmi->sock) {
+ 		ret = kernel_sendmsg(qmi->sock, &msg, &iv, 1, sizeof(pkt));
+-		if (ret < 0)
++		if (ret < 0) {
+ 			pr_err("send service registration failed: %d\n", ret);
++			mutex_unlock(&qmi->sock_lock);
++			return ret;
++		}
+ 	}
+ 	mutex_unlock(&qmi->sock_lock);
++
++	return 0;
+ }
+ 
+ /**
+@@ -272,6 +288,7 @@ int qmi_add_server(struct qmi_handle *qmi, unsigned int service,
+ 		   unsigned int version, unsigned int instance)
+ {
+ 	struct qmi_service *svc;
++	int ret;
+ 
+ 	svc = kzalloc_obj(*svc);
+ 	if (!svc)
+@@ -283,7 +300,12 @@ int qmi_add_server(struct qmi_handle *qmi, unsigned int service,
+ 
+ 	list_add(&svc->list_node, &qmi->services);
+ 
+-	qmi_send_new_server(qmi, svc);
++	ret = qmi_send_new_server(qmi, svc);
++	if (ret < 0) {
++		list_del(&svc->list_node);
++		kfree(svc);
++		return ret;
++	}
+ 
+ 	return 0;
+ }
+@@ -463,10 +485,10 @@ static void qmi_handle_net_reset(struct qmi_handle *qmi)
+ 	mutex_unlock(&qmi->sock_lock);
+ 
+ 	list_for_each_entry(svc, &qmi->lookups, list_node)
+-		qmi_send_new_lookup(qmi, svc);
++		(void)qmi_send_new_lookup(qmi, svc);
+ 
+ 	list_for_each_entry(svc, &qmi->services, list_node)
+-		qmi_send_new_server(qmi, svc);
++		(void)qmi_send_new_server(qmi, svc);
+ }
+ 
+ static void qmi_handle_message(struct qmi_handle *qmi,

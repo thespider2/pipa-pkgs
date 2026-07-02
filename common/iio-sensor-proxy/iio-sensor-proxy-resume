@@ -1,8 +1,11 @@
 #!/bin/bash
-# Restart iio-sensor-proxy after resume to re-establish QMI/QRTR
-# connections to the DSP which are lost during suspend.
+# After resume, the QMI/QRTR connections to the DSP are stale.
+# Trigger a udev re-add on fastrpc devices so iio-sensor-proxy's
+# sensor_changes callback re-discovers sensors without a full
+# service restart (which takes ~15s).
 case "$1" in
     post)
-        systemctl restart iio-sensor-proxy 2>/dev/null
+        udevadm trigger --action=add --subsystem-match=misc \
+            --property-match=IIO_SENSOR_PROXY_TYPE 2>/dev/null
         ;;
 esac

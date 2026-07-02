@@ -1,6 +1,6 @@
 --- a/src/drv-ssc-accel.c
 +++ b/src/drv-ssc-accel.c
-@@ -111,7 +111,23 @@ ssc_accelerometer_set_polling (SensorDevice *sensor_device, gboolean state)
+@@ -111,7 +111,21 @@ ssc_accelerometer_set_polling (SensorDevice *sensor_device, gboolean state)
 -		/* Enable sensor */
 -		if (!ssc_sensor_accelerometer_open_sync (drv_data->sensor, NULL, &error)) {
 -			g_warning ("Opening SSC accelerometer sensor failed: %s", (error && error->message) ? error->message : "unknown error");

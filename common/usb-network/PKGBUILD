@@ -1,0 +1,20 @@
+pkgname=usb-network
+pkgver=2
+pkgrel=1
+pkgdesc="USB gadget network and serial service"
+arch=('any')
+url="https://github.com/pocketblue/packages"
+license=('AGPL-3.0-or-later')
+depends=('bash' 'dnsmasq' 'iproute2')
+source=("usb-network-start"
+        "usb-network-stop"
+        "usb-network.service"
+        "dnsmasq-usb-network.conf")
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+package() {
+  install -Dm755 usb-network-start "$pkgdir/usr/bin/usb-network-start"
+  install -Dm755 usb-network-stop "$pkgdir/usr/bin/usb-network-stop"
+  install -Dm644 usb-network.service "$pkgdir/usr/lib/systemd/system/usb-network.service"
+  install -Dm644 dnsmasq-usb-network.conf "$pkgdir/etc/dnsmasq-usb-network.conf"
+}

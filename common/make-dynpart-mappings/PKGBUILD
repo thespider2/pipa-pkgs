@@ -1,0 +1,23 @@
+pkgname=make-dynpart-mappings
+pkgver=10.2.4
+pkgrel=1
+pkgdesc="A command-line tool that uses the device mapper to make block devices based on dynamic partitions"
+arch=('aarch64')
+url="https://gitlab.com/flamingradian/make-dynpart-mappings"
+license=('GPL3')
+depends=('device-mapper' 'util-linux-libs' 'libmd')
+makedepends=('gcc' 'make')
+source=("https://gitlab.com/flamingradian/make-dynpart-mappings/-/archive/${pkgver}/make-dynpart-mappings-${pkgver}.tar.gz"
+        "make-dynpart-mappings@.service")
+sha256sums=('SKIP' 'SKIP')
+
+build() {
+  cd "make-dynpart-mappings-${pkgver}"
+  make
+}
+
+package() {
+  cd "make-dynpart-mappings-${pkgver}"
+  install -Dm755 make-dynpart-mappings "$pkgdir/usr/bin/make-dynpart-mappings"
+  install -Dm644 ../make-dynpart-mappings@.service "$pkgdir/usr/lib/systemd/system/make-dynpart-mappings@.service"
+}

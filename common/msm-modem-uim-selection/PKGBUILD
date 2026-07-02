@@ -1,0 +1,16 @@
+pkgname=msm-modem-uim-selection
+pkgver=1
+pkgrel=1
+pkgdesc="MSM Modem UIM Slot Selection"
+arch=('aarch64')
+url="https://postmarketos.org"
+license=('GPL3')
+depends=('libqmi')
+source=("msm-modem-uim-selection"
+        "msm-modem-uim-selection.service")
+sha256sums=('SKIP' 'SKIP')
+
+package() {
+  install -Dm755 msm-modem-uim-selection "$pkgdir/usr/libexec/msm-modem-uim-selection"
+  install -Dm644 msm-modem-uim-selection.service "$pkgdir/usr/lib/systemd/system/msm-modem-uim-selection.service"
+}

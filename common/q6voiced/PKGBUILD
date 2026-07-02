@@ -1,0 +1,26 @@
+pkgname=q6voiced
+pkgver=0.2.0
+pkgrel=1
+pkgdesc="A userspace daemon for the QDSP6 voice call audio driver"
+arch=('aarch64')
+url="https://gitlab.postmarketos.org/postmarketOS/q6voiced"
+license=('MIT')
+depends=('alsa-lib' 'dbus')
+makedepends=('meson' 'gcc')
+source=("https://gitlab.postmarketos.org/postmarketOS/q6voiced/-/archive/${pkgver}/q6voiced-${pkgver}.tar.gz"
+        "q6voiced.service"
+        "q6voiced@.service")
+sha256sums=('SKIP' 'SKIP' 'SKIP')
+
+build() {
+  cd "q6voiced-${pkgver}"
+  meson setup build --prefix=/usr
+  meson compile -C build
+}
+
+package() {
+  cd "q6voiced-${pkgver}"
+  meson install -C build --destdir="$pkgdir"
+  install -Dm644 ../q6voiced.service "$pkgdir/usr/lib/systemd/system/q6voiced.service"
+  install -Dm644 ../q6voiced@.service "$pkgdir/usr/lib/systemd/system/q6voiced@.service"
+}

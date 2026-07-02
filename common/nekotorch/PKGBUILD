@@ -1,0 +1,23 @@
+pkgname=nekotorch
+_pkgname=gnome-shell-extension-nekotorch
+_commit=b7d9e1e89b25e76ea19aea746619e72ca6ff36bc
+pkgver=48.0
+pkgrel=1
+pkgdesc="flash-led / torch extension for gnome shell"
+arch=('any')
+url="https://gitlab.com/gmanka/NekoTorch"
+license=('GPL3')
+depends=('gnome-shell' 'udev' 'gsettings-desktop-schemas')
+makedepends=('gettext' 'unzip' 'glib2' 'jq')
+source=("https://gitlab.com/gmanka/NekoTorch/-/archive/${_commit}/NekoTorch-${_commit}.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+  cd "NekoTorch-${_commit}"
+  extpath="$pkgdir/usr/share/gnome-shell/extensions/nekotorch@nekocwd.gitlab.com"
+  mkdir -p "$extpath"
+  cp -a *.js metadata.json stylesheet.css icons "$extpath/"
+  install -Dm644 schemas/com.gitlab.nekocwd.nekotorch.gschema.xml \
+    "$pkgdir/usr/share/glib-2.0/schemas/com.gitlab.nekocwd.nekotorch.gschema.xml"
+  install -Dm644 99-flash.rules "$pkgdir/usr/lib/udev/rules.d/99-flash.rules"
+}

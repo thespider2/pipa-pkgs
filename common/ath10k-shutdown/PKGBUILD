@@ -1,0 +1,16 @@
+pkgname=ath10k-shutdown
+pkgver=1
+pkgrel=1
+pkgdesc="disable ath10k modules on shutdown"
+arch=('any')
+url="https://github.com/pocketblue/packages"
+license=('AGPL-3.0')
+depends=('systemd')
+source=("ath10k-shutdown.service"
+        "90-ath10k-shutdown.preset")
+sha256sums=('SKIP' 'SKIP')
+
+package() {
+  install -Dm644 ath10k-shutdown.service "$pkgdir/usr/lib/systemd/system/ath10k-shutdown.service"
+  install -Dm644 90-ath10k-shutdown.preset "$pkgdir/usr/lib/systemd/system-preset/90-ath10k-shutdown.preset"
+}

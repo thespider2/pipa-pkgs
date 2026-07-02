@@ -1,0 +1,16 @@
+[Unit]
+Description=USB gadget
+After=sys-kernel-config.mount
+Requires=sys-kernel-config.mount
+Before=serial-getty@ttyGS0.service
+DefaultDependencies=no
+SurviveFinalKillSignal=yes
+ConditionPathExistsGlob=!/sys/kernel/config/usb_gadget/*
+
+[Service]
+RuntimeDirectory=usb-gadget
+ExecStartPre=/usr/bin/usb-network-start
+ExecStart=/usr/bin/dnsmasq -k -C /etc/dnsmasq-usb-network.conf -x ${RUNTIME_DIRECTORY}/dnsmasq.pid --dhcp-leasefile=${RUNTIME_DIRECTORY}/dnsmasq.lease
+
+[Install]
+WantedBy=usb-gadget.target

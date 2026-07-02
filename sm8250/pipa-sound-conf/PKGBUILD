@@ -1,6 +1,6 @@
 pkgname=pipa-sound-conf
 pkgver=1.4
-pkgrel=5
+pkgrel=6
 pkgdesc="Sound settings for Xiaomi Mi Pad 6 (pipa)"
 arch=('any')
 license=('custom')

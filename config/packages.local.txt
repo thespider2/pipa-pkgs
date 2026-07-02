@@ -25,5 +25,6 @@ q6voiced
 qca-swiss-army-knife
 usb-network
 pipa-plasma-config
+pipa-tablet-mode
 pipa-metapkg
 libcamera

@@ -1,5 +1,5 @@
 diff --git a/drivers/soc/qcom/qmi_interface.c b/drivers/soc/qcom/qmi_interface.c
-index 16e2e24b6096..48a44e490b40 100644
+index 16e2e24b6..99209a15d 100644
 --- a/drivers/soc/qcom/qmi_interface.c
 +++ b/drivers/soc/qcom/qmi_interface.c
 @@ -162,7 +162,7 @@ static void qmi_recv_ctrl_pkt(struct qmi_handle *qmi,
@@ -28,25 +28,18 @@ index 16e2e24b6096..48a44e490b40 100644
  }
  
  /**
-@@ -208,6 +213,7 @@ int qmi_add_lookup(struct qmi_handle *qmi, unsigned int service,
- 		   unsigned int version, unsigned int instance)
- {
- 	struct qmi_service *svc;
-+	int ret;
- 
- 	svc = kzalloc_obj(*svc);
- 	if (!svc)
-@@ -219,13 +225,18 @@ int qmi_add_lookup(struct qmi_handle *qmi, unsigned int service,
+@@ -219,13 +224,19 @@ int qmi_add_lookup(struct qmi_handle *qmi, unsigned int service,
  
  	list_add(&svc->list_node, &qmi->lookups);
  
 -	qmi_send_new_lookup(qmi, svc);
-+	ret = qmi_send_new_lookup(qmi, svc);
-+	if (ret < 0) {
-+		list_del(&svc->list_node);
-+		kfree(svc);
-+		return ret;
-+	}
++	/*
++	 * qmi_send_new_lookup may fail if QRTR is not ready yet
++	 * (e.g. during early boot). Log and keep the entry anyway;
++	 * it will be re-registered when qmi_handle_net_reset fires
++	 * after QRTR comes up.
++	 */
++	(void)qmi_send_new_lookup(qmi, svc);
  
  	return 0;
  }
@@ -74,25 +67,18 @@ index 16e2e24b6096..48a44e490b40 100644
  }
  
  /**
-@@ -272,6 +288,7 @@ int qmi_add_server(struct qmi_handle *qmi, unsigned int service,
- 		   unsigned int version, unsigned int instance)
- {
- 	struct qmi_service *svc;
-+	int ret;
- 
- 	svc = kzalloc_obj(*svc);
- 	if (!svc)
-@@ -283,7 +300,12 @@ int qmi_add_server(struct qmi_handle *qmi, unsigned int service,
+@@ -283,7 +299,13 @@ int qmi_add_server(struct qmi_handle *qmi, unsigned int service,
  
  	list_add(&svc->list_node, &qmi->services);
  
 -	qmi_send_new_server(qmi, svc);
-+	ret = qmi_send_new_server(qmi, svc);
-+	if (ret < 0) {
-+		list_del(&svc->list_node);
-+		kfree(svc);
-+		return ret;
-+	}
++	/*
++	 * qmi_send_new_server may fail if QRTR is not ready yet
++	 * (e.g. during early boot). Log and keep the entry anyway;
++	 * it will be re-registered when qmi_handle_net_reset fires
++	 * after QRTR comes up.
++	 */
++	(void)qmi_send_new_server(qmi, svc);
  
  	return 0;
  }

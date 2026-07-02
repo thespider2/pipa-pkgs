@@ -1,26 +1,21 @@
 From: Ayman <ayman@aymanrgab.com>
 Date: Sat, 13 Jun 2026 12:38:10 +0300
-Subject: [PATCH 6/6] media: i2c: hi846: Retry clock enable and set rate on
- power_on
+Subject: [PATCH] media: i2c: hi846: Retry clock enable and set rate on power_on
 
-The CAMCC MCLK3 branch clock's hardware state can be corrupted after a
-camss module reload cycle, causing clk_prepare_enable to return -EBUSY.
-Add a retry loop with a delay to handle this transient state.
-
-Also call clk_set_rate() before clk_prepare_enable() to ensure the
-MCLK3 RCG divider is configured for 24MHz, since the hardware reset
-state may not match what the sensor expects after a CAMCC power domain
-cycle.
-
-Do not call clk_disable_unprepare() on -EBUSY -- the CCF already
-unprepares internally on failure, so calling it again would corrupt
-the prepare count.
+Retry clk_prepare_enable() on -EBUSY after camss reload and set MCLK to
+24MHz before enabling the clock.
 
 Signed-off-by: Ayman <ayman@aymanrgab.com>
 
+---
+ drivers/media/i2c/hi846.c | 14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
+---
+diff --git a/drivers/media/i2c/hi846.c b/drivers/media/i2c/hi846.c
+index d57d72b010cc..8026ab194515 100644
 --- a/drivers/media/i2c/hi846.c
 +++ b/drivers/media/i2c/hi846.c
-@@ -1632,6 +1632,8 @@
+@@ -1632,6 +1632,8 @@ static int hi846_power_on(struct hi846 *hi846)
  {
  	struct i2c_client *client = v4l2_get_subdevdata(&hi846->sd);
  	int ret;
@@ -29,7 +24,7 @@ Signed-off-by: Ayman <ayman@aymanrgab.com>
  
  	dev_dbg(&client->dev, "hi846-debug: power_on start rst=%d shdn=%d\n",
  		!!hi846->rst_gpio, !!hi846->shutdown_gpio);
-@@ -1641,7 +1643,17 @@
+@@ -1641,7 +1643,17 @@ static int hi846_power_on(struct hi846 *hi846)
  	if (ret < 0)
  		return ret;
  

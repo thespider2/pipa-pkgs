@@ -36,4 +36,5 @@ index 831486e14754..c4a8f1b2e3a1 100644
 +				"Video pipeline stop failed: %d\n", ret);
  	}
  
- 	video_device_pipeline_stop(vdev);
+-- 
+2.54.0

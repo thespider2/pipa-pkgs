@@ -78,6 +78,3 @@ index a582c09d59d8..cd62403d2924 100644
  	tert_tdm_active: tert-tdm-active-state {
  		sck-pins {
  			pins = "gpio133";
--- 
-2.54.0
-

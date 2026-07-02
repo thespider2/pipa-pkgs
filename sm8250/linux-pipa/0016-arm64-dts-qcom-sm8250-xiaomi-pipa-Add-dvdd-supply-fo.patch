@@ -50,6 +50,3 @@ index cd62403d2924..4352b911c169 100644
  		reset-gpios = <&tlmm 78 GPIO_ACTIVE_HIGH>;
  		awinic,audio-channel = <3>;  /* Channel 3 for right surround */
  		awinic,sync-flag;
--- 
-2.54.0
-

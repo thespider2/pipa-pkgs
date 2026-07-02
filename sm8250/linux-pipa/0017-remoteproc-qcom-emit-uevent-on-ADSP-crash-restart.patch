@@ -80,5 +80,3 @@ index b07fbaa091a0..aa3ae5b2c5f2 100644
  };
  
  struct qcom_rproc_pdm {
--- 
-2.47.2

@@ -61,5 +61,3 @@ index 72259f489075..24958171fbf1 100644
  	list_del(&pds->node);
  	pds->state = SERVREG_LOCATOR_ERR;
  	mutex_lock(&pdr->status_lock);
--- 
-2.47.2

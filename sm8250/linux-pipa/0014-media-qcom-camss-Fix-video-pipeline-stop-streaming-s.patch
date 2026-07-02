@@ -34,7 +34,4 @@ index 831486e14754..c4a8f1b2e3a1 100644
 +		if (ret && ret != -ENOIOCTLCMD)
 +			dev_err(video->camss->dev,
 +				"Video pipeline stop failed: %d\n", ret);
- 	}
- 
--- 
-2.54.0
+  	}

@@ -23,6 +23,3 @@ index 35d6eda8e059..a1b71bbafd2b 100644
  
  		reset-gpios = <&tlmm 109 GPIO_ACTIVE_LOW>;
  		pinctrl-0 = <&mclk3_active &camera_front_active>;
--- 
-2.54.0
-

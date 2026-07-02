@@ -41,5 +41,3 @@ index 55a66d5620d5..40f3fcc9cbeb 100644
  }
  
  static void clk_rcg2_shared_disable(struct clk_hw *hw)
--- 
-2.39.5

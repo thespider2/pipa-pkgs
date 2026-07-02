@@ -45,6 +45,3 @@ index eeebb266adb6..ee38a178dedc 100644
  # pmos containers kconfig
  CONFIG_CGROUP_FREEZER=y
  CONFIG_NETFILTER_XT_MATCH_IPVS=m
--- 
-2.54.0
-

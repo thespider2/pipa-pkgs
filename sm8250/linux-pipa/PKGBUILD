@@ -26,6 +26,7 @@ source=(
   '0008-clk-qcom-clk-rcg2-Keep-force-enable-in-shared_enable-t.patch'
   '0009-media-i2c-ov13b10-Add-get_selection-pad-operation.patch'
   '0010-media-hi846-Set-clock-to-24MHz.patch'
+  '0011-arm64-dts-qcom-sm8250-xiaomi-pipa-Set-correct-clock-.patch'
   '0012-arm64-dts-qcom-sm8250-xiaomi-pipa-Fix-TDM-dout-pin-d.patch'
   '0013-arm64-dts-qcom-sm8250-xiaomi-pipa-Fix-OV13B10-rear-c.patch'
   '0014-media-qcom-camss-Fix-video-pipeline-stop-streaming-s.patch'
@@ -36,7 +37,7 @@ source=(
   '0020-aw88261-reduce-boot-spam-and-use-sync-start.patch'
   '0021-arm64-dts-qcom-sm8250-xiaomi-pipa-Add-front-camera-s.patch'
 )
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 prepare() {
   cd $_srcname-${_commit}
@@ -51,6 +52,7 @@ prepare() {
   patch -p1 < ../0008-clk-qcom-clk-rcg2-Keep-force-enable-in-shared_enable-t.patch
   patch -p1 < ../0009-media-i2c-ov13b10-Add-get_selection-pad-operation.patch
   patch -p1 < ../0010-media-hi846-Set-clock-to-24MHz.patch
+  patch -p1 < ../0011-arm64-dts-qcom-sm8250-xiaomi-pipa-Set-correct-clock-.patch
   patch -p1 < ../0012-arm64-dts-qcom-sm8250-xiaomi-pipa-Fix-TDM-dout-pin-d.patch
   patch -p1 < ../0013-arm64-dts-qcom-sm8250-xiaomi-pipa-Fix-OV13B10-rear-c.patch
   patch -p1 < ../0014-media-qcom-camss-Fix-video-pipeline-stop-streaming-s.patch

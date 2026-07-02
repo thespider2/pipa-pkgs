@@ -1,0 +1,20 @@
+pkgname=pipa-plasma-config
+pkgver=1
+pkgrel=1
+pkgdesc="Xiaomi Pad 6 Plasma session configuration (SDDM, KWin)"
+arch=('any')
+url="https://github.com/PipaDB/images"
+license=('MIT')
+depends=('plasma-meta' 'sddm')
+source=("etc/sddm.conf.d/10-wayland.conf"
+        "etc/sddm.conf.d/20-theme.conf"
+        "etc/skel/.config/kwinoutputconfig.json"
+        "var/lib/sddm/.config/kwinoutputconfig.json")
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+package() {
+  install -Dm644 etc/sddm.conf.d/10-wayland.conf "$pkgdir/etc/sddm.conf.d/10-wayland.conf"
+  install -Dm644 etc/sddm.conf.d/20-theme.conf "$pkgdir/etc/sddm.conf.d/20-theme.conf"
+  install -Dm644 etc/skel/.config/kwinoutputconfig.json "$pkgdir/etc/skel/.config/kwinoutputconfig.json"
+  install -Dm644 var/lib/sddm/.config/kwinoutputconfig.json "$pkgdir/var/lib/sddm/.config/kwinoutputconfig.json"
+}

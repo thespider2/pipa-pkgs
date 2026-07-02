@@ -1,11 +1,9 @@
 #!/bin/bash
 # After resume, the QMI/QRTR connections to the DSP are stale.
-# Trigger a udev re-add on fastrpc devices so iio-sensor-proxy's
-# sensor_changes callback re-discovers sensors without a full
-# service restart (which takes ~15s).
+# Restart iio-sensor-proxy to re-establish them. Run in a subshell
+# with a small delay so it doesn't block other resume hooks.
 case "$1" in
     post)
-        udevadm trigger --action=add --subsystem-match=misc \
-            --property-match=IIO_SENSOR_PROXY_TYPE 2>/dev/null
+        ( sleep 1 && systemctl restart iio-sensor-proxy 2>/dev/null ) &
         ;;
 esac

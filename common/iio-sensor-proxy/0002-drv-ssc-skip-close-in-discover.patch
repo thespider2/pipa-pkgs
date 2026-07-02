@@ -129,3 +129,21 @@ diff --git src/drv-ssc-proximity.c b/src/drv-ssc-proximity.c
  	g_clear_object (&drv_data->sensor);
  	g_clear_pointer (&sensor_device->priv, g_free);
  	g_free (sensor_device);
+diff --git src/iio-sensor-proxy.c b/src/iio-sensor-proxy.c
+--- a/src/iio-sensor-proxy.c	2026-07-02 02:43:40.662768897 +0300
++++ b/src/iio-sensor-proxy.c	2026-07-02 03:08:00.262729287 +0300
+@@ -779,6 +779,14 @@
+ 		}
+ 
+ 		DEVICE_FOR_TYPE(i) = sensor_device;
++
++		/* If clients claimed the sensor before we opened the device
++		 * (between bus_acquired_handler and name_acquired_handler),
++		 * start polling now. */
++		if (g_hash_table_size (data->clients[i]) > 0) {
++			data->sensor_startup_dbus_event_delayed[i] = TRUE;
++			driver_set_polling (sensor_device, TRUE);
++		}
+ 	}
+ 
+ 	if (!any_sensors_left (data))

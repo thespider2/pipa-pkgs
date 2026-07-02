@@ -1,10 +1,10 @@
 pkgname=pipa-metapkg
 pkgver=1.1
-pkgrel=18
+pkgrel=19
 pkgdesc="Xiaomi Pad 6 support meta package for EndeavourOS"
 arch=('any')
 license=('MIT')
-depends=('linux-pipa' 'xiaomi-pipa-firmware' 'qbootctl' 'pipa-dracut' 'pipa-grub-config' 'pipa-sound-conf' 'swclock-offset' 'bootmac' 'bluez-git' 'mesa' 'pipa-sensors' 'libcamera' 'pipewire-libcamera' 'qrtr' 'tqftpserv' 'pd-mapper' 'wireless-regdb' 'tuned' 'tuned-ppd' 'grub2-theme-endeavouros-classic' 'ath10k-shutdown' 'make-dynpart-mappings' 'qca-swiss-army-knife' 'usb-network')
+depends=('linux-pipa' 'xiaomi-pipa-firmware' 'qbootctl' 'pipa-dracut' 'pipa-grub-config' 'pipa-sound-conf' 'swclock-offset' 'bootmac' 'bluez-git' 'mesa' 'pipa-sensors' 'libcamera' 'libcamera-ipa' 'libcamera-tools' 'gst-plugin-libcamera' 'pipewire-libcamera' 'qrtr' 'tqftpserv' 'pd-mapper' 'wireless-regdb' 'tuned' 'tuned-ppd' 'grub2-theme-endeavouros-classic' 'ath10k-shutdown' 'make-dynpart-mappings' 'qca-swiss-army-knife' 'usb-network')
 
 source=('90-pipa-gsk-renderer.sh')
 sha256sums=('SKIP')

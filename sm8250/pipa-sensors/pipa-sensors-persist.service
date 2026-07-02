@@ -1,0 +1,14 @@
+[Unit]
+Description=Prepare Xiaomi Pad 6 sensor persist storage
+DefaultDependencies=no
+After=local-fs.target
+Before=hexagonrpcd-sdsp.service
+ConditionPathExists=/usr/share/qcom/sm8250/Xiaomi/pipa/sensors/registry
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/pipa-prepare-sensor-persist
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

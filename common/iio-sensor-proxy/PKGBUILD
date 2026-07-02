@@ -1,7 +1,7 @@
 pkgname=iio-sensor-proxy
 _commit=0085ddf8ecb173a1c5fcf2344aa40e561125354f
 pkgver=3.9
-pkgrel=5
+pkgrel=6
 pkgdesc="IIO accelerometer sensor to input device proxy (with libssc support)"
 arch=('x86_64' 'aarch64')
 url="https://gitlab.freedesktop.org/hadess/iio-sensor-proxy"
@@ -14,7 +14,7 @@ source=("${url}/-/archive/${_commit}/iio-sensor-proxy-${_commit}.tar.gz"
         "0001-iio-sensor-proxy-Do-not-exit-based-on-sensor-events.patch"
         "0002-drv-ssc-skip-close-in-discover.patch"
         "0003-ssc-drivers-guard-against-null-GError-in-g_warning.patch"
-        "iio-sensor-proxy-resume")
+        "0004-ssc-drivers-fix-close-signal-handler.patch")
 sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 prepare() {
@@ -22,6 +22,7 @@ prepare() {
   patch -p1 < ../0001-iio-sensor-proxy-Do-not-exit-based-on-sensor-events.patch
   patch -p1 < ../0002-drv-ssc-skip-close-in-discover.patch
   patch -p1 < ../0003-ssc-drivers-guard-against-null-GError-in-g_warning.patch
+  patch -p1 < ../0004-ssc-drivers-fix-close-signal-handler.patch
 }
 
 build() {
@@ -33,7 +34,4 @@ build() {
 package() {
   cd "iio-sensor-proxy-${_commit}"
   DESTDIR="$pkgdir" ninja -C build install
-
-  install -Dm755 ../iio-sensor-proxy-resume \
-    "$pkgdir/usr/lib/systemd/system-sleep/iio-sensor-proxy-resume"
 }

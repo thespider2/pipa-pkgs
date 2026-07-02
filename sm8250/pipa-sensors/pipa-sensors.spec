@@ -1,6 +1,6 @@
 Name: pipa-sensors
 Version: 1.2
-Release: 16
+Release: 17
 Summary: Sensors configs for the Xiaomi Pad 6
 Source1: 81-libssc-xiaomi-pipa.rules
 Source2: hexagonrpcd-sdsp.conf
@@ -10,6 +10,7 @@ Source5: pipa-sensors-resume
 Source6: iio-sensor-proxy-pipa-audio.conf
 Source7: pipa-audio-init-sensors.conf
 Source8: pipa-sensors.tmpfiles
+Source9: hexagonrpcd-sdsp-pipa-sensors.conf
 License: MIT
 
 Requires: xiaomi-pipa-firmware
@@ -30,6 +31,7 @@ install -Dm755 %{SOURCE5} %{buildroot}/usr/lib/systemd/system-sleep/pipa-sensors
 install -Dm644 %{SOURCE6} %{buildroot}/usr/lib/systemd/system/iio-sensor-proxy.service.d/10-pipa-audio.conf
 install -Dm644 %{SOURCE7} %{buildroot}/usr/lib/systemd/system/pipa-audio-init.service.d/10-sensors.conf
 install -Dm644 %{SOURCE8} %{buildroot}/usr/lib/tmpfiles.d/pipa-sensors.conf
+install -Dm644 %{SOURCE9} %{buildroot}/usr/lib/systemd/system/hexagonrpcd-sdsp.service.d/10-pipa-sensors.conf
 
 %post
 systemd-tmpfiles --create %{_tmpfilesdir}/pipa-sensors.conf >/dev/null 2>&1 || :
@@ -46,3 +48,4 @@ systemd-tmpfiles --create %{_tmpfilesdir}/pipa-sensors.conf >/dev/null 2>&1 || :
 /usr/lib/systemd/system/iio-sensor-proxy.service.d/10-pipa-audio.conf
 /usr/lib/systemd/system/pipa-audio-init.service.d/10-sensors.conf
 /usr/lib/tmpfiles.d/pipa-sensors.conf
+/usr/lib/systemd/system/hexagonrpcd-sdsp.service.d/10-pipa-sensors.conf

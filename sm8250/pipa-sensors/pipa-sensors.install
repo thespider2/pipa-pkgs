@@ -1,0 +1,17 @@
+activate_pipa_sensors() {
+  if command -v systemctl >/dev/null 2>&1; then
+    systemd-tmpfiles --create /usr/lib/tmpfiles.d/pipa-sensors.conf >/dev/null 2>&1 || true
+    /usr/local/bin/pipa-prepare-sensor-persist >/dev/null 2>&1 || true
+    systemctl daemon-reload >/dev/null 2>&1 || true
+    systemctl enable pipa-sensors-persist.service >/dev/null 2>&1 || true
+    systemctl start pipa-sensors-persist.service >/dev/null 2>&1 || true
+  fi
+}
+
+post_install() {
+  activate_pipa_sensors
+}
+
+post_upgrade() {
+  activate_pipa_sensors
+}

@@ -3,7 +3,7 @@ pkgname=(linux-pipa linux-pipa-headers)
 _srcname=linux
 _commit=afac0607a1046fe1dcdd341297a2144d5013272a
 pkgver=7.0.8
-pkgrel=15
+pkgrel=16
 pkgdesc='Linux kernel for Xiaomi Pad 6 (Pipa)'
 arch=('aarch64')
 url="https://github.com/aymanrgab/linux"
@@ -29,7 +29,7 @@ source=(
   '0017-remoteproc-qcom-emit-uevent-on-ADSP-crash-restart.patch'
   '0018-soc-qcom-qmi-return-error-on-lookup-server-registra.patch'
   '0019-soc-qcom-pdr-retry-service-lookup-on-transient-fail.patch'
-  '0020-aw88261-reduce-boot-spam-and-add-pipa-startup-delay.patch'
+  '0020-aw88261-reduce-boot-spam-and-use-sync-start.patch'
 )
 sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
@@ -49,7 +49,7 @@ prepare() {
   patch -p1 < ../0017-remoteproc-qcom-emit-uevent-on-ADSP-crash-restart.patch
   patch -p1 < ../0018-soc-qcom-qmi-return-error-on-lookup-server-registra.patch
   patch -p1 < ../0019-soc-qcom-pdr-retry-service-lookup-on-transient-fail.patch
-  patch -p1 < ../0020-aw88261-reduce-boot-spam-and-add-pipa-startup-delay.patch
+  patch -p1 < ../0020-aw88261-reduce-boot-spam-and-use-sync-start.patch
 
   make EXTRAVERSION="-${pkgrel}-pipa" olddefconfig
 }

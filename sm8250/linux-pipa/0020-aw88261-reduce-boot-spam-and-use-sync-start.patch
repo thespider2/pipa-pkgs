@@ -1,5 +1,5 @@
 diff --git a/sound/soc/codecs/aw88261.c b/sound/soc/codecs/aw88261.c
-index 9c3b229c854b..1087070af933 100644
+index 9c3b229c854b..25f54987fcee 100644
 --- a/sound/soc/codecs/aw88261.c
 +++ b/sound/soc/codecs/aw88261.c
 @@ -172,7 +172,7 @@ static int aw88261_dev_get_iis_status(struct aw_device *aw_dev)
@@ -68,24 +68,12 @@ index 9c3b229c854b..1087070af933 100644
  			break;
  		}
  	}
-@@ -805,7 +806,7 @@ static void aw88261_start(struct aw88261 *aw88261, bool sync_start)
- 	else
- 		queue_delayed_work(aw88261_is_pipa() ? system_wq : system_dfl_wq,
- 			&aw88261->start_work,
--			AW88261_START_WORK_DELAY_MS);
-+			aw88261_is_pipa() ? AW88261_PIPA_START_WORK_DELAY_MS : AW88261_START_WORK_DELAY_MS);
- }
- 
- static int aw88261_dai_set_sysclk(struct snd_soc_dai *dai, int clk_id,
-diff --git a/sound/soc/codecs/aw88261.h b/sound/soc/codecs/aw88261.h
-index 23ab8d236cc7..84672a966303 100644
---- a/sound/soc/codecs/aw88261.h
-+++ b/sound/soc/codecs/aw88261.h
-@@ -369,6 +369,7 @@
- 
- #define AW88261_START_RETRIES		(5)
- #define AW88261_START_WORK_DELAY_MS	(0)
-+#define AW88261_PIPA_START_WORK_DELAY_MS	(2000)
- 
- #define AW88261_RATES (SNDRV_PCM_RATE_8000_48000 | \
- 			SNDRV_PCM_RATE_96000)
+@@ -1099,7 +1100,7 @@ static int aw88261_playback_event(struct snd_soc_dapm_widget *w,
+ 	mutex_lock(&aw88261->lock);
+ 	switch (event) {
+ 	case SND_SOC_DAPM_PRE_PMU:
+-		aw88261_start(aw88261, AW88261_ASYNC_START);
++		aw88261_start(aw88261, AW88261_SYNC_START);
+ 		break;
+ 	case SND_SOC_DAPM_POST_PMD:
+ 		aw88261_dev_stop(aw88261->aw_pa);

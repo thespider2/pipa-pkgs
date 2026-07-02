@@ -1,9 +1,13 @@
 #!/bin/bash
 # After resume, the QMI/QRTR connections to the DSP are stale.
-# Restart iio-sensor-proxy to re-establish them. Run in a subshell
-# with a small delay so it doesn't block other resume hooks.
+# Restart hexagonrpcd (reloads DSP firmware) then iio-sensor-proxy.
 case "$1" in
     post)
-        ( sleep 1 && systemctl restart iio-sensor-proxy 2>/dev/null ) &
+        (
+            sleep 2
+            systemctl restart hexagonrpcd-adsp-sensorspd hexagonrpcd-sdsp 2>/dev/null
+            sleep 1
+            systemctl restart iio-sensor-proxy 2>/dev/null
+        ) &
         ;;
 esac

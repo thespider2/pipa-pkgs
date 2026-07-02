@@ -6,6 +6,7 @@ pkgdesc="IIO accelerometer sensor to input device proxy (with libssc support)"
 arch=('x86_64' 'aarch64')
 url="https://gitlab.freedesktop.org/hadess/iio-sensor-proxy"
 license=('GPL3')
+options=('debug')
 depends=('dbus' 'glib2' 'libgudev' 'libssc>=0.2.2' 'polkit' 'systemd')
 makedepends=('meson' 'gcc' 'gtk-doc' 'umockdev')
 provides=('iio-sensor-proxy-pipa')

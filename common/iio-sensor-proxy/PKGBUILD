@@ -1,7 +1,7 @@
 pkgname=iio-sensor-proxy
 _commit=0085ddf8ecb173a1c5fcf2344aa40e561125354f
 pkgver=3.9
-pkgrel=4
+pkgrel=5
 pkgdesc="IIO accelerometer sensor to input device proxy (with libssc support)"
 arch=('x86_64' 'aarch64')
 url="https://gitlab.freedesktop.org/hadess/iio-sensor-proxy"

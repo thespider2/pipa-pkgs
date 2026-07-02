@@ -7,7 +7,7 @@ index 1448312..f6e06ed 100644
  
  	if (!qmi_indication_ssc_report_large_output_get_data (output, &protobuf, &error)) {
 -		g_warning ("Cannot extract Protobuf data (large report): %s", error->message);
-+		g_warning ("Cannot extract Protobuf data (large report): %s", error ? error->message : "unknown error");
++		g_warning ("Cannot extract Protobuf data (large report): %s", (error && error->message) ? error->message : "unknown error");
  		return;
  	}
  
@@ -16,7 +16,7 @@ index 1448312..f6e06ed 100644
  
  	if (!qmi_indication_ssc_report_small_output_get_data (output, &protobuf, &error)) {
 -		g_warning ("Cannot extract Protobuf data (small report): %s", error->message);
-+		g_warning ("Cannot extract Protobuf data (small report): %s", error ? error->message : "unknown error");
++		g_warning ("Cannot extract Protobuf data (small report): %s", (error && error->message) ? error->message : "unknown error");
  		return;
  	}
  
@@ -25,7 +25,7 @@ index 1448312..f6e06ed 100644
  
  	if (!qmi_message_ssc_control_output_get_result (output, &error)) {
 -		g_warning ("QMI request failed: %s", error->message);
-+		g_warning ("QMI request failed: %s", error ? error->message : "unknown error");
++		g_warning ("QMI request failed: %s", (error && error->message) ? error->message : "unknown error");
  		qmi_message_ssc_control_output_unref (output);
  		g_task_return_error (task, error);
  		g_clear_object (&task);
@@ -34,7 +34,7 @@ index 1448312..f6e06ed 100644
  
  	if (!qmi_message_ssc_control_input_set_report_type (input, QMI_SSC_REPORT_TYPE_LARGE, &error)) {
 -		g_debug ("Inserting report type failed: %s", error->message);
-+		g_debug ("Inserting report type failed: %s", error ? error->message : "unknown error");
++		g_debug ("Inserting report type failed: %s", (error && error->message) ? error->message : "unknown error");
  		qmi_message_ssc_control_input_unref (input);
  		g_task_return_error (task, error);
  		g_clear_object (&task);
@@ -43,7 +43,7 @@ index 1448312..f6e06ed 100644
  
  	if (!qmi_message_ssc_control_input_set_data (input, buf, &error)) {
 -		g_debug ("Inserting protobuf data failed: %s", error->message);
-+		g_debug ("Inserting protobuf data failed: %s", error ? error->message : "unknown error");
++		g_debug ("Inserting protobuf data failed: %s", (error && error->message) ? error->message : "unknown error");
  		qmi_message_ssc_control_input_unref (input);
  		g_task_return_error (task, error);
  		g_clear_object (&task);
@@ -52,7 +52,7 @@ index 1448312..f6e06ed 100644
  	/* QMI client released, check result */
  	if (!qmi_device_release_client_finish (priv->device, ctx.result, &error))
 -		g_warning ("Could not release SSC QMI client: %s\n", error->message);
-+		g_warning ("Could not release SSC QMI client: %s\n", error ? error->message : "unknown error");
++		g_warning ("Could not release SSC QMI client: %s\n", (error && error->message) ? error->message : "unknown error");
  
  	ssc_common_clear_sync_context (&ctx);
  
@@ -61,7 +61,7 @@ index 1448312..f6e06ed 100644
  
  	if (!qmi_device_close_finish (priv->device, ctx.result, &error))
 -		g_warning ("Could not close SSC QMI client: %s\n", error->message);
-+		g_warning ("Could not close SSC QMI client: %s\n", error ? error->message : "unknown error");
++		g_warning ("Could not close SSC QMI client: %s\n", (error && error->message) ? error->message : "unknown error");
  
  	g_clear_object (&priv->qmi_client_ssc);
  	g_clear_object (&priv->device);
@@ -74,7 +74,7 @@ index 2cf686f..a2ced89 100644
  		g_task_return_error (task, error);
  		g_clear_object (&task);
 -		g_debug ("Sensor disable request failed: %s", error->message);
-+		g_debug ("Sensor disable request failed: %s", error ? error->message : "unknown error");
++		g_debug ("Sensor disable request failed: %s", (error && error->message) ? error->message : "unknown error");
  		return;
  	}
  
@@ -83,7 +83,7 @@ index 2cf686f..a2ced89 100644
  		g_task_return_error (task, error);
  		g_clear_object (&task);
 -		g_debug ("Sensor enable request failed: %s", error->message);
-+		g_debug ("Sensor enable request failed: %s", error ? error->message : "unknown error");
++		g_debug ("Sensor enable request failed: %s", (error && error->message) ? error->message : "unknown error");
  		return;
  	}
  
@@ -92,7 +92,7 @@ index 2cf686f..a2ced89 100644
  
  	if (!ssc_client_send_finish (self, result, &error)) {
 -		g_warning ("Sensor attribute request failed: %s", error->message);
-+		g_warning ("Sensor attribute request failed: %s", error ? error->message : "unknown error");
++		g_warning ("Sensor attribute request failed: %s", (error && error->message) ? error->message : "unknown error");
  		return;
  	}
  

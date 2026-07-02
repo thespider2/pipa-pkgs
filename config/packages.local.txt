@@ -18,5 +18,13 @@ pipa-sensors
 pipa-sound-conf
 swclock-offset
 grub2-theme-endeavouros-classic
+ath10k-shutdown
+make-dynpart-mappings
+msm-modem-uim-selection
+nekotorch
+q6voiced
+qca-swiss-army-knife
+usb-network
+pipa-plasma-config
 pipa-metapkg
 libcamera

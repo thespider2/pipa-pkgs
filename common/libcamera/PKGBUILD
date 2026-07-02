@@ -8,7 +8,7 @@ pkgname=(
   python-libcamera
 )
 pkgver=0.7.1
-pkgrel=2
+pkgrel=3
 pkgdesc="A complex camera support library for Linux, Android, and ChromeOS"
 arch=('x86_64' 'aarch64')
 url="https://libcamera.org/"
@@ -18,8 +18,14 @@ makedepends=('cmake' 'doxygen' 'git' 'glib2' 'graphviz' 'gst-plugins-base' 'gtes
              'python-sphinx' 'python-sphinx-book-theme' 'python-sphinxcontrib-doxylink'
              'qt6-base' 'qt6-tools' 'sdl2' 'systemd' 'texlive-core')
 source=("git+https://git.libcamera.org/libcamera/libcamera.git#tag=v${pkgver}"
-        '0001-ipa-libipa-Add-sensor-helper-for-OV13B10.patch')
+        '0001-ipa-libipa-Add-sensor-helper-for-OV13B10.patch'
+        '0002-libcamera-add-pipa-sensor-properties.patch'
+        'hi846.yaml'
+        'ov13b10.yaml')
 sha256sums=('SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
             'SKIP')
 
 _pick() {
@@ -35,6 +41,7 @@ _pick() {
 prepare() {
   cd "$pkgname"
   patch -p1 < ../0001-ipa-libipa-Add-sensor-helper-for-OV13B10.patch
+  patch -p1 < ../0002-libcamera-add-pipa-sensor-properties.patch
 }
 
 build() {
@@ -65,6 +72,9 @@ package_libcamera() {
 
   cd "$pkgname"
   DESTDIR="$pkgdir" meson install -C build
+
+  install -Dm644 ../hi846.yaml "$pkgdir/usr/share/libcamera/ipa/simple/hi846.yaml"
+  install -Dm644 ../ov13b10.yaml "$pkgdir/usr/share/libcamera/ipa/simple/ov13b10.yaml"
 
   # remove bundled libpisp (provided by separate system package)
   rm -rf "$pkgdir"/usr/{include/libpisp,lib/libpisp.so*,lib/pkgconfig/libpisp.pc,share/libpisp}

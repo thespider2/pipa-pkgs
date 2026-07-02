@@ -1,45 +1,69 @@
 #!/bin/bash
-# Restart the SLPI sensor stack after suspend/resume.
+# Restart the SLPI sensor stack around suspend/resume.
+set -eu
+
+LOG_TAG=pipa-sensors-resume
+
+log() {
+	logger -t "$LOG_TAG" "$@"
+}
+
+wait_for_unit() {
+	local unit=$1
+	local tries=${2:-30}
+	local i
+
+	for ((i = 1; i <= tries; i++)); do
+		if systemctl is-active --quiet "${unit}"; then
+			sleep 1
+			return 0
+		fi
+		sleep 1
+	done
+	return 1
+}
+
+stop_iio_sensor_proxy() {
+	local i
+
+	systemctl stop iio-sensor-proxy.service 2>/dev/null || true
+	for ((i = 1; i <= 15; i++)); do
+		systemctl is-active --quiet iio-sensor-proxy.service || return 0
+		sleep 1
+	done
+	systemctl kill --kill-who=all --signal=SIGKILL iio-sensor-proxy.service 2>/dev/null || true
+}
+
 case "$1" in
+pre)
+	log "suspend: stopping iio-sensor-proxy"
+	stop_iio_sensor_proxy
+	;;
 post)
-	(
-		wait_for_unit() {
-			local unit=$1
-			local tries=${2:-30}
-			local i
+	log "resume: restarting sensor stack"
 
-			for ((i = 1; i <= tries; i++)); do
-				if systemctl is-active --quiet "${unit}"; then
-					sleep 1
-					return 0
-				fi
-				sleep 1
-			done
-			return 1
-		}
+	# Let remoteproc/fastrpc settle after resume.
+	sleep 3
 
-		stop_iio_sensor_proxy() {
-			local i
+	stop_iio_sensor_proxy
 
-			systemctl stop iio-sensor-proxy.service 2>/dev/null || true
-			for ((i = 1; i <= 15; i++)); do
-				systemctl is-active --quiet iio-sensor-proxy.service || return 0
-				sleep 1
-			done
-			systemctl kill --kill-who=all --signal=SIGKILL iio-sensor-proxy.service 2>/dev/null || true
-		}
+	if ! systemctl restart hexagonrpcd-sdsp.service; then
+		log "resume: failed to restart hexagonrpcd-sdsp"
+		exit 0
+	fi
 
-		# Let remoteproc/fastrpc settle after resume.
-		sleep 3
+	if ! wait_for_unit hexagonrpcd-sdsp.service 30; then
+		log "resume: hexagonrpcd-sdsp did not become active"
+		exit 0
+	fi
 
-		stop_iio_sensor_proxy
-		systemctl restart hexagonrpcd-sdsp.service || exit 0
-		wait_for_unit hexagonrpcd-sdsp.service 30 || exit 0
+	/usr/local/bin/pipa-prepare-sensor-persist >/dev/null 2>&1 || true
 
-		/usr/local/bin/pipa-prepare-sensor-persist >/dev/null 2>&1 || true
-
-		systemctl reset-failed iio-sensor-proxy.service 2>/dev/null || true
-		systemctl restart iio-sensor-proxy.service 2>/dev/null || true
-	) &
+	systemctl reset-failed iio-sensor-proxy.service 2>/dev/null || true
+	if systemctl restart iio-sensor-proxy.service; then
+		log "resume: iio-sensor-proxy restarted"
+	else
+		log "resume: iio-sensor-proxy restart failed"
+	fi
 	;;
 esac

@@ -1,0 +1,22 @@
+--- a/src/libssc-sensor.c
++++ b/src/libssc-sensor.c
+@@ -108,6 +108,9 @@ sensor_close_ready (SSCClient *self, GAsyncResult *result, gpointer user_data)
+ 	GError *error = NULL;
+ 
+ 	if (!ssc_client_send_finish (self, result, &error)) {
++		if (!error)
++			g_set_error (&error, ssc_sensor_error_quark (), SSC_SENSOR_ERROR_UNAVAILABLE,
++				     "Sensor disable request failed");
+ 		g_task_return_error (task, error);
+ 		g_clear_object (&task);
+ 		g_debug ("Sensor disable request failed: %s", (error && error->message) ? error->message : "unknown error");
+@@ -170,6 +173,9 @@ sensor_open_ready (SSCClient *self, GAsyncResult *result, gpointer user_data)
+ 	GError *error = NULL;
+ 
+ 	if (!ssc_client_send_finish (self, result, &error)) {
++		if (!error)
++			g_set_error (&error, ssc_sensor_error_quark (), SSC_SENSOR_ERROR_UNAVAILABLE,
++				     "Sensor enable request failed");
+ 		g_task_return_error (task, error);
+ 		g_clear_object (&task);
+ 		g_debug ("Sensor enable request failed: %s", (error && error->message) ? error->message : "unknown error");

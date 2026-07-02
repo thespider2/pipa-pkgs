@@ -1,6 +1,6 @@
 Name: pipa-sound-conf
 Version: 1.4
-Release: 6
+Release: 7
 Summary: Sound settings for Xiaomi Mi Pad 6 (pipa)
 Source1: 51-pipa.conf
 Source2: pipa-audio-init

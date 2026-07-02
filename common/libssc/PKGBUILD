@@ -1,6 +1,6 @@
 pkgname=libssc
 pkgver=0.4.4
-pkgrel=3
+pkgrel=4
 pkgdesc="Library to expose Qualcomm Sensor Core sensors"
 arch=('x86_64' 'aarch64')
 url="https://codeberg.org/DylanVanAssche/libssc"
@@ -8,12 +8,14 @@ license=('GPL3')
 depends=('protobuf-c' 'glib2' 'libgudev' 'libqmi' 'qrtr' 'systemd' 'python')
 makedepends=('meson' 'gcc' 'python')
 source=("https://codeberg.org/DylanVanAssche/libssc/archive/v${pkgver}.tar.gz"
-        "0001-ssc-guard-against-null-GError-in-g_warning-g_debug.patch")
-sha256sums=('SKIP' 'SKIP')
+        "0001-ssc-guard-against-null-GError-in-g_warning-g_debug.patch"
+        "0002-ssc-guard-null-GError-in-task-return.patch")
+sha256sums=('SKIP' 'SKIP' 'SKIP')
 
 prepare() {
   cd "$pkgname"
   patch -p1 < ../0001-ssc-guard-against-null-GError-in-g_warning-g_debug.patch
+  patch -p1 < ../0002-ssc-guard-null-GError-in-task-return.patch
 }
 
 build() {

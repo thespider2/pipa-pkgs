@@ -157,7 +157,10 @@ for pkg in "${PKGS[@]}"; do
             done
 
             if [ ${#remote_dependencies[@]} -gt 0 ]; then
-                pacman -S --needed --noconfirm "${remote_dependencies[@]}"
+                mapfile -t unsatisfied < <(pacman -T "${remote_dependencies[@]}" 2>/dev/null || true)
+                if [ ${#unsatisfied[@]} -gt 0 ] && [ -n "${unsatisfied[0]}" ]; then
+                    pacman -S --needed --noconfirm "${unsatisfied[@]}"
+                fi
             fi
 
             if [ ${#local_dependency_archives[@]} -gt 0 ]; then

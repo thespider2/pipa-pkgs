@@ -109,23 +109,35 @@ for name in "${BUILD_ORDER[@]}"; do
     rm -rf ~/rpmbuild/SOURCES/*
     cp "$SOURCES_DIR/$name"/* ~/rpmbuild/SOURCES/ 2>/dev/null || true
 
-    spectool -g -R --define "_topdir $HOME/rpmbuild" "$spec" 2>/dev/null || true
+    echo "  Downloading sources..."
+    spectool -g -R --define "_topdir $HOME/rpmbuild" "$spec" || \
+        echo "  WARNING: spectool failed for $name, sources may be missing"
 
-    if rpmbuild -ba "$spec" \
+    echo "  Running rpmbuild..."
+    BUILD_LOG="/tmp/rpmbuild-$name.log"
+    set +e
+    rpmbuild -ba "$spec" \
         --define "_topdir $HOME/rpmbuild" \
         --define "dist .um44" \
-        --target "$(uname -m)" 2>&1; then
+        --target "$(uname -m)" 2>&1 | tee "$BUILD_LOG"
+    BUILD_RC=${PIPESTATUS[0]}
+    set -e
+    if [ "$BUILD_RC" -eq 0 ]; then
 
         find ~/rpmbuild/RPMS/ -name "*.rpm" -newer "$spec" -exec cp -v {} "$RPM_REPO_DIR/" \;
         find ~/rpmbuild/SRPMS/ -name "*.rpm" -newer "$spec" -exec cp -v {} "$RPM_REPO_DIR/" \;
 
-        # Install just-built RPMs so later specs can BuildRequire them
         find ~/rpmbuild/RPMS/ -name "*.rpm" -newer "$spec" \
             -exec dnf install -y --nogpgcheck {} + 2>/dev/null || true
 
         BUILT=$((BUILT + 1))
     else
-        echo "WARNING: Failed to build $name"
+        echo ""
+        echo "========================================="
+        echo "FAILED: $name"
+        echo "========================================="
+        tail -30 "$BUILD_LOG" 2>/dev/null
+        echo "========================================="
         FAILED=$((FAILED + 1))
     fi
 done

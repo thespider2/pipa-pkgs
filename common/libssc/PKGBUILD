@@ -1,6 +1,6 @@
 pkgname=libssc
 pkgver=0.4.4
-pkgrel=4
+pkgrel=5
 pkgdesc="Library to expose Qualcomm Sensor Core sensors"
 arch=('x86_64' 'aarch64')
 url="https://codeberg.org/DylanVanAssche/libssc"
@@ -27,4 +27,6 @@ build() {
 package() {
   cd "$pkgname"
   DESTDIR="$pkgdir" ninja -C build install
+  # iio-sensor-proxy and older consumers expect the libssc.so.0 soname.
+  ln -sf libssc.so.2 "$pkgdir/usr/lib/libssc.so.0"
 }

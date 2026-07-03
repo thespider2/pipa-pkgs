@@ -8,7 +8,7 @@ pkgname=(
   python-libcamera
 )
 pkgver=0.7.1
-pkgrel=3
+pkgrel=4
 pkgdesc="A complex camera support library for Linux, Android, and ChromeOS"
 arch=('x86_64' 'aarch64')
 url="https://libcamera.org/"
@@ -48,6 +48,7 @@ build() {
   cd "$pkgname"
   meson setup build \
     --prefix=/usr \
+    --libdir=lib \
     -Dcpp_args=-Wno-array-bounds \
     -Ddocumentation=enabled \
     -Dpipelines=auto \
@@ -82,7 +83,7 @@ package_libcamera() {
   cd "$pkgdir"
   _pick libcamera-docs usr/share/doc
   _pick libcamera-ipa usr/lib/libcamera/
-  _pick libcamera-tools usr/bin/cam usr/bin/qcam usr/bin/lc-compliance usr/bin/libcamera-bug-report
+  _pick libcamera-tools usr/bin/cam usr/bin/qcam usr/bin/lc-compliance usr/bin/libcamera-bug-report usr/bin/libcamerify
   _pick gst-plugin-libcamera usr/lib/gstreamer-1.0/
   _pick python-libcamera usr/lib/python*
 }

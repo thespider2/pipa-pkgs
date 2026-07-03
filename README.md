@@ -1,29 +1,33 @@
 # pipa-pkgs
 
-`pipa-pkgs` is a pacman repository for Xiaomi Pad 6 / Pipa packages, published with GitHub Pages.
-It is designed to replace or reduce dependency on the upstream `pipa-alarm` feed during image builds.
-This repo now carries your local `pkgbuilds/` tree directly, including the `linux-pipa` 7.0.8 kernel package source.
+`pipa-pkgs` is a multi-distro package repository for Xiaomi Pad 6 / Pipa, published with GitHub Pages.
+It hosts both Arch Linux (pacman) and Ultramarine/Fedora (dnf) packages, enabling OTA updates for both distros from a single repo.
 
 ## Goals
 
-- Build all packages whose `PKGBUILD` sources are stored in this repo
+- Build all packages whose sources are stored in this repo (both PKGBUILDs and RPM specs)
 - Use the local `linux-pipa` 7.0.8 package as the kernel source of truth
 - Mirror only the remaining upstream Pipa packages that do not yet have local `PKGBUILD`s
 - Publish a pacman repository at `https://<user>.github.io/pipa-pkgs/repo/`
-- Make `pipa-endeavouros-builder/build-image.sh` faster by pointing `PIPA_REPO_URL` at a single cached feed
+- Publish a DNF repository at `https://<user>.github.io/pipa-pkgs/repo/ultramarine/`
+- Enable OTA updates for both EndeavourOS and Ultramarine OS installs
 
 ## Repository Layout
 
-- `pkgbuilds/`: local package sources built into the pacman repo
-- `config/packages.local.txt`: local package directories that should be built
+- `common/`, `sm8250/`: package source trees (PKGBUILDs + patches + configs)
+- `ultramarine/specs/`: RPM `.spec` files for Ultramarine/Fedora packages
+- `ultramarine/Dockerfile`: Fedora 44 build container for RPMs
+- `ultramarine/pipa-pkgs.repo`: DNF repo config file for the tablet
+- `config/packages.local.txt`: local package directories that should be built (pacman)
 - `config/packages.upstream.txt`: packages still mirrored from the upstream Pipa repo
 - `config/repo.env`: repo configuration, Pages URL, sync source, and kernel version note
 - `scripts/build-local-packages.sh`: builds local `PKGBUILD`s into the pacman repo
+- `scripts/build-ultramarine-rpms.sh`: builds RPM specs into the Ultramarine repo
 - `scripts/sync-pkgbuilds.sh`: refreshes `pkgbuilds/` from the source `endeavouros-pipa` repo
 - `scripts/fetch-upstream.py`: downloads selected upstream packages into the pacman repo
 - `scripts/compose-repo.sh`: regenerates the pacman database from all package files
 - `scripts/stage-pages.sh`: prepares the GitHub Pages site output
-- `.github/workflows/publish.yml`: builds and publishes the repo to GitHub Pages
+- `.github/workflows/publish.yml`: builds and publishes both repos to GitHub Pages
 
 ## Expected Published URL
 
@@ -97,6 +101,46 @@ To refresh the local `common/` and `sm8250/` trees from your main source repo:
 ```bash
 scripts/sync-pkgbuilds.sh
 ```
+
+## Ultramarine / Fedora (DNF) Repository
+
+The RPM packages are built from `.spec` files in `ultramarine/specs/` using the same
+source files in `common/` and `sm8250/` that the Arch packages use.
+
+### Published URL
+
+```text
+https://thespider2.github.io/pipa-pkgs/repo/ultramarine/
+```
+
+### Add to a running tablet
+
+```bash
+sudo cp pipa-pkgs.repo /etc/yum.repos.d/
+sudo dnf install pipa-metapkg
+```
+
+Or install manually from the repo URL:
+
+```bash
+sudo dnf config-manager --add-repo https://thespider2.github.io/pipa-pkgs/repo/ultramarine/
+sudo dnf install pipa-metapkg
+```
+
+### OTA Updates
+
+```bash
+sudo dnf upgrade --refresh
+```
+
+### Build RPMs locally
+
+```bash
+docker build -t pipa-rpms-builder -f ultramarine/Dockerfile .
+docker run --rm -v "$PWD:/work" -w /work pipa-rpms-builder scripts/build-ultramarine-rpms.sh
+```
+
+RPMs are output to `repo/ultramarine/`.
 
 ## Use In Image Builds
 

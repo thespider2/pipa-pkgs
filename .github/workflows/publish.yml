@@ -1,4 +1,4 @@
-name: Publish pacman repo
+name: Publish package repos
 
 on:
   workflow_dispatch:
@@ -89,6 +89,18 @@ jobs:
         run: |
           docker run --rm -v "$PWD:/work" -w /work pipa-pkgs-builder scripts/compose-repo.sh
           sudo chown -R "$USER:$USER" repo
+
+      - name: Build Ultramarine RPM builder image
+        run: docker build -t pipa-rpms-builder -f ultramarine/Dockerfile .
+
+      - name: Build Ultramarine RPMs
+        run: |
+          mkdir -p repo/ultramarine
+          docker run --rm \
+            -v "$PWD:/work" \
+            -w /work \
+            pipa-rpms-builder scripts/build-ultramarine-rpms.sh
+          sudo chown -R "$USER:$USER" repo/ultramarine
 
       - name: Stage Pages content
         run: scripts/stage-pages.sh

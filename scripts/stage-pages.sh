@@ -8,9 +8,16 @@ SITE_DIR="$ROOT_DIR/site"
 
 source "$CONFIG_FILE"
 
+UM_REPO_DIR="$ROOT_DIR/repo/ultramarine"
+
 rm -rf "$SITE_DIR"
 mkdir -p "$SITE_DIR/repo"
 cp -r "$REPO_DIR"/. "$SITE_DIR/repo/"
+
+if [ -d "$UM_REPO_DIR" ] && ls "$UM_REPO_DIR"/*.rpm &>/dev/null; then
+    mkdir -p "$SITE_DIR/repo/ultramarine"
+    cp -r "$UM_REPO_DIR"/. "$SITE_DIR/repo/ultramarine/"
+fi
 
 cat > "$SITE_DIR/index.html" <<EOF
 <!doctype html>
@@ -22,8 +29,11 @@ cat > "$SITE_DIR/index.html" <<EOF
 </head>
 <body>
   <h1>$REPO_NAME</h1>
-  <p>Pacman repository for Xiaomi Pad 6 / Pipa packages.</p>
+  <p>Package repository for Xiaomi Pad 6 / Pipa.</p>
+  <h2>Arch Linux (pacman)</h2>
   <p>Repo URL: <a href="$PAGES_BASE_URL/repo/">$PAGES_BASE_URL/repo/</a></p>
+  <h2>Ultramarine / Fedora (dnf)</h2>
+  <p>Repo URL: <a href="$PAGES_BASE_URL/repo/ultramarine/">$PAGES_BASE_URL/repo/ultramarine/</a></p>
   <p>Source repo: <a href="https://github.com/thespider2/pipa-pkgs">https://github.com/thespider2/pipa-pkgs</a></p>
 </body>
 </html>

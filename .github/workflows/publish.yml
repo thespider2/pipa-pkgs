@@ -1,27 +1,29 @@
-name: Publish package repos
+name: Build & publish package repos
 
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
+    branches: [main]
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
+concurrency:
+  group: pages-deploy
+  cancel-in-progress: false
+
 jobs:
-  publish:
+  # ── Arch Linux (pacman) ──────────────────────────────────────────
+  pacman:
+    name: Build pacman packages
     runs-on: ubuntu-24.04-arm
-
     steps:
-      - name: Check out repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Compute pacman repo cache key
-        id: repo-cache-key
-        shell: bash
+      - name: Compute cache key
+        id: cache-key
         run: |
           set -euo pipefail
           {
@@ -32,28 +34,24 @@ jobs:
               config/repo.env \
               scripts/build-local-packages.sh \
               scripts/compose-repo.sh \
-              scripts/fetch-upstream.py \
-              scripts/stage-pages.sh
+              scripts/fetch-upstream.py
             find common sm8250 -type f \
               ! -path '*/src/*' \
               ! -path '*/pkg/*' \
               -print0
-          } | sort -z | xargs -0 sha256sum | sha256sum | awk '{print "hash="$1}' >> "$GITHUB_OUTPUT"
+          } | sort -z | xargs -0 sha256sum | sha256sum \
+            | awk '{print "hash="$1}' >> "$GITHUB_OUTPUT"
 
-      - name: Restore local package build cache
-        id: local-package-cache-restore
+      - name: Restore build cache
+        id: cache-restore
         uses: actions/cache/restore@v4
         with:
           path: |
             repo/repo/.build-cache
             repo/repo/*.pkg.tar.zst
             repo/repo/*.pkg.tar.xz
-          key: pacman-repo-${{ runner.os }}-${{ runner.arch }}-${{ github.ref_name }}-${{ steps.repo-cache-key.outputs.hash }}
-          restore-keys: |
-            pacman-repo-${{ runner.os }}-${{ runner.arch }}-${{ github.ref_name }}-
-
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
+          key: pacman-${{ runner.arch }}-${{ github.ref_name }}-${{ steps.cache-key.outputs.hash }}
+          restore-keys: pacman-${{ runner.arch }}-${{ github.ref_name }}-
 
       - name: Build builder image
         run: docker build -t pipa-pkgs-builder .
@@ -69,31 +67,46 @@ jobs:
             -v "$PWD/sm8250:/work/sm8250" \
             pipa-pkgs-builder /usr/local/bin/build-local-packages.sh
 
-      - name: Fix repo directory ownership
+      - name: Fix ownership
         run: sudo chown -R "$USER:$USER" .
 
-      - name: Save local package build cache
-        if: steps.local-package-cache-restore.outputs.cache-hit != 'true'
+      - name: Save build cache
+        if: steps.cache-restore.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: |
             repo/repo/.build-cache
             repo/repo/*.pkg.tar.zst
             repo/repo/*.pkg.tar.xz
-          key: ${{ steps.local-package-cache-restore.outputs.cache-primary-key }}
+          key: ${{ steps.cache-restore.outputs.cache-primary-key }}
 
       - name: Mirror upstream packages
         run: python scripts/fetch-upstream.py
 
-      - name: Compose pacman repo
+      - name: Compose repo database
         run: |
-          docker run --rm -v "$PWD:/work" -w /work pipa-pkgs-builder scripts/compose-repo.sh
+          docker run --rm -v "$PWD:/work" -w /work \
+            pipa-pkgs-builder scripts/compose-repo.sh
           sudo chown -R "$USER:$USER" repo
 
-      - name: Build Ultramarine RPM builder image
+      - name: Upload pacman repo
+        uses: actions/upload-artifact@v4
+        with:
+          name: pacman-repo
+          path: repo/repo/
+          retention-days: 1
+
+  # ── Ultramarine / Fedora (RPM) ──────────────────────────────────
+  ultramarine:
+    name: Build Ultramarine RPMs
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build RPM builder image
         run: docker build -t pipa-rpms-builder -f ultramarine/Dockerfile .
 
-      - name: Build Ultramarine RPMs
+      - name: Build RPMs
         run: |
           mkdir -p repo/ultramarine
           docker run --rm \
@@ -101,6 +114,42 @@ jobs:
             -w /work \
             pipa-rpms-builder scripts/build-ultramarine-rpms.sh
           sudo chown -R "$USER:$USER" repo/ultramarine
+
+      - name: Upload RPM repo
+        uses: actions/upload-artifact@v4
+        with:
+          name: ultramarine-repo
+          path: repo/ultramarine/
+          retention-days: 1
+
+  # ── Deploy to GitHub Pages ──────────────────────────────────────
+  deploy:
+    name: Deploy to Pages
+    needs: [pacman, ultramarine]
+    runs-on: ubuntu-24.04-arm
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            config/
+            scripts/
+
+      - name: Download pacman repo
+        uses: actions/download-artifact@v4
+        with:
+          name: pacman-repo
+          path: repo/repo/
+
+      - name: Download RPM repo
+        uses: actions/download-artifact@v4
+        with:
+          name: ultramarine-repo
+          path: repo/ultramarine/
+
+      - uses: actions/configure-pages@v5
 
       - name: Stage Pages content
         run: scripts/stage-pages.sh
@@ -111,4 +160,5 @@ jobs:
           path: site
 
       - name: Deploy to GitHub Pages
+        id: deploy
         uses: actions/deploy-pages@v4

@@ -76,13 +76,15 @@ systemctl mask hexagonrpcd-adsp-rootpd.service >/dev/null 2>&1 || :
 %{_unitdir}/*.service
 %{_bindir}/hexagonrpcd
 %{_libexecdir}/hexagonrpc
+%{_libdir}/libhexagonrpc.so.*
 %{_sysusersdir}/fastrpc.conf
 %{_udevrulesdir}/10-fastrpc.rules
+%{_mandir}/man1/hexagonrpcd.1*
 
 %files devel
 %{_includedir}/libhexagonrpc
 %{_libdir}/libhexagonrpc.so
 
 %changelog
-* Thu Jul 03 2026 Ayman <ayman@pipa> - 0.4.0-1
+* Fri Jul 03 2026 Ayman <ayman@pipa> - 0.4.0-1
 - Update to 0.4.0 for Ultramarine OS pipa port

@@ -4,7 +4,7 @@ Release:        1%{?dist}
 Summary:        Camera support library for Linux with pipa sensor support
 License:        LGPL-2.1-or-later AND GPL-2.0-or-later
 URL:            https://libcamera.org/
-Source0:        https://git.libcamera.org/libcamera/libcamera.git/snapshot/libcamera-v%{version}.tar.gz
+Source0:        https://github.com/libcamera-org/libcamera/archive/refs/tags/v%{version}.tar.gz#/libcamera-%{version}.tar.gz
 Source10:       hi846.yaml
 Source11:       ov13b10.yaml
 
@@ -79,7 +79,7 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 Python 3 bindings for %{name}.
 
 %prep
-%autosetup -p1 -n %{name}-v%{version}
+%autosetup -p1 -n %{name}-%{version}
 
 %build
 %meson \
@@ -134,5 +134,5 @@ rm -rf %{buildroot}%{_prefix}/{include/libpisp,lib*/libpisp.so*,lib*/pkgconfig/l
 %{python3_sitearch}/libcamera/
 
 %changelog
-* Thu Jul 03 2026 Ayman <ayman@pipa> - 0.7.1-1
+* Fri Jul 03 2026 Ayman <ayman@pipa> - 0.7.1-1
 - Package for Ultramarine OS pipa port with OV13B10/HI846 sensor support

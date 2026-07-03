@@ -87,5 +87,5 @@ EOF
 %{_datadir}/gtk-doc/html/%{name}/
 
 %changelog
-* Thu Jul 03 2026 Ayman <ayman@pipa> - 3.9-1
+* Fri Jul 03 2026 Ayman <ayman@pipa> - 3.9-1
 - Update to 3.9 with pipa SSC patches

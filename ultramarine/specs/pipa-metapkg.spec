@@ -43,5 +43,5 @@ install -Dm755 %{SOURCE1} %{buildroot}%{_sysconfdir}/profile.d/90-pipa-gsk-rende
 %config(noreplace) %{_sysconfdir}/profile.d/90-pipa-gsk-renderer.sh
 
 %changelog
-* Thu Jul 03 2026 Ayman <ayman@pipa> - 1.1-1
+* Fri Jul 03 2026 Ayman <ayman@pipa> - 1.1-1
 - Initial Ultramarine OS meta package

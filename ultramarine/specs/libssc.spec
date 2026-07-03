@@ -68,5 +68,5 @@ ln -sf libssc.so.2 %{buildroot}%{_libdir}/libssc.so.0
 %pycached %{python3_sitelib}/ssc.py
 
 %changelog
-* Thu Jul 03 2026 Ayman <ayman@pipa> - 0.4.4-1
+* Fri Jul 03 2026 Ayman <ayman@pipa> - 0.4.4-1
 - Update to 0.4.4 with pipa GError guard patches

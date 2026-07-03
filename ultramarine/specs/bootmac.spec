@@ -40,5 +40,5 @@ install -Dm644 bootmac-wifi.rules -T %{buildroot}%{_udevrulesdir}/70-bootmac-wif
 %{_udevrulesdir}/70-bootmac-wifi.rules
 
 %changelog
-* Thu Jul 03 2026 Ayman <ayman@pipa> - 0.6.0-1
+* Fri Jul 03 2026 Ayman <ayman@pipa> - 0.6.0-1
 - Package for Ultramarine OS pipa port

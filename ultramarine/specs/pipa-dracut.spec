@@ -30,5 +30,5 @@ install -Dm755 %{SOURCE3} %{buildroot}/usr/local/bin/pipa-refresh-initramfs
 /usr/local/bin/pipa-refresh-initramfs
 
 %changelog
-* Thu Jul 03 2026 Ayman <ayman@pipa> - 1.1-5
+* Fri Jul 03 2026 Ayman <ayman@pipa> - 1.1-5
 - Initial Ultramarine OS packaging

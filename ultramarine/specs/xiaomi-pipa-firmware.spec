@@ -59,5 +59,5 @@ done
 %{_hexagonpath}/*
 
 %changelog
-* Thu Jul 03 2026 Ayman <ayman@pipa> - 1.1-3
+* Fri Jul 03 2026 Ayman <ayman@pipa> - 1.1-3
 - Initial Ultramarine OS packaging

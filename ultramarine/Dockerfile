@@ -9,8 +9,8 @@ RUN dnf install -y \
     json-glib-devel gobject-introspection-devel \
     gtk-doc umockdev-devel systemd-rpm-macros systemd-devel \
     polkit-devel python3-dbusmock \
-    python3-jinja2 python3-yaml python3-ply python3-pybind11 pybind11-devel \
-    python3-sphinx \
+    python3-devel python3-jinja2 python3-yaml python3-ply python3-pybind11 pybind11-devel \
+    python3-sphinx doxygen graphviz \
     libevent-devel libyaml-devel gnutls-devel \
     libdrm-devel libjpeg-turbo-devel SDL2-devel \
     gstreamer1-devel gstreamer1-plugins-base-devel \

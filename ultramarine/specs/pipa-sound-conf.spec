@@ -49,6 +49,6 @@ install -Dm644 %{SOURCE5} %{buildroot}%{_unitdir}/pipa-audio-init.service
 %{_unitdir}/pipa-audio-init.service
 
 %changelog
-* Thu Jul 03 2026 Ayman <ayman@pipa> - 1.4-8
+* Fri Jul 03 2026 Ayman <ayman@pipa> - 1.4-8
 - Add 52-pipa-camera.conf for camera resolution limits
 - Add pipewire-softisp-cpu.conf for CPU debayer

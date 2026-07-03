@@ -48,5 +48,5 @@ install -Dm644 "systemd/%{name}-shutdown.service" "%{buildroot}%{_unitdir}/%{nam
 %{_unitdir}/%{name}-shutdown.service
 
 %changelog
-* Thu Jul 03 2026 Ayman <ayman@pipa> - 0.3.0-1
+* Fri Jul 03 2026 Ayman <ayman@pipa> - 0.3.0-1
 - Package for Ultramarine OS pipa port

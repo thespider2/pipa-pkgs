@@ -1,6 +1,6 @@
 Name:           pipa-sound-conf
 Version:        1.4
-Release:        10%{?dist}
+Release:        11%{?dist}
 Summary:        Sound and camera settings for Xiaomi Pad 6 (pipa)
 License:        MIT
 BuildArch:      noarch
@@ -51,7 +51,7 @@ install -Dm644 %{SOURCE5} %{buildroot}%{_unitdir}/pipa-audio-init.service
 %systemd_postun_with_restart pipa-audio-init.service
 
 %files
-/usr/share/alsa/ucm2/conf.d/sm8250/Xiaomi Pad 6.conf
+"/usr/share/alsa/ucm2/conf.d/sm8250/Xiaomi Pad 6.conf"
 /usr/share/alsa/ucm2/conf.d/sm8250/sm8250.conf
 /usr/share/alsa/ucm2/conf.d/sm8250/Xiaomi-Pad6-pipa-M82.conf
 /usr/share/alsa/ucm2/Qualcomm/sm8250/HiFi_pipa.conf
@@ -62,6 +62,9 @@ install -Dm644 %{SOURCE5} %{buildroot}%{_unitdir}/pipa-audio-init.service
 %{_unitdir}/pipa-audio-init.service
 
 %changelog
+* Sat Jul 04 2026 Ayman <ayman@pipa> - 1.4-11
+- Quote UCM file path in %%files for spaces in filename
+
 * Sat Jul 04 2026 Ayman <ayman@pipa> - 1.4-10
 - Fix UCM install paths with spaces in the destination filename
 

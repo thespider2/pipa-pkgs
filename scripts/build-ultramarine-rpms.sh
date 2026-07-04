@@ -6,7 +6,7 @@ UM_DIR="$ROOT_DIR/ultramarine"
 SPECS_DIR="$UM_DIR/specs"
 RPM_REPO_DIR="$ROOT_DIR/repo/ultramarine"
 SOURCES_DIR="$UM_DIR/.sources"
-CACHE_DIR="$RPM_REPO_DIR/.build-cache"
+CACHE_DIR="$UM_DIR/.build-cache"
 CACHE_RPM_DIR="$CACHE_DIR/rpms"
 
 mkdir -p "$RPM_REPO_DIR" "$SOURCES_DIR" "$CACHE_DIR" "$CACHE_RPM_DIR"
@@ -78,6 +78,35 @@ remove_cached_rpms() {
     done
 }
 
+is_installable_rpm() {
+    case "$1" in
+        *-debuginfo-*|*-debugsource-*|*.src.rpm) return 1 ;;
+        *) return 0 ;;
+    esac
+}
+
+restore_all_cached_to_repo() {
+    shopt -s nullglob
+    for rpm_file in "$CACHE_RPM_DIR"/*.rpm; do
+        cp -fn "$rpm_file" "$RPM_REPO_DIR/$(basename "$rpm_file")"
+    done
+    shopt -u nullglob
+}
+
+package_present_in_repo() {
+    local pkg="$1"
+    local candidate
+    shopt -s nullglob
+    for candidate in "$RPM_REPO_DIR/$pkg"-*.aarch64.rpm "$RPM_REPO_DIR/$pkg"-*.noarch.rpm; do
+        if is_installable_rpm "$(basename "$candidate")"; then
+            shopt -u nullglob
+            return 0
+        fi
+    done
+    shopt -u nullglob
+    return 1
+}
+
 echo "=== Gathering sources from pipa-pkgs ==="
 
 link_files "$SOURCES_DIR/kernel-pipa" \
@@ -142,6 +171,7 @@ link_files "$SOURCES_DIR/libcamera" \
     "$ROOT_DIR/common/libcamera/ov13b10.yaml"
 
 echo "=== Building RPMs ==="
+restore_all_cached_to_repo
 BUILT=0
 SKIPPED=0
 FAILED=0
@@ -176,12 +206,19 @@ for name in "${BUILD_ORDER[@]}"; do
         mapfile -t cache_lines < "$cache_file"
         if [ "${#cache_lines[@]}" -gt 1 ] && [ "${cache_lines[0]}" = "$source_hash" ]; then
             cache_hit=1
+            has_installable=0
             for rpm_name in "${cache_lines[@]:1}"; do
                 if ! stage_cached_rpm "$rpm_name"; then
                     cache_hit=0
                     break
                 fi
+                if is_installable_rpm "$rpm_name"; then
+                    has_installable=1
+                fi
             done
+            if [ "$cache_hit" -eq 1 ] && [ "$has_installable" -eq 0 ]; then
+                cache_hit=0
+            fi
             if [ "$cache_hit" -eq 1 ]; then
                 echo "  Unchanged, reusing cached RPMs"
                 # Install cached RPMs so later packages can depend on them
@@ -227,14 +264,21 @@ for name in "${BUILD_ORDER[@]}"; do
             remove_cached_rpms "${old_cache_lines[@]:1}"
         fi
 
-        # Collect newly built RPMs
+        # Collect newly built RPMs from rpmbuild output
         built_rpms=()
-        while IFS= read -r -d '' rpm_file; do
-            rpm_basename="$(basename "$rpm_file")"
-            cp -f "$rpm_file" "$RPM_REPO_DIR/$rpm_basename"
-            cp -f "$rpm_file" "$CACHE_RPM_DIR/$rpm_basename"
+        while IFS= read -r rpm_path; do
+            [ -n "$rpm_path" ] || continue
+            rpm_basename="$(basename "$rpm_path")"
+            cp -f "$rpm_path" "$RPM_REPO_DIR/$rpm_basename"
+            cp -f "$rpm_path" "$CACHE_RPM_DIR/$rpm_basename"
             built_rpms+=("$rpm_basename")
-        done < <(find ~/rpmbuild/RPMS/ ~/rpmbuild/SRPMS/ -name "*.rpm" -newer "$spec" -print0)
+        done < <(grep '^Wrote:' "$BUILD_LOG" | sed 's|^Wrote: ||')
+
+        if [ ${#built_rpms[@]} -eq 0 ]; then
+            echo "ERROR: rpmbuild succeeded for $name but no RPM artifacts were collected" >&2
+            FAILED=$((FAILED + 1))
+            continue
+        fi
 
         # Write cache
         {
@@ -268,6 +312,7 @@ done
 
 echo ""
 echo "=== Creating RPM repo metadata ==="
+restore_all_cached_to_repo
 createrepo_c --update "$RPM_REPO_DIR"
 
 echo ""
@@ -284,10 +329,7 @@ missing_pkgs=()
 for pkg in bootmac swclock-offset hexagonrpc xiaomi-pipa-firmware pipa-dracut \
     pipa-grub-config libssc iio-sensor-proxy pipa-sensors pipa-sound-conf \
     libcamera kernel-pipa pipa-metapkg; do
-    shopt -s nullglob
-    matches=("$RPM_REPO_DIR/$pkg"-[0-9]*.aarch64.rpm "$RPM_REPO_DIR/$pkg"-[0-9]*.noarch.rpm)
-    shopt -u nullglob
-    if [ ${#matches[@]} -eq 0 ]; then
+    if ! package_present_in_repo "$pkg"; then
         missing_pkgs+=("$pkg")
     fi
 done

@@ -1,6 +1,6 @@
 pkgname=pipa-grub-config
 pkgver=1.0
-pkgrel=12
+pkgrel=13
 pkgdesc="GRUB config refresh helper for the Xiaomi Pad 6"
 arch=('any')
 license=('MIT')

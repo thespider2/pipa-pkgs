@@ -1,3 +1,5 @@
+%global debug_package %{nil}
+
 %global kversion 7.0.8
 %global krelease 21
 %global kextra %{krelease}-pipa

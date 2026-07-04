@@ -49,6 +49,10 @@ ln -sf libssc.so.2 %{buildroot}%{_libdir}/libssc.so.0
 %{_bindir}/ssccli
 %{_libdir}/%{name}.so.2
 %{_libdir}/%{name}.so.0
+%{_libexecdir}/installed-tests/%{name}/
+%{python3_sitelib}/ssc_server/
+%{_libdir}/girepository-1.0/SSC-*.typelib
+%{_datadir}/gir-1.0/SSC-*.gir
 
 %files devel
 %{_includedir}/%{name}

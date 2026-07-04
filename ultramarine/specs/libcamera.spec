@@ -83,7 +83,8 @@ Python 3 bindings for %{name}.
 
 %build
 %meson \
-    -Dcpp_args=-Wno-array-bounds \
+    -Dc_args=-fPIC \
+    -Dcpp_args="-Wno-array-bounds -fPIC" \
     -Ddocumentation=disabled \
     -Dpipelines=simple,uvcvideo,vimc \
     -Dipas=simple,vimc \

@@ -9,10 +9,11 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: write
 
 concurrency:
   group: pages-deploy
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   # ── Arch Linux (pacman) ──────────────────────────────────────────
@@ -199,11 +200,20 @@ jobs:
       - name: Stage Pages content
         run: scripts/stage-pages.sh
 
+      # Re-running this job leaves a stale "github-pages" artifact from the
+      # first attempt; deploy-pages rejects multiple artifacts with that name.
+      - name: Delete stale Pages artifact
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: github-pages
+          failOnError: false
+
       - name: Upload Pages artifact
+        id: pages-artifact
         uses: actions/upload-pages-artifact@v4
         with:
           path: site
 
       - name: Deploy to GitHub Pages
         id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

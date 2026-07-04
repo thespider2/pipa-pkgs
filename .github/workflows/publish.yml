@@ -89,6 +89,14 @@ jobs:
             pipa-pkgs-builder scripts/compose-repo.sh
           sudo chown -R "$USER:$USER" repo
 
+      - name: Sanitize filenames for artifact upload
+        run: |
+          cd repo/repo
+          for f in *:*; do
+            [ -e "$f" ] || continue
+            mv "$f" "${f//:/%3A}"
+          done
+
       - name: Upload pacman repo
         uses: actions/upload-artifact@v4
         with:
@@ -142,6 +150,14 @@ jobs:
         with:
           name: pacman-repo
           path: repo/repo/
+
+      - name: Restore epoch colons in pacman filenames
+        run: |
+          cd repo/repo
+          for f in *%3A*; do
+            [ -e "$f" ] || continue
+            mv "$f" "${f//%3A/:}"
+          done
 
       - name: Download RPM repo
         uses: actions/download-artifact@v4

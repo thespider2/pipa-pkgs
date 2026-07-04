@@ -1,6 +1,6 @@
 Name:           pipa-grub-config
 Version:        1.0
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        GRUB config refresh helper for the Xiaomi Pad 6
 License:        MIT
 BuildArch:      noarch
@@ -41,6 +41,9 @@ chmod 755 %{buildroot}/usr/lib/kernel/install.d/95-pipa-grub.install
 /usr/lib/kernel/install.d/95-pipa-grub.install
 
 %changelog
+* Sat Jul 04 2026 Ayman <ayman@pipa> - 1.0-5
+- Use --- before kernel cmdline so GRUB does not parse root= as netboot
+
 * Sat Jul 04 2026 Ayman <ayman@pipa> - 1.0-4
 - GRUB menu: linux, initrd, then devicetree (required on aarch64 EFI)
 

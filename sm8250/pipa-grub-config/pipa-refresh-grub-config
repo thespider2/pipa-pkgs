@@ -211,7 +211,7 @@ fi
 
     for dtb_rel in "${DTB_RELS[@]}"; do
         printf 'menuentry "EndeavourOS ARM (Pipa) - %s" {\n' "$(dtb_title "$dtb_rel")"
-        printf '    linux ($boot)/%s %s\n' "$separate_kernel_rel" "$cmdline"
+        printf '    linux ($boot)/%s --- %s\n' "$separate_kernel_rel" "$cmdline"
         printf '    initrd ($boot)/%s\n' "$INITRAMFS_STABLE_REL"
         printf '    devicetree ($boot)/%s\n' "$dtb_rel"
         printf '}\n\n'

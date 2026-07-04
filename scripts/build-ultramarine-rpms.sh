@@ -6,8 +6,9 @@ UM_DIR="$ROOT_DIR/ultramarine"
 SPECS_DIR="$UM_DIR/specs"
 RPM_REPO_DIR="$ROOT_DIR/repo/ultramarine"
 SOURCES_DIR="$UM_DIR/.sources"
+CACHE_DIR="$RPM_REPO_DIR/.build-cache"
 
-mkdir -p "$RPM_REPO_DIR" "$SOURCES_DIR"
+mkdir -p "$RPM_REPO_DIR" "$SOURCES_DIR" "$CACHE_DIR"
 rpmdev-setuptree 2>/dev/null || true
 
 link_files() {
@@ -16,6 +17,37 @@ link_files() {
     for src in "$@"; do
         [ -e "$src" ] && cp "$src" "$dest/" || echo "WARNING: $src not found"
     done
+}
+
+compute_source_hash() {
+    local name="$1"
+    local spec="$SPECS_DIR/$name.spec"
+    local src_dir="$SOURCES_DIR/$name"
+
+    python3 - "$spec" "$src_dir" <<'PY'
+import hashlib, pathlib, sys
+
+digest = hashlib.sha256()
+
+spec = pathlib.Path(sys.argv[1])
+if spec.is_file():
+    digest.update(b"spec\0")
+    digest.update(spec.read_bytes())
+    digest.update(b"\0")
+
+src_dir = pathlib.Path(sys.argv[2])
+if src_dir.is_dir():
+    for path in sorted(src_dir.rglob("*")):
+        if path.is_dir():
+            continue
+        rel = str(path.relative_to(src_dir))
+        digest.update(rel.encode())
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+
+print(digest.hexdigest())
+PY
 }
 
 echo "=== Gathering sources from pipa-pkgs ==="
@@ -80,9 +112,9 @@ link_files "$SOURCES_DIR/libcamera" \
 
 echo "=== Building RPMs ==="
 BUILT=0
+SKIPPED=0
 FAILED=0
 
-# Build order: dependencies first, then dependents
 BUILD_ORDER=(
     bootmac
     swclock-offset
@@ -104,7 +136,41 @@ for name in "${BUILD_ORDER[@]}"; do
     [ -f "$spec" ] || { echo "SKIP: $spec not found"; continue; }
 
     echo ""
-    echo "--- Building: $name ---"
+    echo "--- $name ---"
+
+    source_hash="$(compute_source_hash "$name")"
+    cache_file="$CACHE_DIR/$name"
+
+    if [ -f "$cache_file" ]; then
+        mapfile -t cache_lines < "$cache_file"
+        if [ "${#cache_lines[@]}" -gt 1 ] && [ "${cache_lines[0]}" = "$source_hash" ]; then
+            cache_hit=1
+            for rpm_name in "${cache_lines[@]:1}"; do
+                if [ ! -f "$RPM_REPO_DIR/$rpm_name" ]; then
+                    cache_hit=0
+                    break
+                fi
+            done
+            if [ "$cache_hit" -eq 1 ]; then
+                echo "  Unchanged, reusing cached RPMs"
+                # Install cached RPMs so later packages can depend on them
+                cached_rpms=()
+                for rpm_name in "${cache_lines[@]:1}"; do
+                    case "$rpm_name" in
+                        *-debuginfo-*|*-debugsource-*|*.src.rpm) ;;
+                        *) cached_rpms+=("$RPM_REPO_DIR/$rpm_name") ;;
+                    esac
+                done
+                if [ ${#cached_rpms[@]} -gt 0 ]; then
+                    dnf install -y --nogpgcheck "${cached_rpms[@]}" 2>/dev/null || true
+                fi
+                SKIPPED=$((SKIPPED + 1))
+                continue
+            fi
+        fi
+    fi
+
+    echo "  Building..."
 
     rm -rf ~/rpmbuild/SOURCES/*
     cp "$SOURCES_DIR/$name"/* ~/rpmbuild/SOURCES/ 2>/dev/null || true
@@ -123,12 +189,39 @@ for name in "${BUILD_ORDER[@]}"; do
     BUILD_RC=${PIPESTATUS[0]}
     set -e
     if [ "$BUILD_RC" -eq 0 ]; then
+        # Remove old cached RPMs for this package
+        if [ -f "$cache_file" ]; then
+            mapfile -t old_cache_lines < "$cache_file"
+            for old_rpm in "${old_cache_lines[@]:1}"; do
+                rm -f "$RPM_REPO_DIR/$old_rpm"
+            done
+        fi
 
-        find ~/rpmbuild/RPMS/ -name "*.rpm" -newer "$spec" -exec cp -v {} "$RPM_REPO_DIR/" \;
-        find ~/rpmbuild/SRPMS/ -name "*.rpm" -newer "$spec" -exec cp -v {} "$RPM_REPO_DIR/" \;
+        # Collect newly built RPMs
+        built_rpms=()
+        while IFS= read -r -d '' rpm_file; do
+            rpm_basename="$(basename "$rpm_file")"
+            cp -v "$rpm_file" "$RPM_REPO_DIR/"
+            built_rpms+=("$rpm_basename")
+        done < <(find ~/rpmbuild/RPMS/ ~/rpmbuild/SRPMS/ -name "*.rpm" -newer "$spec" -print0)
 
-        find ~/rpmbuild/RPMS/ -name "*.rpm" -newer "$spec" \
-            -exec dnf install -y --nogpgcheck {} + 2>/dev/null || true
+        # Write cache
+        {
+            printf '%s\n' "$source_hash"
+            printf '%s\n' "${built_rpms[@]}"
+        } > "$cache_file"
+
+        # Install built RPMs so later packages can depend on them
+        install_rpms=()
+        for rpm_name in "${built_rpms[@]}"; do
+            case "$rpm_name" in
+                *-debuginfo-*|*-debugsource-*|*.src.rpm) ;;
+                *) install_rpms+=("$RPM_REPO_DIR/$rpm_name") ;;
+            esac
+        done
+        if [ ${#install_rpms[@]} -gt 0 ]; then
+            dnf install -y --nogpgcheck "${install_rpms[@]}" 2>/dev/null || true
+        fi
 
         BUILT=$((BUILT + 1))
     else
@@ -147,6 +240,6 @@ echo "=== Creating RPM repo metadata ==="
 createrepo_c --update "$RPM_REPO_DIR"
 
 echo ""
-echo "=== Done: $BUILT built, $FAILED failed ==="
+echo "=== Done: $BUILT built, $SKIPPED cached, $FAILED failed ==="
 ls -lh "$RPM_REPO_DIR/"*.rpm 2>/dev/null | wc -l
 echo "RPM packages in repo"

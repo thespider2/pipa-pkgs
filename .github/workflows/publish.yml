@@ -111,6 +111,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Compute RPM cache key
+        id: rpm-cache-key
+        run: |
+          set -euo pipefail
+          {
+            printf '%s\0' ultramarine/Dockerfile scripts/build-ultramarine-rpms.sh
+            find ultramarine/specs -type f -print0
+            find common sm8250 -type f \
+              ! -path '*/src/*' \
+              ! -path '*/pkg/*' \
+              -print0
+          } | sort -z | xargs -0 sha256sum | sha256sum \
+            | awk '{print "hash="$1}' >> "$GITHUB_OUTPUT"
+
+      - name: Restore RPM build cache
+        id: rpm-cache-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            repo/ultramarine/.build-cache
+            repo/ultramarine/*.rpm
+          key: rpm-${{ runner.arch }}-${{ github.ref_name }}-${{ steps.rpm-cache-key.outputs.hash }}
+          restore-keys: rpm-${{ runner.arch }}-${{ github.ref_name }}-
+
       - name: Build RPM builder image
         run: docker build -t pipa-rpms-builder -f ultramarine/Dockerfile .
 
@@ -122,6 +146,15 @@ jobs:
             -w /work \
             pipa-rpms-builder scripts/build-ultramarine-rpms.sh
           sudo chown -R "$USER:$USER" repo/ultramarine
+
+      - name: Save RPM build cache
+        if: steps.rpm-cache-restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            repo/ultramarine/.build-cache
+            repo/ultramarine/*.rpm
+          key: ${{ steps.rpm-cache-restore.outputs.cache-primary-key }}
 
       - name: Upload RPM repo
         uses: actions/upload-artifact@v4

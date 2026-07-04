@@ -246,3 +246,25 @@ echo ""
 echo "=== Done: $BUILT built, $SKIPPED cached, $FAILED failed ==="
 ls -lh "$RPM_REPO_DIR/"*.rpm 2>/dev/null | wc -l
 echo "RPM packages in repo"
+
+if [ "$FAILED" -gt 0 ]; then
+    echo "ERROR: $FAILED RPM build(s) failed; refusing to publish incomplete repo" >&2
+    exit 1
+fi
+
+missing_pkgs=()
+for pkg in bootmac swclock-offset hexagonrpc xiaomi-pipa-firmware pipa-dracut \
+    pipa-grub-config libssc iio-sensor-proxy pipa-sensors pipa-sound-conf \
+    libcamera kernel-pipa pipa-metapkg; do
+    shopt -s nullglob
+    matches=("$RPM_REPO_DIR/$pkg"-[0-9]*.aarch64.rpm "$RPM_REPO_DIR/$pkg"-[0-9]*.noarch.rpm)
+    shopt -u nullglob
+    if [ ${#matches[@]} -eq 0 ]; then
+        missing_pkgs+=("$pkg")
+    fi
+done
+
+if [ ${#missing_pkgs[@]} -gt 0 ]; then
+    echo "ERROR: Missing required RPMs in $RPM_REPO_DIR: ${missing_pkgs[*]}" >&2
+    exit 1
+fi

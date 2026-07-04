@@ -6,7 +6,7 @@
 
 Name:           xiaomi-pipa-firmware
 Version:        1.1
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Firmware package for Xiaomi Pad 6 (pipa)
 License:        Proprietary
 URL:            https://github.com/pipa-mainline/xiaomi-pipa-firmware
@@ -20,6 +20,8 @@ Source4:        novatek_firmware.files
 Source5:        nuvolta_firmware.files
 
 Requires:       linux-firmware
+Requires:       qcom-firmware
+Requires:       atheros-firmware
 
 %description
 Firmware for various components in Xiaomi Pad 6 (pipa) including
@@ -59,5 +61,8 @@ done
 %{_hexagonpath}/*
 
 %changelog
+* Sun Jul 05 2026 Ayman <ayman@pipa> - 1.1-4
+- Require Fedora qcom-firmware and atheros-firmware subpackages
+
 * Fri Jul 03 2026 Ayman <ayman@pipa> - 1.1-3
 - Initial Ultramarine OS packaging

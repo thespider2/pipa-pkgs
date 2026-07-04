@@ -1,6 +1,6 @@
 Name:           pipa-metapkg
 Version:        1.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Xiaomi Pad 6 support meta package for Ultramarine OS
 License:        MIT
 BuildArch:      noarch
@@ -10,6 +10,9 @@ Source1:        90-pipa-gsk-renderer.sh
 Requires:       kernel-pipa
 Requires:       kernel-pipa-modules
 Requires:       xiaomi-pipa-firmware
+Requires:       linux-firmware
+Requires:       qcom-firmware
+Requires:       atheros-firmware
 Requires:       pipa-dracut
 Requires:       pipa-grub-config
 Requires:       pipa-sound-conf
@@ -43,6 +46,9 @@ install -Dm755 %{SOURCE1} %{buildroot}%{_sysconfdir}/profile.d/90-pipa-gsk-rende
 %config(noreplace) %{_sysconfdir}/profile.d/90-pipa-gsk-renderer.sh
 
 %changelog
+* Sun Jul 05 2026 Ayman <ayman@pipa> - 1.1-3
+- Pull in Fedora linux-firmware GPU and ath11k subpackages
+
 * Sat Jul 04 2026 Ayman <ayman@pipa> - 1.1-2
 - Change gstreamer1-plugin-libcamera from Requires to Recommends
 

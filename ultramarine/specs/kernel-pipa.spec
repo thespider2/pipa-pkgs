@@ -103,7 +103,7 @@ cp %{SOURCE1} .config
 make EXTRAVERSION="-%{kextra}" olddefconfig
 
 %build
-make EXTRAVERSION="-%{kextra}" -j%{_smp_mflags} Image Image.gz modules dtbs
+make EXTRAVERSION="-%{kextra}" %{?_smp_mflags} Image Image.gz modules dtbs
 
 %install
 KernelVer=$(make EXTRAVERSION="-%{kextra}" kernelrelease)

@@ -90,7 +90,7 @@ Python 3 bindings for %{name}.
     -Dv4l2=enabled \
     -Dgstreamer=enabled \
     -Dcam=enabled \
-    -Dlc-compliance=enabled \
+    -Dlc-compliance=disabled \
     -Dqcam=enabled \
     -Dpycamera=enabled \
     -Dtest=false
@@ -123,7 +123,6 @@ rm -rf %{buildroot}%{_prefix}/{include/libpisp,lib*/libpisp.so*,lib*/pkgconfig/l
 %files tools
 %{_bindir}/cam
 %{_bindir}/qcam
-%{_bindir}/lc-compliance
 %{_bindir}/libcamera-bug-report
 %{_bindir}/libcamerify
 

@@ -32,12 +32,6 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 %description devel
 %{summary}.
 
-%package -n python3-ssc
-Summary:        Python bindings for libssc
-Requires:       %{name}%{?_isa} = %{version}-%{release}
-
-%description -n python3-ssc
-%{summary}.
 
 %prep
 %autosetup -p1 -n %{name}
@@ -60,10 +54,6 @@ ln -sf libssc.so.2 %{buildroot}%{_libdir}/libssc.so.0
 %{_includedir}/%{name}
 %{_libdir}/%{name}.so
 %{_libdir}/pkgconfig/%{name}.pc
-
-%files -n python3-ssc
-%pycached %{python3_sitelib}/qmi.py
-%pycached %{python3_sitelib}/ssc.py
 
 %changelog
 * Fri Jul 03 2026 Ayman <ayman@pipa> - 0.4.4-1

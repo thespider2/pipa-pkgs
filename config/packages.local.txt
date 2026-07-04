@@ -24,6 +24,6 @@ msm-modem-uim-selection
 q6voiced
 qca-swiss-army-knife
 usb-network
+libcamera
 pipa-plasma-config
 pipa-metapkg
-libcamera

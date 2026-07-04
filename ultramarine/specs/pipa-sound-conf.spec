@@ -1,6 +1,6 @@
 Name:           pipa-sound-conf
 Version:        1.4
-Release:        9%{?dist}
+Release:        10%{?dist}
 Summary:        Sound and camera settings for Xiaomi Pad 6 (pipa)
 License:        MIT
 BuildArch:      noarch
@@ -10,7 +10,7 @@ Source2:        52-pipa-camera.conf
 Source3:        pipewire-softisp-cpu.conf
 Source4:        pipa-audio-init
 Source5:        pipa-audio-init.service
-Source6:        Xiaomi Pad 6.conf
+Source6:        Xiaomi-Pad-6.conf
 Source7:        HiFi_pipa.conf
 
 BuildRequires:  systemd-rpm-macros
@@ -31,7 +31,7 @@ PipeWire CPU debayer override, and ALSA UCM audio initialization.
 %install
 install -d %{buildroot}/usr/share/alsa/ucm2/conf.d/sm8250
 install -d %{buildroot}/usr/share/alsa/ucm2/Qualcomm/sm8250
-install -Dm644 %{SOURCE6} %{buildroot}/usr/share/alsa/ucm2/conf.d/sm8250/Xiaomi\ Pad\ 6.conf
+install -Dm644 %{SOURCE6} "%{buildroot}/usr/share/alsa/ucm2/conf.d/sm8250/Xiaomi Pad 6.conf"
 install -Dm644 %{SOURCE7} %{buildroot}/usr/share/alsa/ucm2/Qualcomm/sm8250/HiFi_pipa.conf
 ln -sf "Xiaomi Pad 6.conf" %{buildroot}/usr/share/alsa/ucm2/conf.d/sm8250/sm8250.conf
 ln -sf "Xiaomi Pad 6.conf" %{buildroot}/usr/share/alsa/ucm2/conf.d/sm8250/Xiaomi-Pad6-pipa-M82.conf
@@ -62,6 +62,9 @@ install -Dm644 %{SOURCE5} %{buildroot}%{_unitdir}/pipa-audio-init.service
 %{_unitdir}/pipa-audio-init.service
 
 %changelog
+* Sat Jul 04 2026 Ayman <ayman@pipa> - 1.4-10
+- Fix UCM install paths with spaces in the destination filename
+
 * Sat Jul 04 2026 Ayman <ayman@pipa> - 1.4-9
 - Bundle sm8250 ALSA UCM profiles (replaces separate alsa-ucm-conf-sm8250 dep)
 

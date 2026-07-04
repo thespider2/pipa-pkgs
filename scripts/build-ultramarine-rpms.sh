@@ -80,8 +80,9 @@ link_files "$SOURCES_DIR/pipa-sound-conf" \
     "$ROOT_DIR/sm8250/pipa-sound-conf/pipewire-softisp-cpu.conf" \
     "$ROOT_DIR/sm8250/pipa-sound-conf/pipa-audio-init" \
     "$ROOT_DIR/sm8250/pipa-sound-conf/pipa-audio-init.service" \
-    "$ROOT_DIR/sm8250/alsa-ucm-conf-sm8250/Xiaomi Pad 6.conf" \
     "$ROOT_DIR/sm8250/alsa-ucm-conf-sm8250/HiFi_pipa.conf"
+cp -f "$ROOT_DIR/sm8250/alsa-ucm-conf-sm8250/Xiaomi Pad 6.conf" \
+    "$SOURCES_DIR/pipa-sound-conf/Xiaomi-Pad-6.conf"
 
 link_files "$SOURCES_DIR/pipa-dracut" \
     "$ROOT_DIR/sm8250/pipa-dracut/module-setup.sh" \

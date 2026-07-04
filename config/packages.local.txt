@@ -4,10 +4,10 @@ xiaomi-pipa-firmware
 alsa-ucm-conf-sm8250
 bluez-git
 bootmac
+qrtr
 hexagonrpc
 libssc
 iio-sensor-proxy
-qrtr
 rmtfs
 tqftpserv
 pd-mapper

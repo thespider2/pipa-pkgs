@@ -1,6 +1,6 @@
 Name:           pipa-metapkg
 Version:        1.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Xiaomi Pad 6 support meta package for Ultramarine OS
 License:        MIT
 BuildArch:      noarch
@@ -21,7 +21,7 @@ Requires:       libssc
 Requires:       libcamera
 Requires:       libcamera-ipa
 Requires:       libcamera-tools
-Requires:       gstreamer1-plugin-libcamera
+Recommends:     gstreamer1-plugin-libcamera
 Requires:       iio-sensor-proxy
 Requires:       qrtr
 Requires:       tqftpserv
@@ -43,5 +43,8 @@ install -Dm755 %{SOURCE1} %{buildroot}%{_sysconfdir}/profile.d/90-pipa-gsk-rende
 %config(noreplace) %{_sysconfdir}/profile.d/90-pipa-gsk-renderer.sh
 
 %changelog
+* Sat Jul 04 2026 Ayman <ayman@pipa> - 1.1-2
+- Change gstreamer1-plugin-libcamera from Requires to Recommends
+
 * Fri Jul 03 2026 Ayman <ayman@pipa> - 1.1-1
 - Initial Ultramarine OS meta package

@@ -1,6 +1,7 @@
+Epoch:          1
 Name:           libcamera
 Version:        0.7.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Camera support library for Linux with pipa sensor support
 License:        LGPL-2.1-or-later AND GPL-2.0-or-later
 URL:            https://libcamera.org/
@@ -45,46 +46,48 @@ cameras (OV13B10 rear, HI846 front).
 
 %package devel
 Summary:        Development files for %{name}
-Requires:       %{name}%{?_isa} = %{version}-%{release}
+Requires:       %{name}%{?_isa} = %{epoch}:%{version}-%{release}
 
 %description devel
 Development files for %{name}.
 
 %package ipa
 Summary:        Signed IPA modules for %{name}
-Requires:       %{name}%{?_isa} = %{version}-%{release}
+Requires:       %{name}%{?_isa} = %{epoch}:%{version}-%{release}
 
 %description ipa
 Image Processing Algorithm modules for %{name}.
 
 %package tools
 Summary:        Camera tools (cam, qcam, libcamerify)
-Requires:       %{name}%{?_isa} = %{version}-%{release}
+Requires:       %{name}%{?_isa} = %{epoch}:%{version}-%{release}
 
 %description tools
 Command-line and GUI camera tools built with libcamera.
 
 %package -n gstreamer1-plugin-libcamera
 Summary:        GStreamer plugin for libcamera
-Requires:       %{name}%{?_isa} = %{version}-%{release}
+Requires:       %{name}%{?_isa} = %{epoch}:%{version}-%{release}
 
 %description -n gstreamer1-plugin-libcamera
 GStreamer element for capturing from libcamera-supported cameras.
 
 %package -n python3-libcamera
 Summary:        Python bindings for libcamera
-Requires:       %{name}%{?_isa} = %{version}-%{release}
+Requires:       %{name}%{?_isa} = %{epoch}:%{version}-%{release}
 
 %description -n python3-libcamera
 Python 3 bindings for %{name}.
 
 %prep
-%autosetup -p1 -n %{name}-%{version}
+%autosetup -p1 -N -n %{name}-%{version}
+%patch -P 0001 -p1 -F 2
+%patch -P 0002 -p1 -F 2
 
 %build
+export CFLAGS="%{optflags} -fPIC"
+export CXXFLAGS="%{optflags} -fPIC -Wno-array-bounds"
 %meson \
-    -Dc_args=-fPIC \
-    -Dcpp_args="-Wno-array-bounds -fPIC" \
     -Ddocumentation=disabled \
     -Dpipelines=simple,uvcvideo,vimc \
     -Dipas=simple,vimc \
@@ -134,5 +137,10 @@ rm -rf %{buildroot}%{_prefix}/{include/libpisp,lib*/libpisp.so*,lib*/pkgconfig/l
 %{python3_sitearch}/libcamera/
 
 %changelog
+* Sat Jul 04 2026 Ayman <ayman@pipa> - 1:0.7.1-2
+- Add epoch to override Fedora package
+- Fix patch application with fuzz factor
+- Use environment CFLAGS/CXXFLAGS for -fPIC instead of meson args
+
 * Fri Jul 03 2026 Ayman <ayman@pipa> - 0.7.1-1
 - Package for Ultramarine OS pipa port with OV13B10/HI846 sensor support

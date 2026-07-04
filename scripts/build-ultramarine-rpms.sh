@@ -74,16 +74,14 @@ link_files "$SOURCES_DIR/pipa-sensors" \
     "$ROOT_DIR/sm8250/pipa-sensors/pipa-sensors.tmpfiles" \
     "$ROOT_DIR/sm8250/pipa-sensors/hexagonrpcd-sdsp-pipa-sensors.conf"
 
-link_files "$SOURCES_DIR/alsa-ucm-conf-sm8250" \
-    "$ROOT_DIR/sm8250/alsa-ucm-conf-sm8250/Xiaomi Pad 6.conf" \
-    "$ROOT_DIR/sm8250/alsa-ucm-conf-sm8250/HiFi_pipa.conf"
-
 link_files "$SOURCES_DIR/pipa-sound-conf" \
     "$ROOT_DIR/sm8250/pipa-sound-conf/51-pipa.conf" \
     "$ROOT_DIR/sm8250/pipa-sound-conf/52-pipa-camera.conf" \
     "$ROOT_DIR/sm8250/pipa-sound-conf/pipewire-softisp-cpu.conf" \
     "$ROOT_DIR/sm8250/pipa-sound-conf/pipa-audio-init" \
-    "$ROOT_DIR/sm8250/pipa-sound-conf/pipa-audio-init.service"
+    "$ROOT_DIR/sm8250/pipa-sound-conf/pipa-audio-init.service" \
+    "$ROOT_DIR/sm8250/alsa-ucm-conf-sm8250/Xiaomi Pad 6.conf" \
+    "$ROOT_DIR/sm8250/alsa-ucm-conf-sm8250/HiFi_pipa.conf"
 
 link_files "$SOURCES_DIR/pipa-dracut" \
     "$ROOT_DIR/sm8250/pipa-dracut/module-setup.sh" \
@@ -129,7 +127,6 @@ BUILD_ORDER=(
     libssc
     iio-sensor-proxy
     pipa-sensors
-    alsa-ucm-conf-sm8250
     pipa-sound-conf
     libcamera
     kernel-pipa

@@ -1,6 +1,6 @@
 Name:           pipa-sound-conf
 Version:        1.4
-Release:        11%{?dist}
+Release:        12%{?dist}
 Summary:        Sound and camera settings for Xiaomi Pad 6 (pipa)
 License:        MIT
 BuildArch:      noarch
@@ -15,7 +15,7 @@ Source7:        HiFi_pipa.conf
 
 BuildRequires:  systemd-rpm-macros
 
-Requires:       alsa-ucm-conf
+Requires:       alsa-ucm
 Requires:       alsa-utils
 Requires:       wireplumber
 
@@ -62,6 +62,9 @@ install -Dm644 %{SOURCE5} %{buildroot}%{_unitdir}/pipa-audio-init.service
 %{_unitdir}/pipa-audio-init.service
 
 %changelog
+* Sat Jul 04 2026 Ayman <ayman@pipa> - 1.4-12
+- Require Fedora alsa-ucm instead of Arch alsa-ucm-conf
+
 * Sat Jul 04 2026 Ayman <ayman@pipa> - 1.4-11
 - Quote UCM file path in %%files for spaces in filename
 

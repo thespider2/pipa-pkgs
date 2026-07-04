@@ -81,24 +81,24 @@ Loadable kernel modules for kernel-pipa.
 %setup -q -n linux-%{commit}
 cp %{SOURCE1} .config
 
-patch -p1 --fuzz=2 < %{PATCH0002}
-patch -p1 --fuzz=2 < %{PATCH0003}
-patch -p1 --fuzz=2 < %{PATCH0004}
-patch -p1 --fuzz=2 < %{PATCH0005}
-patch -p1 --fuzz=2 < %{PATCH0006}
-patch -p1 --fuzz=2 < %{PATCH0007}
-patch -p1 --fuzz=2 < %{PATCH0008}
-patch -p1 --fuzz=2 < %{PATCH0009}
-patch -p1 --fuzz=2 < %{PATCH0010}
-patch -p1 --fuzz=2 < %{PATCH0012}
-patch -p1 --fuzz=2 < %{PATCH0013}
-patch -p1 --fuzz=2 < %{PATCH0014}
-patch -p1 --fuzz=2 < %{PATCH0016}
-patch -p1 --fuzz=2 < %{PATCH0017}
-patch -p1 --fuzz=2 < %{PATCH0018}
-patch -p1 --fuzz=2 < %{PATCH0019}
-patch -p1 --fuzz=2 < %{PATCH0020}
-patch -p1 --fuzz=2 < %{PATCH0021}
+%patch -P 0002 -p1 -F 2
+%patch -P 0003 -p1 -F 2
+%patch -P 0004 -p1 -F 2
+%patch -P 0005 -p1 -F 2
+%patch -P 0006 -p1 -F 2
+%patch -P 0007 -p1 -F 2
+%patch -P 0008 -p1 -F 2
+%patch -P 0009 -p1 -F 2
+%patch -P 0010 -p1 -F 2
+%patch -P 0012 -p1 -F 2
+%patch -P 0013 -p1 -F 2
+%patch -P 0014 -p1 -F 2
+%patch -P 0016 -p1 -F 2
+%patch -P 0017 -p1 -F 2
+%patch -P 0018 -p1 -F 2
+%patch -P 0019 -p1 -F 2
+%patch -P 0020 -p1 -F 2
+%patch -P 0021 -p1 -F 2
 
 make EXTRAVERSION="-%{kextra}" olddefconfig
 

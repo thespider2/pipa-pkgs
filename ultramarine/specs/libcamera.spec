@@ -85,8 +85,8 @@ Python 3 bindings for %{name}.
 %meson \
     -Dcpp_args=-Wno-array-bounds \
     -Ddocumentation=disabled \
-    -Dpipelines=auto \
-    -Dipas=ipu3,mali-c55,rkisp1,rpi/pisp,rpi/vc4,simple,vimc \
+    -Dpipelines=simple,uvcvideo,vimc \
+    -Dipas=simple,vimc \
     -Dv4l2=enabled \
     -Dgstreamer=enabled \
     -Dcam=enabled \

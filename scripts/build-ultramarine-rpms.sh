@@ -7,8 +7,9 @@ SPECS_DIR="$UM_DIR/specs"
 RPM_REPO_DIR="$ROOT_DIR/repo/ultramarine"
 SOURCES_DIR="$UM_DIR/.sources"
 CACHE_DIR="$RPM_REPO_DIR/.build-cache"
+CACHE_RPM_DIR="$CACHE_DIR/rpms"
 
-mkdir -p "$RPM_REPO_DIR" "$SOURCES_DIR" "$CACHE_DIR"
+mkdir -p "$RPM_REPO_DIR" "$SOURCES_DIR" "$CACHE_DIR" "$CACHE_RPM_DIR"
 rpmdev-setuptree 2>/dev/null || true
 
 link_files() {
@@ -48,6 +49,33 @@ if src_dir.is_dir():
 
 print(digest.hexdigest())
 PY
+}
+
+stage_cached_rpm() {
+    local rpm_name="$1"
+    if [ -f "$RPM_REPO_DIR/$rpm_name" ]; then
+        return 0
+    fi
+    if [ -f "$CACHE_RPM_DIR/$rpm_name" ]; then
+        cp -f "$CACHE_RPM_DIR/$rpm_name" "$RPM_REPO_DIR/$rpm_name"
+        return 0
+    fi
+    return 1
+}
+
+publish_rpms() {
+    local rpm_name
+    for rpm_name in "$@"; do
+        [ -f "$RPM_REPO_DIR/$rpm_name" ] || continue
+        cp -f "$RPM_REPO_DIR/$rpm_name" "$CACHE_RPM_DIR/$rpm_name"
+    done
+}
+
+remove_cached_rpms() {
+    local rpm_name
+    for rpm_name in "$@"; do
+        rm -f "$RPM_REPO_DIR/$rpm_name" "$CACHE_RPM_DIR/$rpm_name"
+    done
 }
 
 echo "=== Gathering sources from pipa-pkgs ==="
@@ -149,7 +177,7 @@ for name in "${BUILD_ORDER[@]}"; do
         if [ "${#cache_lines[@]}" -gt 1 ] && [ "${cache_lines[0]}" = "$source_hash" ]; then
             cache_hit=1
             for rpm_name in "${cache_lines[@]:1}"; do
-                if [ ! -f "$RPM_REPO_DIR/$rpm_name" ]; then
+                if ! stage_cached_rpm "$rpm_name"; then
                     cache_hit=0
                     break
                 fi
@@ -167,6 +195,7 @@ for name in "${BUILD_ORDER[@]}"; do
                 if [ ${#cached_rpms[@]} -gt 0 ]; then
                     dnf install -y --nogpgcheck "${cached_rpms[@]}" 2>/dev/null || true
                 fi
+                publish_rpms "${cache_lines[@]:1}"
                 SKIPPED=$((SKIPPED + 1))
                 continue
             fi
@@ -195,16 +224,15 @@ for name in "${BUILD_ORDER[@]}"; do
         # Remove old cached RPMs for this package
         if [ -f "$cache_file" ]; then
             mapfile -t old_cache_lines < "$cache_file"
-            for old_rpm in "${old_cache_lines[@]:1}"; do
-                rm -f "$RPM_REPO_DIR/$old_rpm"
-            done
+            remove_cached_rpms "${old_cache_lines[@]:1}"
         fi
 
         # Collect newly built RPMs
         built_rpms=()
         while IFS= read -r -d '' rpm_file; do
             rpm_basename="$(basename "$rpm_file")"
-            cp -v "$rpm_file" "$RPM_REPO_DIR/"
+            cp -f "$rpm_file" "$RPM_REPO_DIR/$rpm_basename"
+            cp -f "$rpm_file" "$CACHE_RPM_DIR/$rpm_basename"
             built_rpms+=("$rpm_basename")
         done < <(find ~/rpmbuild/RPMS/ ~/rpmbuild/SRPMS/ -name "*.rpm" -newer "$spec" -print0)
 

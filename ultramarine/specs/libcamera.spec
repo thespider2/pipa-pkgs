@@ -1,7 +1,7 @@
 Epoch:          1
 Name:           libcamera
 Version:        0.7.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Camera support library for Linux with pipa sensor support
 License:        LGPL-2.1-or-later AND GPL-2.0-or-later
 URL:            https://libcamera.org/
@@ -13,10 +13,8 @@ Patch0001:      0001-ipa-libipa-Add-sensor-helper-for-OV13B10.patch
 Patch0002:      0002-libcamera-add-pipa-sensor-properties.patch
 
 BuildRequires:  cmake
-BuildRequires:  doxygen
 BuildRequires:  gcc-c++
 BuildRequires:  git
-BuildRequires:  graphviz
 BuildRequires:  meson >= 0.60
 BuildRequires:  ninja-build
 BuildRequires:  openssl-devel
@@ -24,7 +22,6 @@ BuildRequires:  python3-devel
 BuildRequires:  python3-jinja2
 BuildRequires:  python3-ply
 BuildRequires:  python3-pyyaml
-BuildRequires:  python3-sphinx
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(gstreamer-1.0)
 BuildRequires:  pkgconfig(gstreamer-video-1.0)
@@ -36,8 +33,6 @@ BuildRequires:  pkgconfig(libelf)
 BuildRequires:  pkgconfig(sdl2)
 BuildRequires:  pkgconfig(yaml-0.1)
 BuildRequires:  pybind11-devel
-BuildRequires:  qt6-qtbase-devel
-BuildRequires:  qt6-qttools-devel
 
 %description
 libcamera is a complex camera support library for Linux. This build
@@ -52,18 +47,18 @@ Requires:       %{name}%{?_isa} = %{epoch}:%{version}-%{release}
 Development files for %{name}.
 
 %package ipa
-Summary:        Signed IPA modules for %{name}
+Summary:        IPA modules and proxy for %{name}
 Requires:       %{name}%{?_isa} = %{epoch}:%{version}-%{release}
 
 %description ipa
-Image Processing Algorithm modules for %{name}.
+Image Processing Algorithm modules and proxy executables for %{name}.
 
 %package tools
-Summary:        Camera tools (cam, qcam, libcamerify)
+Summary:        Camera tools (cam, libcamerify)
 Requires:       %{name}%{?_isa} = %{epoch}:%{version}-%{release}
 
 %description tools
-Command-line and GUI camera tools built with libcamera.
+Command-line camera tools built with libcamera.
 
 %package -n gstreamer1-plugin-libcamera
 Summary:        GStreamer plugin for libcamera
@@ -95,7 +90,7 @@ export CXXFLAGS="%{optflags} -fPIC -Wno-array-bounds"
     -Dgstreamer=enabled \
     -Dcam=enabled \
     -Dlc-compliance=disabled \
-    -Dqcam=enabled \
+    -Dqcam=disabled \
     -Dpycamera=enabled \
     -Dtest=false
 %meson_build
@@ -105,8 +100,6 @@ export CXXFLAGS="%{optflags} -fPIC -Wno-array-bounds"
 
 install -Dm644 %{SOURCE10} %{buildroot}%{_datadir}/libcamera/ipa/simple/hi846.yaml
 install -Dm644 %{SOURCE11} %{buildroot}%{_datadir}/libcamera/ipa/simple/ov13b10.yaml
-
-rm -rf %{buildroot}%{_prefix}/{include/libpisp,lib*/libpisp.so*,lib*/pkgconfig/libpisp.pc,share/libpisp} 2>/dev/null || :
 
 %files
 %license LICENSES/
@@ -123,12 +116,12 @@ rm -rf %{buildroot}%{_prefix}/{include/libpisp,lib*/libpisp.so*,lib*/pkgconfig/l
 
 %files ipa
 %{_libdir}/libcamera/
+%{_libexecdir}/libcamera/
 
 %files tools
 %{_bindir}/cam
-%{_bindir}/qcam
-%{_bindir}/libcamera-bug-report
 %{_bindir}/libcamerify
+%{_bindir}/libcamera-bug-report
 
 %files -n gstreamer1-plugin-libcamera
 %{_libdir}/gstreamer-1.0/libgstlibcamera.so
@@ -137,6 +130,11 @@ rm -rf %{buildroot}%{_prefix}/{include/libpisp,lib*/libpisp.so*,lib*/pkgconfig/l
 %{python3_sitearch}/libcamera/
 
 %changelog
+* Sat Jul 04 2026 Ayman <ayman@pipa> - 1:0.7.1-3
+- Add libexecdir to ipa package (proxy executables, v4l2-compat)
+- Disable qcam (not needed, removes Qt6 build dependency)
+- Remove doxygen/graphviz/sphinx (docs disabled)
+
 * Sat Jul 04 2026 Ayman <ayman@pipa> - 1:0.7.1-2
 - Add epoch to override Fedora package
 - Fix patch application with fuzz factor

@@ -151,7 +151,7 @@ link_files "$SOURCES_DIR/pipa-grub-config" \
 
 link_files "$SOURCES_DIR/pipa-metapkg" \
     "$ROOT_DIR/sm8250/pipa-metapkg/90-pipa-gsk-renderer.sh" \
-    "$SOURCES_DIR/pipa-pkgs.repo"
+    "$UM_DIR/pipa-pkgs.repo"
 
 link_files "$SOURCES_DIR/hexagonrpc" \
     "$ROOT_DIR/common/hexagonrpc/hexagonrpcd-adsp-rootpd.service" \

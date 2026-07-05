@@ -1,6 +1,6 @@
 Name:           pipa-sensors
 Version:        1.2
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Sensor configuration for the Xiaomi Pad 6
 License:        MIT
 BuildArch:      noarch
@@ -57,5 +57,8 @@ systemd-tmpfiles --create %{_tmpfilesdir}/pipa-sensors.conf >/dev/null 2>&1 || :
 %{_unitdir}/hexagonrpcd-sdsp.service.d/10-pipa-sensors.conf
 
 %changelog
+* Sun Jul 05 2026 Ayman <ayman@pipa> - 1.2-4
+- Resume sensor recovery in background so wake is not blocked ~15 seconds
+
 * Fri Jul 03 2026 Ayman <ayman@pipa> - 1.2-3
 - Initial Ultramarine OS packaging

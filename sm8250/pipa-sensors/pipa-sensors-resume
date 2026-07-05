@@ -10,15 +10,14 @@ log() {
 
 wait_for_unit() {
 	local unit=$1
-	local tries=${2:-30}
+	local tries=${2:-20}
 	local i
 
 	for ((i = 1; i <= tries; i++)); do
 		if systemctl is-active --quiet "${unit}"; then
-			sleep 1
 			return 0
 		fi
-		sleep 1
+		sleep 0.25
 	done
 	return 1
 }
@@ -27,34 +26,27 @@ stop_iio_sensor_proxy() {
 	local i
 
 	systemctl stop iio-sensor-proxy.service 2>/dev/null || true
-	for ((i = 1; i <= 15; i++)); do
+	for ((i = 1; i <= 8; i++)); do
 		systemctl is-active --quiet iio-sensor-proxy.service || return 0
-		sleep 1
+		sleep 0.25
 	done
 	systemctl kill --kill-who=all --signal=SIGKILL iio-sensor-proxy.service 2>/dev/null || true
 }
 
-case "$1" in
-pre)
-	log "suspend: stopping iio-sensor-proxy"
-	stop_iio_sensor_proxy
-	;;
-post)
+resume_sensor_stack() {
 	log "resume: restarting sensor stack"
 
-	# Let remoteproc/fastrpc settle after resume.
-	sleep 3
-
-	stop_iio_sensor_proxy
+	# Brief pause for remoteproc/fastrpc after SoC wake.
+	sleep 1
 
 	if ! systemctl restart hexagonrpcd-sdsp.service; then
 		log "resume: failed to restart hexagonrpcd-sdsp"
-		exit 0
+		return 0
 	fi
 
-	if ! wait_for_unit hexagonrpcd-sdsp.service 30; then
+	if ! wait_for_unit hexagonrpcd-sdsp.service 20; then
 		log "resume: hexagonrpcd-sdsp did not become active"
-		exit 0
+		return 0
 	fi
 
 	/usr/local/bin/pipa-prepare-sensor-persist >/dev/null 2>&1 || true
@@ -65,5 +57,17 @@ post)
 	else
 		log "resume: iio-sensor-proxy restart failed"
 	fi
+}
+
+case "$1" in
+pre)
+	log "suspend: stopping iio-sensor-proxy"
+	stop_iio_sensor_proxy
+	;;
+post)
+	log "resume: scheduling sensor stack restart"
+	(
+		resume_sensor_stack
+	) >/dev/null 2>&1 &
 	;;
 esac

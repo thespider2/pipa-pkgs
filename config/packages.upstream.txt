@@ -1,8 +1,9 @@
 # Packages that still have no local PKGBUILD sources in this repo.
+# Upstream host maakiopus/pipa-alarm (GitHub Pages) is currently unavailable;
+# fetch-upstream.py will warn and skip when the database 404s.
 box64
 gamescope
 mangohud-git
 mkbootimg-pipa
-swclock-offset
 widevine
 wine-aarch64

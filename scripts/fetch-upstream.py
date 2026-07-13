@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import io
 import tarfile
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -46,12 +47,29 @@ def main() -> int:
         if line.strip() and not line.strip().startswith('#')
     }
 
+    if not wanted:
+        print('No upstream packages requested; skipping mirror step.')
+        return 0
+
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     db_url = f"{upstream_url}{db_name}.db.tar.gz"
     print(f"Fetching upstream database: {db_url}")
-    with urllib.request.urlopen(db_url) as response:
-        data = response.read()
+    try:
+        with urllib.request.urlopen(db_url) as response:
+            data = response.read()
+    except urllib.error.HTTPError as exc:
+        print(
+            f"WARNING: upstream database unavailable ({exc.code} {exc.reason}); "
+            f"skipping mirror of: {', '.join(sorted(wanted))}"
+        )
+        return 0
+    except urllib.error.URLError as exc:
+        print(
+            f"WARNING: upstream database unreachable ({exc.reason}); "
+            f"skipping mirror of: {', '.join(sorted(wanted))}"
+        )
+        return 0
 
     tf = tarfile.open(fileobj=io.BytesIO(data), mode='r:gz')
     found: dict[str, str] = {}
@@ -69,7 +87,10 @@ def main() -> int:
 
     missing = sorted(wanted - set(found))
     if missing:
-        raise SystemExit(f"Missing packages in upstream database: {', '.join(missing)}")
+        print(
+            f"WARNING: missing packages in upstream database "
+            f"(continuing without them): {', '.join(missing)}"
+        )
 
     for name in sorted(found):
         filename = found[name]

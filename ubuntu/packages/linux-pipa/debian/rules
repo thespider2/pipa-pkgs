@@ -11,7 +11,7 @@ override_dh_auto_configure:
 	cp debian/extras/pipa.config .config
 	for p in debian/extras/0*.patch; do \
 		[ -f "$$p" ] || continue; \
-		patch -p1 -F2 < "$$p"; \
+		patch -p1 -F2 < "$$p" || exit 1; \
 	done
 	$(MAKE) EXTRAVERSION="$(KEXTRAVERSION)" olddefconfig
 

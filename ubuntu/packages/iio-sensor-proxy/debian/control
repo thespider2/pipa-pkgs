@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Ayman <ayman@pipa>
 Build-Depends: debhelper-compat (= 13), meson, ninja-build, pkg-config,
  libssc-dev, libglib2.0-dev, libgudev-1.0-dev, libpolkit-gobject-1-dev,
- libsystemd-dev, libudev-dev, udev, umockdev, libumockdev-dev, python3-dbusmock, gtk-doc-tools
+ libsystemd-dev, systemd-dev, libudev-dev, udev, umockdev, libumockdev-dev, python3-dbusmock, gtk-doc-tools
 Standards-Version: 4.6.2
 Homepage: https://gitlab.freedesktop.org/hadess/iio-sensor-proxy/
 

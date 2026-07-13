@@ -14,10 +14,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libqmi-glib-dev \
     libjson-glib-dev gobject-introspection libgirepository1.0-dev \
     libpolkit-gobject-1-dev umockdev libumockdev-dev python3-dbusmock \
-    libdrm-dev libjpeg-dev libsdl2-dev libtiff-dev libyaml-dev \
+    libdrm-dev libjpeg-dev libsdl2-dev libtiff-dev libyaml-dev libevent-dev \
     libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
     liblttng-ust-dev libqrtr1 libqrtr-dev \
-    systemd libsystemd-dev udev \
+    systemd libsystemd-dev udev gtk-doc-tools \
     ca-certificates xz-utils tar gzip unzip \
     && rm -rf /var/lib/apt/lists/*
 

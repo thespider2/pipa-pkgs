@@ -2,6 +2,9 @@
 %:
 	dh $@ --buildsystem=meson
 
+# Mock sensor tests need python3-protobuf; skip in packaging builds.
+override_dh_auto_test:
+
 override_dh_auto_install:
 	dh_auto_install
 	# Compatibility SONAME symlink used by some consumers

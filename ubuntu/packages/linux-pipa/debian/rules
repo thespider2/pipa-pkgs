@@ -4,6 +4,9 @@ export KEXTRAVERSION = -21-pipa
 %:
 	dh $@
 
+# Kernel `make distclean` deletes debian/; never let dh run it.
+override_dh_auto_clean:
+
 override_dh_auto_configure:
 	cp debian/extras/pipa.config .config
 	for p in debian/extras/0*.patch; do \

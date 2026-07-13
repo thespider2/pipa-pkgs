@@ -2,6 +2,9 @@
 %:
 	dh $@
 
+# Scripts intentionally live under /usr/local/bin to match Arch layouts.
+override_dh_usrlocal:
+
 override_dh_auto_build:
 
 override_dh_auto_install:

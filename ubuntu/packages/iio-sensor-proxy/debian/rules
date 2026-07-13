@@ -7,9 +7,10 @@ override_dh_auto_configure:
 
 override_dh_auto_install:
 	dh_auto_install
-	install -d debian/tmp/usr/lib/systemd/system/iio-sensor-proxy.service.d
+	# Meson installs straight into debian/iio-sensor-proxy; put the drop-in there too.
+	install -d debian/iio-sensor-proxy/usr/lib/systemd/system/iio-sensor-proxy.service.d
 	printf '%s\n' '[Unit]' \
 		'Wants=hexagonrpcd-sdsp.service' \
 		'After=hexagonrpcd-sdsp.service' \
 		'PartOf=hexagonrpcd-sdsp.service' \
-		> debian/tmp/usr/lib/systemd/system/iio-sensor-proxy.service.d/hexagonrpcd.conf
+		> debian/iio-sensor-proxy/usr/lib/systemd/system/iio-sensor-proxy.service.d/hexagonrpcd.conf

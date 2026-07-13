@@ -160,10 +160,65 @@ jobs:
           path: repo/ultramarine/
           retention-days: 1
 
+  # ── Ubuntu (deb) ────────────────────────────────────────────────
+  ubuntu:
+    name: Build Ubuntu debs
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute deb cache key
+        id: deb-cache-key
+        run: |
+          set -euo pipefail
+          {
+            printf '%s\0' ubuntu/Dockerfile scripts/build-ubuntu-debs.sh
+            find ubuntu/packages -type f -print0
+            find common sm8250 -type f \
+              ! -path '*/src/*' \
+              ! -path '*/pkg/*' \
+              -print0
+          } | sort -z | xargs -0 sha256sum | sha256sum \
+            | awk '{print "hash="$1}' >> "$GITHUB_OUTPUT"
+
+      - name: Restore deb build cache
+        id: deb-cache-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: ubuntu/.build-cache
+          key: deb-${{ runner.arch }}-${{ github.ref_name }}-${{ steps.deb-cache-key.outputs.hash }}
+          restore-keys: deb-${{ runner.arch }}-${{ github.ref_name }}-
+
+      - name: Build Ubuntu builder image
+        run: docker build -t pipa-debs-builder -f ubuntu/Dockerfile .
+
+      - name: Build debs
+        run: |
+          mkdir -p repo/ubuntu
+          docker run --rm --privileged \
+            -v "$PWD:/work" \
+            -w /work \
+            pipa-debs-builder scripts/build-ubuntu-debs.sh
+          sudo chown -R "$USER:$USER" repo/ubuntu ubuntu/.build-cache || true
+
+      - name: Save deb build cache
+        if: steps.deb-cache-restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ubuntu/.build-cache
+          key: ${{ steps.deb-cache-restore.outputs.cache-primary-key }}
+
+      - name: Upload Ubuntu repo
+        uses: actions/upload-artifact@v4
+        with:
+          name: ubuntu-repo
+          path: repo/ubuntu/
+          retention-days: 1
+
   # ── Deploy to GitHub Pages ──────────────────────────────────────
   deploy:
     name: Deploy to Pages
-    needs: [pacman, ultramarine]
+    needs: [pacman, ultramarine, ubuntu]
     runs-on: ubuntu-24.04-arm
     environment:
       name: github-pages
@@ -194,6 +249,12 @@ jobs:
         with:
           name: ultramarine-repo
           path: repo/ultramarine/
+
+      - name: Download Ubuntu repo
+        uses: actions/download-artifact@v4
+        with:
+          name: ubuntu-repo
+          path: repo/ubuntu/
 
       - uses: actions/configure-pages@v5
 

@@ -1,0 +1,6 @@
+pipa-grub-config (1.0-5pipa1) resolute; urgency=medium
+
+  * Initial Ubuntu packaging for Xiaomi Pad 6 (pipa).
+  * Use /boot/grub paths for Ubuntu.
+
+ -- Ayman <ayman@pipa>  Mon, 13 Jul 2026 12:00:00 +0000

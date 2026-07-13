@@ -1,0 +1,28 @@
+Source: linux-pipa
+Section: kernel
+Priority: optional
+Maintainer: Ayman <ayman@pipa>
+Build-Depends: debhelper-compat (= 13), bc, bison, flex, cpio, dwarves,
+ libelf-dev, libssl-dev, kmod, rsync, xz-utils, python3, perl
+Standards-Version: 4.6.2
+Homepage: https://github.com/aymanrgab/linux
+
+Package: linux-image-pipa
+Architecture: arm64
+Depends: ${misc:Depends}, kmod, dracut | initramfs-tools, xiaomi-pipa-firmware
+Provides: linux-image, linux-image-arm64
+Description: Linux kernel for Xiaomi Pad 6 (pipa)
+ Custom Linux 7.0.8 kernel for the Xiaomi Pad 6 (SM8250 / pipa).
+
+Package: linux-modules-pipa
+Architecture: arm64
+Depends: linux-image-pipa (= ${binary:Version}), ${misc:Depends}
+Description: Kernel modules for linux-image-pipa
+ Loadable kernel modules for the Xiaomi Pad 6 kernel.
+
+Package: linux-headers-pipa
+Architecture: arm64
+Depends: ${misc:Depends}
+Provides: linux-headers, linux-headers-arm64
+Description: Header files for linux-image-pipa
+ Kernel headers for building out-of-tree modules against linux-pipa.

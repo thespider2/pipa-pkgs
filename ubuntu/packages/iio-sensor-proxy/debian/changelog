@@ -1,0 +1,5 @@
+iio-sensor-proxy (3.9-1pipa1) resolute; urgency=medium
+
+  * Ubuntu packaging with SSC support and pipa patches.
+
+ -- Ayman <ayman@pipa>  Mon, 13 Jul 2026 12:00:00 +0000

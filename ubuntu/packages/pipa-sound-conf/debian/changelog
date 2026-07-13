@@ -1,0 +1,5 @@
+pipa-sound-conf (1.4-12pipa1) resolute; urgency=medium
+
+  * Initial Ubuntu packaging for Xiaomi Pad 6 (pipa).
+
+ -- Ayman <ayman@pipa>  Mon, 13 Jul 2026 12:00:00 +0000

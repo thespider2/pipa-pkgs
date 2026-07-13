@@ -1,0 +1,14 @@
+Source: xiaomi-pipa-firmware
+Section: non-free/kernel
+Priority: optional
+Maintainer: Ayman <ayman@pipa>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Homepage: https://github.com/pipa-mainline/xiaomi-pipa-firmware
+
+Package: xiaomi-pipa-firmware
+Architecture: all
+Depends: ${misc:Depends}, linux-firmware
+Description: Firmware for Xiaomi Pad 6 (pipa)
+ Firmware for speaker amplifiers, DSP, touchscreen, SoC blobs, and
+ wireless charging on the Xiaomi Pad 6.

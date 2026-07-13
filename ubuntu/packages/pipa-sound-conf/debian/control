@@ -1,0 +1,14 @@
+Source: pipa-sound-conf
+Section: sound
+Priority: optional
+Maintainer: Ayman <ayman@pipa>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+
+Package: pipa-sound-conf
+Architecture: all
+Depends: ${misc:Depends}, alsa-ucm-conf, alsa-utils, wireplumber
+Provides: alsa-ucm-conf-sm8250 (= 1.0), alsa-ucm-conf-xiaomi-pipa (= 1.4)
+Description: Sound and camera settings for Xiaomi Pad 6
+ WirePlumber audio and camera configuration, ALSA UCM profiles, and
+ audio initialization for the Xiaomi Pad 6 (pipa).

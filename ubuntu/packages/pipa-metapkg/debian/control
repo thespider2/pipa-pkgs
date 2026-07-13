@@ -1,0 +1,34 @@
+Source: pipa-metapkg
+Section: metapackages
+Priority: optional
+Maintainer: Ayman <ayman@pipa>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+
+Package: pipa-metapkg
+Architecture: all
+Depends: ${misc:Depends},
+ linux-image-pipa,
+ linux-modules-pipa,
+ xiaomi-pipa-firmware,
+ linux-firmware,
+ pipa-dracut,
+ pipa-grub-config,
+ pipa-sound-conf,
+ pipa-sensors,
+ swclock-offset,
+ bootmac,
+ hexagonrpc,
+ libssc,
+ libcamera0.7,
+ libcamera-ipa,
+ libcamera-tools,
+ iio-sensor-proxy,
+ mesa-vulkan-drivers,
+ wireless-regdb,
+ bluez
+Recommends: gstreamer1.0-libcamera, tuned, qrtr-tools, rmtfs, tqftpserv, pd-mapper
+Description: Xiaomi Pad 6 support meta package for Ubuntu
+ Pulls in the full device support stack for running Ubuntu on the
+ Xiaomi Pad 6 (pipa): custom kernel, firmware, sensors, audio, camera,
+ and boot configuration. Also installs the pipa-pkgs apt source.

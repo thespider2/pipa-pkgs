@@ -1,0 +1,11 @@
+#!/usr/bin/make -f
+%:
+	dh $@
+
+override_dh_auto_build:
+
+override_dh_auto_install:
+	install -Dm755 debian/extras/90-pipa-gsk-renderer.sh \
+		debian/pipa-metapkg/etc/profile.d/90-pipa-gsk-renderer.sh
+	install -Dm644 debian/extras/pipa-pkgs.list \
+		debian/pipa-metapkg/etc/apt/sources.list.d/pipa-pkgs.list

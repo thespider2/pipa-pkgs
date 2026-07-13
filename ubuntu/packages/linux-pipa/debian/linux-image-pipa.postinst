@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+if command -v pipa-refresh-initramfs >/dev/null 2>&1; then
+    pipa-refresh-initramfs >/dev/null 2>&1 || true
+elif command -v update-initramfs >/dev/null 2>&1; then
+    update-initramfs -u >/dev/null 2>&1 || true
+fi
+if command -v pipa-refresh-grub-config >/dev/null 2>&1; then
+    pipa-refresh-grub-config >/dev/null 2>&1 || true
+fi
+#DEBHELPER#

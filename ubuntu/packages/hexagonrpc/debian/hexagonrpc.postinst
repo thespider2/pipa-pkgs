@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+if ! getent passwd fastrpc >/dev/null; then
+    adduser --system --group --home /var/lib/fastrpc --no-create-home \
+        --gecos "FastRPC" fastrpc || true
+fi
+if [ -d /run/systemd/system ]; then
+    systemctl stop hexagonrpcd-adsp-rootpd.service >/dev/null 2>&1 || true
+    systemctl disable hexagonrpcd-adsp-rootpd.service >/dev/null 2>&1 || true
+    systemctl mask hexagonrpcd-adsp-rootpd.service >/dev/null 2>&1 || true
+fi
+#DEBHELPER#

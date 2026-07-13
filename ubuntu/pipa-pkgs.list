@@ -1,0 +1,2 @@
+# Xiaomi Pad 6 (pipa) device packages
+deb [trusted=yes] https://thespider2.github.io/pipa-pkgs/repo/ubuntu/ ./

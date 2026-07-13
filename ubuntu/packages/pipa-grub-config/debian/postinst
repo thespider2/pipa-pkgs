@@ -1,0 +1,4 @@
+#!/bin/sh
+set -e
+/usr/local/bin/pipa-refresh-grub-config >/dev/null 2>&1 || true
+#DEBHELPER#

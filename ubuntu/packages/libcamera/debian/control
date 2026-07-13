@@ -1,0 +1,45 @@
+Source: libcamera
+Section: libs
+Priority: optional
+Maintainer: Ayman <ayman@pipa>
+Build-Depends: debhelper-compat (= 13), meson (>= 0.60), ninja-build, cmake,
+ g++ , pkg-config, git, libssl-dev, python3-dev, python3-jinja2, python3-ply,
+ python3-yaml, python3-pybind11, libglib2.0-dev, libgstreamer1.0-dev,
+ libgstreamer-plugins-base1.0-dev, libdrm-dev, libjpeg-dev, libtiff-dev,
+ libudev-dev, libelf-dev, libsdl2-dev, libyaml-dev
+Standards-Version: 4.6.2
+Homepage: https://libcamera.org/
+
+Package: libcamera0.7
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Conflicts: libcamera0.5, libcamera0.6, libcamera0
+Replaces: libcamera0.5, libcamera0.6, libcamera0
+Description: Camera support library with pipa sensor support
+ libcamera with OV13B10 and HI846 sensor helpers for Xiaomi Pad 6.
+
+Package: libcamera-dev
+Architecture: any
+Section: libdevel
+Depends: libcamera0.7 (= ${binary:Version}), ${misc:Depends}
+Description: Development files for libcamera (pipa)
+
+Package: libcamera-ipa
+Architecture: any
+Depends: libcamera0.7 (= ${binary:Version}), ${misc:Depends}
+Description: IPA modules for libcamera (pipa)
+
+Package: libcamera-tools
+Architecture: any
+Depends: libcamera0.7 (= ${binary:Version}), ${misc:Depends}
+Description: Camera tools for libcamera (pipa)
+
+Package: gstreamer1.0-libcamera
+Architecture: any
+Depends: libcamera0.7 (= ${binary:Version}), ${misc:Depends}
+Description: GStreamer plugin for libcamera (pipa)
+
+Package: python3-libcamera
+Architecture: any
+Depends: libcamera0.7 (= ${binary:Version}), ${misc:Depends}, ${python3:Depends}
+Description: Python bindings for libcamera (pipa)

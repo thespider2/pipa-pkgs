@@ -1,0 +1,12 @@
+Source: pipa-grub-config
+Section: admin
+Priority: optional
+Maintainer: Ayman <ayman@pipa>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+
+Package: pipa-grub-config
+Architecture: all
+Depends: ${misc:Depends}, bash, coreutils, util-linux, grub-efi-arm64
+Description: GRUB config refresh helper for Xiaomi Pad 6
+ Refreshes the Xiaomi Pad 6 GRUB menu and keeps the DTB entry as default.

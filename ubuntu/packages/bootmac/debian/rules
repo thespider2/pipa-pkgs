@@ -1,0 +1,15 @@
+#!/usr/bin/make -f
+export DH_VERBOSE = 1
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	# Upstream ships a ready-to-install script; nothing to build.
+
+override_dh_auto_install:
+	install -Dm755 bootmac debian/bootmac/usr/bin/bootmac
+	install -Dm644 bootmac-bluetooth.service \
+		debian/bootmac/usr/lib/systemd/system/bootmac-bluetooth.service
+	install -Dm644 bootmac-wifi.rules \
+		debian/bootmac/usr/lib/udev/rules.d/70-bootmac-wifi.rules

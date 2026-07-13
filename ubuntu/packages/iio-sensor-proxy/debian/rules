@@ -1,0 +1,15 @@
+#!/usr/bin/make -f
+%:
+	dh $@ --buildsystem=meson
+
+override_dh_auto_configure:
+	dh_auto_configure -- -Dgtk_doc=false -Dgtk-tests=false -Dssc-support=enabled
+
+override_dh_auto_install:
+	dh_auto_install
+	install -d debian/tmp/usr/lib/systemd/system/iio-sensor-proxy.service.d
+	printf '%s\n' '[Unit]' \
+		'Wants=hexagonrpcd-sdsp.service' \
+		'After=hexagonrpcd-sdsp.service' \
+		'PartOf=hexagonrpcd-sdsp.service' \
+		> debian/tmp/usr/lib/systemd/system/iio-sensor-proxy.service.d/hexagonrpcd.conf

@@ -1,0 +1,13 @@
+#!/usr/bin/make -f
+%:
+	dh $@
+
+override_dh_auto_build:
+
+override_dh_auto_install:
+	install -Dm755 debian/extras/module-setup.sh \
+		debian/pipa-dracut/usr/lib/dracut/modules.d/90pipafw/module-setup.sh
+	install -Dm644 debian/extras/pipa.conf \
+		debian/pipa-dracut/usr/lib/dracut/dracut.conf.d/10-pipa.conf
+	install -Dm755 debian/extras/pipa-refresh-initramfs \
+		debian/pipa-dracut/usr/local/bin/pipa-refresh-initramfs

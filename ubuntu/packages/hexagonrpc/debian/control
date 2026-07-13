@@ -1,0 +1,21 @@
+Source: hexagonrpc
+Section: libs
+Priority: optional
+Maintainer: Ayman <ayman@pipa>
+Build-Depends: debhelper-compat (= 13), meson, ninja-build, pkg-config, systemd
+Standards-Version: 4.6.2
+Homepage: https://github.com/linux-msm/hexagonrpc/
+
+Package: hexagonrpc
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, systemd, udev, adduser
+Description: FastRPC ioctl wrapper and reverse tunnel
+ Used to communicate with the Context Hub Runtime Environment on the
+ DSP that manages sensors, and to serve files to remote processors.
+
+Package: libhexagonrpc-dev
+Architecture: any
+Section: libdevel
+Depends: hexagonrpc (= ${binary:Version}), ${misc:Depends}
+Description: Development headers for hexagonrpc
+ Development headers for the hexagonrpc FastRPC library.

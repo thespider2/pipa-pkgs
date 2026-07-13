@@ -1,0 +1,26 @@
+#!/usr/bin/make -f
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_CXXFLAGS_MAINT_APPEND = -Wno-array-bounds
+
+%:
+	dh $@ --buildsystem=meson
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		-Ddocumentation=disabled \
+		-Dpipelines=simple,uvcvideo,vimc \
+		-Dipas=simple,vimc \
+		-Dv4l2=enabled \
+		-Dgstreamer=enabled \
+		-Dcam=enabled \
+		-Dlc-compliance=disabled \
+		-Dqcam=disabled \
+		-Dpycamera=enabled \
+		-Dtest=false
+
+override_dh_auto_install:
+	dh_auto_install
+	install -Dm644 debian/extras/hi846.yaml \
+		debian/tmp/usr/share/libcamera/ipa/simple/hi846.yaml
+	install -Dm644 debian/extras/ov13b10.yaml \
+		debian/tmp/usr/share/libcamera/ipa/simple/ov13b10.yaml

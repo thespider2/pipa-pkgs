@@ -1,0 +1,16 @@
+Source: iio-sensor-proxy
+Section: utils
+Priority: optional
+Maintainer: Ayman <ayman@pipa>
+Build-Depends: debhelper-compat (= 13), meson, ninja-build, pkg-config,
+ libssc-dev, libglib2.0-dev, libgudev-1.0-dev, libpolkit-gobject-1-dev,
+ libsystemd-dev, udev, umockdev, libumockdev-dev, python3-dbusmock, gtk-doc-tools
+Standards-Version: 4.6.2
+Homepage: https://gitlab.freedesktop.org/hadess/iio-sensor-proxy/
+
+Package: iio-sensor-proxy
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libssc (>= 0.2.2), systemd
+Description: IIO/SSC sensor proxy with pipa patches
+ D-Bus proxy for IIO and Qualcomm Sensor Core sensors, with pipa-specific
+ SSC resume resilience patches.

@@ -1,0 +1,7 @@
+usr/bin/ssccli
+usr/lib/*/libssc.so.2
+usr/lib/*/libssc.so.0
+usr/libexec/installed-tests/libssc/
+usr/lib/python3*/dist-packages/ssc_server/
+usr/lib/*/girepository-1.0/SSC-*.typelib
+usr/share/gir-1.0/SSC-*.gir

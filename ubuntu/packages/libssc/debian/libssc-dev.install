@@ -1,0 +1,3 @@
+usr/include/libssc
+usr/lib/*/libssc.so
+usr/lib/*/pkgconfig/libssc.pc

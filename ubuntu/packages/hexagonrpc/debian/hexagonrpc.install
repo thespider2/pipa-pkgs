@@ -1,0 +1,7 @@
+usr/bin/hexagonrpcd
+usr/lib/*/libhexagonrpc.so.*
+usr/libexec/hexagonrpc
+usr/lib/systemd/system/*.service
+usr/lib/sysusers.d/fastrpc.conf
+usr/lib/udev/rules.d/10-fastrpc.rules
+usr/share/man/man1/hexagonrpcd.1*

@@ -1,0 +1,13 @@
+#!/usr/bin/make -f
+%:
+	dh $@ --buildsystem=meson
+
+override_dh_auto_install:
+	dh_auto_install
+	# Compatibility SONAME symlink used by some consumers
+	for libdir in debian/tmp/usr/lib/*; do \
+		[ -d "$$libdir" ] || continue; \
+		if [ -e "$$libdir/libssc.so.2" ]; then \
+			ln -sfn libssc.so.2 "$$libdir/libssc.so.0"; \
+		fi; \
+	done

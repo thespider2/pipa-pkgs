@@ -1,0 +1,16 @@
+#!/usr/bin/make -f
+%:
+	dh $@
+
+override_dh_auto_build:
+	sed -e 's+STORAGE_PATH+/var/cache+g' src/swclock-offset-boot.sh.in > src/swclock-offset-boot.sh
+	sed -e 's+STORAGE_PATH+/var/cache+g' src/swclock-offset-shutdown.sh.in > src/swclock-offset-shutdown.sh
+	sed -e 's+SWCLOCK_PATH+/usr/bin+g' systemd/swclock-offset-boot.service.in > systemd/swclock-offset-boot.service
+	sed -e 's+SWCLOCK_PATH+/usr/bin+g' systemd/swclock-offset-shutdown.service.in > systemd/swclock-offset-shutdown.service
+
+override_dh_auto_install:
+	install -Dm755 src/swclock-offset-boot.sh debian/swclock-offset/usr/bin/swclock-offset-boot
+	install -Dm755 src/swclock-offset-shutdown.sh debian/swclock-offset/usr/bin/swclock-offset-shutdown
+	install -Dm644 systemd/swclock-offset.target debian/swclock-offset/usr/lib/systemd/system/swclock-offset.target
+	install -Dm644 systemd/swclock-offset-boot.service debian/swclock-offset/usr/lib/systemd/system/swclock-offset-boot.service
+	install -Dm644 systemd/swclock-offset-shutdown.service debian/swclock-offset/usr/lib/systemd/system/swclock-offset-shutdown.service

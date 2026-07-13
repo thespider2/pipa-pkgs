@@ -1,0 +1,13 @@
+Source: pipa-sensors
+Section: utils
+Priority: optional
+Maintainer: Ayman <ayman@pipa>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+
+Package: pipa-sensors
+Architecture: all
+Depends: ${misc:Depends}, xiaomi-pipa-firmware, iio-sensor-proxy, hexagonrpc
+Description: Sensor configuration for Xiaomi Pad 6
+ Sensor configuration, udev rules, systemd services, and resume hooks
+ for the Xiaomi Pad 6 (pipa).

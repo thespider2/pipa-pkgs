@@ -1,0 +1,27 @@
+#!/usr/bin/make -f
+%:
+	dh $@
+
+override_dh_auto_build:
+
+override_dh_auto_install:
+	install -d debian/pipa-sound-conf/usr/share/alsa/ucm2/conf.d/sm8250
+	install -d debian/pipa-sound-conf/usr/share/alsa/ucm2/Qualcomm/sm8250
+	install -Dm644 debian/extras/Xiaomi-Pad-6.conf \
+		"debian/pipa-sound-conf/usr/share/alsa/ucm2/conf.d/sm8250/Xiaomi Pad 6.conf"
+	install -Dm644 debian/extras/HiFi_pipa.conf \
+		debian/pipa-sound-conf/usr/share/alsa/ucm2/Qualcomm/sm8250/HiFi_pipa.conf
+	ln -sf "Xiaomi Pad 6.conf" \
+		debian/pipa-sound-conf/usr/share/alsa/ucm2/conf.d/sm8250/sm8250.conf
+	ln -sf "Xiaomi Pad 6.conf" \
+		debian/pipa-sound-conf/usr/share/alsa/ucm2/conf.d/sm8250/Xiaomi-Pad6-pipa-M82.conf
+	install -Dm644 debian/extras/51-pipa.conf \
+		debian/pipa-sound-conf/usr/share/wireplumber/wireplumber.conf.d/51-pipa.conf
+	install -Dm644 debian/extras/52-pipa-camera.conf \
+		debian/pipa-sound-conf/usr/share/wireplumber/wireplumber.conf.d/52-pipa-camera.conf
+	install -Dm644 debian/extras/pipewire-softisp-cpu.conf \
+		debian/pipa-sound-conf/usr/lib/systemd/user/pipewire.service.d/softisp-cpu.conf
+	install -Dm755 debian/extras/pipa-audio-init \
+		debian/pipa-sound-conf/usr/local/bin/pipa-audio-init
+	install -Dm644 debian/extras/pipa-audio-init.service \
+		debian/pipa-sound-conf/usr/lib/systemd/system/pipa-audio-init.service

@@ -1,0 +1,24 @@
+Source: libssc
+Section: libs
+Priority: optional
+Maintainer: Ayman <ayman@pipa>
+Build-Depends: debhelper-compat (= 13), meson, ninja-build, pkg-config,
+ python3-dev, libprotobuf-c-dev, libglib2.0-dev, libgudev-1.0-dev,
+ libqmi-glib-dev, libqrtr-dev, udev, gobject-introspection,
+ libgirepository1.0-dev
+Standards-Version: 4.6.2
+Homepage: https://codeberg.org/DylanVanAssche/libssc
+
+Package: libssc
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Library to expose Qualcomm Sensor Core sensors
+ libssc exposes sensors managed by the Qualcomm Sensor Core. This build
+ includes pipa-specific GError guard patches.
+
+Package: libssc-dev
+Architecture: any
+Section: libdevel
+Depends: libssc (= ${binary:Version}), ${misc:Depends}
+Description: Development headers for libssc
+ Development files for libssc.

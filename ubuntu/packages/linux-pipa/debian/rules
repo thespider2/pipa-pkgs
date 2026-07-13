@@ -1,0 +1,42 @@
+#!/usr/bin/make -f
+export KEXTRAVERSION = -21-pipa
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	cp debian/extras/pipa.config .config
+	for p in debian/extras/0*.patch; do \
+		[ -f "$$p" ] || continue; \
+		patch -p1 -F2 < "$$p"; \
+	done
+	$(MAKE) EXTRAVERSION="$(KEXTRAVERSION)" olddefconfig
+
+override_dh_auto_build:
+	$(MAKE) EXTRAVERSION="$(KEXTRAVERSION)" Image Image.gz modules dtbs
+
+override_dh_auto_install:
+	KernelVer=$$($(MAKE) -s EXTRAVERSION="$(KEXTRAVERSION)" kernelrelease); \
+	install -Dm644 arch/arm64/boot/Image.gz debian/linux-image-pipa/boot/vmlinuz-$$KernelVer; \
+	install -Dm644 arch/arm64/boot/Image debian/linux-image-pipa/boot/vmlinuz-$$KernelVer.uncompressed; \
+	install -Dm644 arch/arm64/boot/Image.gz debian/linux-image-pipa/boot/Image.gz; \
+	install -Dm644 arch/arm64/boot/Image debian/linux-image-pipa/boot/Image; \
+	install -Dm644 System.map debian/linux-image-pipa/boot/System.map-$$KernelVer; \
+	install -Dm644 .config debian/linux-image-pipa/boot/config-$$KernelVer; \
+	install -Dm644 arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dtb \
+		debian/linux-image-pipa/boot/dtbs/qcom/sm8250-xiaomi-pipa.dtb; \
+	$(MAKE) EXTRAVERSION="$(KEXTRAVERSION)" INSTALL_MOD_PATH=$(CURDIR)/debian/linux-modules-pipa/usr modules_install; \
+	ModDir=debian/linux-modules-pipa/usr/lib/modules/$$KernelVer; \
+	install -d $$ModDir/devicetree; \
+	cp arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dtb $$ModDir/devicetree/; \
+	ln -sfn devicetree $$ModDir/dtb; \
+	cp arch/arm64/boot/Image.gz $$ModDir/vmlinuz; \
+	cp arch/arm64/boot/Image $$ModDir/vmlinuz.uncompressed; \
+	rm -f $$ModDir/build $$ModDir/source; \
+	$(MAKE) EXTRAVERSION="$(KEXTRAVERSION)" INSTALL_HDR_PATH=$(CURDIR)/debian/linux-headers-pipa/usr headers_install; \
+	find debian/linux-headers-pipa/usr/include -name '.*' -delete
+
+override_dh_strip:
+	# Do not strip kernel modules/images
+
+override_dh_dwz:

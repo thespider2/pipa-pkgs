@@ -1,0 +1,29 @@
+#!/usr/bin/make -f
+%:
+	dh $@
+
+override_dh_auto_build:
+
+override_dh_auto_install:
+	install -Dm644 debian/extras/81-libssc-xiaomi-pipa.rules \
+		debian/pipa-sensors/usr/lib/udev/rules.d/81-libssc-xiaomi-pipa.rules
+	install -Dm644 debian/extras/hexagonrpcd-sdsp.conf \
+		debian/pipa-sensors/usr/share/hexagonrpcd/hexagonrpcd-sdsp.conf
+	install -Dm644 debian/extras/hexagonrpcd-sdsp.conf \
+		debian/pipa-sensors/usr/share/hexagonrpcd/hexagonrpcd-adsp-rootpd.conf
+	install -Dm644 debian/extras/hexagonrpcd-sdsp.conf \
+		debian/pipa-sensors/usr/share/hexagonrpcd/hexagonrpcd-adsp-sensorspd.conf
+	install -Dm755 debian/extras/pipa-prepare-sensor-persist \
+		debian/pipa-sensors/usr/local/bin/pipa-prepare-sensor-persist
+	install -Dm644 debian/extras/pipa-sensors-persist.service \
+		debian/pipa-sensors/usr/lib/systemd/system/pipa-sensors-persist.service
+	install -Dm755 debian/extras/pipa-sensors-resume \
+		debian/pipa-sensors/usr/lib/systemd/system-sleep/pipa-sensors-resume
+	install -Dm644 debian/extras/iio-sensor-proxy-pipa-audio.conf \
+		debian/pipa-sensors/usr/lib/systemd/system/iio-sensor-proxy.service.d/10-pipa-audio.conf
+	install -Dm644 debian/extras/pipa-audio-init-sensors.conf \
+		debian/pipa-sensors/usr/lib/systemd/system/pipa-audio-init.service.d/10-sensors.conf
+	install -Dm644 debian/extras/pipa-sensors.tmpfiles \
+		debian/pipa-sensors/usr/lib/tmpfiles.d/pipa-sensors.conf
+	install -Dm644 debian/extras/hexagonrpcd-sdsp-pipa-sensors.conf \
+		debian/pipa-sensors/usr/lib/systemd/system/hexagonrpcd-sdsp.service.d/10-pipa-sensors.conf

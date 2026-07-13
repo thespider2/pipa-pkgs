@@ -1,0 +1,18 @@
+#!/usr/bin/make -f
+%:
+	dh $@ --buildsystem=meson
+
+override_dh_auto_install:
+	dh_auto_install
+	mkdir -p debian/tmp/usr/include
+	cp -a include/libhexagonrpc debian/tmp/usr/include/
+	install -Dm644 debian/extras/hexagonrpcd-adsp-rootpd.service \
+		debian/tmp/usr/lib/systemd/system/hexagonrpcd-adsp-rootpd.service
+	install -Dm644 debian/extras/hexagonrpcd-adsp-sensorspd.service \
+		debian/tmp/usr/lib/systemd/system/hexagonrpcd-adsp-sensorspd.service
+	install -Dm644 debian/extras/hexagonrpcd-sdsp.service \
+		debian/tmp/usr/lib/systemd/system/hexagonrpcd-sdsp.service
+	install -Dm644 debian/extras/sysusers.conf \
+		debian/tmp/usr/lib/sysusers.d/fastrpc.conf
+	install -Dm644 debian/extras/10-fastrpc.rules \
+		debian/tmp/usr/lib/udev/rules.d/10-fastrpc.rules

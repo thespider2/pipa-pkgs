@@ -1,0 +1,5 @@
+libcamera (1:0.7.1-3pipa1) resolute; urgency=medium
+
+  * Ubuntu packaging with Xiaomi Pad 6 sensor patches.
+
+ -- Ayman <ayman@pipa>  Mon, 13 Jul 2026 12:00:00 +0000

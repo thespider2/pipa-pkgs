@@ -1,0 +1,14 @@
+Source: swclock-offset
+Section: utils
+Priority: optional
+Maintainer: Ayman <ayman@pipa>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Homepage: https://gitlab.postmarketos.org/postmarketOS/swclock-offset
+
+Package: swclock-offset
+Architecture: all
+Depends: ${misc:Depends}, systemd
+Description: Keep system time at an offset to a non-writable RTC
+ Needed on devices like the Xiaomi Pad 6 where the hardware RTC is
+ not directly writable.

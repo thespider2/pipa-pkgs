@@ -1,0 +1,5 @@
+linux-pipa (7.0.8-21pipa1) resolute; urgency=medium
+
+  * Ubuntu packaging of pipa kernel 7.0.8 (commit afac0607).
+
+ -- Ayman <ayman@pipa>  Mon, 13 Jul 2026 12:00:00 +0000

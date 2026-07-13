@@ -1,16 +1,17 @@
 # pipa-pkgs
 
 `pipa-pkgs` is a multi-distro package repository for Xiaomi Pad 6 / Pipa, published with GitHub Pages.
-It hosts both Arch Linux (pacman) and Ultramarine/Fedora (dnf) packages, enabling OTA updates for both distros from a single repo.
+It hosts Arch Linux (pacman), Ultramarine/Fedora (dnf), and Ubuntu (apt) packages, enabling OTA updates from a single repo.
 
 ## Goals
 
-- Build all packages whose sources are stored in this repo (both PKGBUILDs and RPM specs)
+- Build all packages whose sources are stored in this repo (PKGBUILDs, RPM specs, and Debian packaging)
 - Use the local `linux-pipa` 7.0.8 package as the kernel source of truth
 - Mirror only the remaining upstream Pipa packages that do not yet have local `PKGBUILD`s
 - Publish a pacman repository at `https://<user>.github.io/pipa-pkgs/repo/`
 - Publish a DNF repository at `https://<user>.github.io/pipa-pkgs/repo/ultramarine/`
-- Enable OTA updates for both EndeavourOS and Ultramarine OS installs
+- Publish an apt repository at `https://<user>.github.io/pipa-pkgs/repo/ubuntu/`
+- Enable OTA updates for EndeavourOS, Ultramarine OS, and Ubuntu installs
 
 ## Repository Layout
 
@@ -18,16 +19,20 @@ It hosts both Arch Linux (pacman) and Ultramarine/Fedora (dnf) packages, enablin
 - `ultramarine/specs/`: RPM `.spec` files for Ultramarine/Fedora packages
 - `ultramarine/Dockerfile`: Fedora 44 build container for RPMs
 - `ultramarine/pipa-pkgs.repo`: DNF repo config file for the tablet
+- `ubuntu/packages/*/debian/`: Debian packaging for Ubuntu 26.04 (Resolute)
+- `ubuntu/Dockerfile`: Ubuntu 26.04 build container for debs
+- `ubuntu/pipa-pkgs.list`: apt sources snippet shipped by `pipa-metapkg`
 - `config/packages.local.txt`: local package directories that should be built (pacman)
 - `config/packages.upstream.txt`: packages still mirrored from the upstream Pipa repo
 - `config/repo.env`: repo configuration, Pages URL, sync source, and kernel version note
 - `scripts/build-local-packages.sh`: builds local `PKGBUILD`s into the pacman repo
 - `scripts/build-ultramarine-rpms.sh`: builds RPM specs into the Ultramarine repo
+- `scripts/build-ubuntu-debs.sh`: builds Ubuntu debs into the apt repo
 - `scripts/sync-pkgbuilds.sh`: refreshes `pkgbuilds/` from the source `endeavouros-pipa` repo
 - `scripts/fetch-upstream.py`: downloads selected upstream packages into the pacman repo
 - `scripts/compose-repo.sh`: regenerates the pacman database from all package files
 - `scripts/stage-pages.sh`: prepares the GitHub Pages site output
-- `.github/workflows/publish.yml`: builds and publishes both repos to GitHub Pages
+- `.github/workflows/publish.yml`: builds and publishes all repos to GitHub Pages
 
 ## Expected Published URL
 

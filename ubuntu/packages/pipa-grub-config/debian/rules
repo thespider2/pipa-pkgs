@@ -1,0 +1,22 @@
+#!/usr/bin/make -f
+%:
+	dh $@
+
+override_dh_auto_build:
+	sed -e 's|/boot/grub2|/boot/grub|g' \
+	    -e 's|EndeavourOS ARM (Pipa)|Ubuntu (Pipa)|g' \
+	    debian/extras/pipa-refresh-grub-config > pipa-refresh-grub-config
+	chmod 755 pipa-refresh-grub-config
+
+override_dh_auto_install:
+	install -Dm755 pipa-refresh-grub-config \
+		debian/pipa-grub-config/usr/local/bin/pipa-refresh-grub-config
+	install -d debian/pipa-grub-config/etc/kernel/postinst.d
+	install -d debian/pipa-grub-config/etc/kernel/postrm.d
+	printf '%s\n' '#!/bin/bash' \
+		'/usr/local/bin/pipa-refresh-grub-config >/dev/null 2>&1 || :' \
+		> debian/pipa-grub-config/etc/kernel/postinst.d/zz-pipa-grub
+	cp debian/pipa-grub-config/etc/kernel/postinst.d/zz-pipa-grub \
+		debian/pipa-grub-config/etc/kernel/postrm.d/zz-pipa-grub
+	chmod 755 debian/pipa-grub-config/etc/kernel/postinst.d/zz-pipa-grub \
+		debian/pipa-grub-config/etc/kernel/postrm.d/zz-pipa-grub

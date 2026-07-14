@@ -246,15 +246,24 @@ compose_apt_repo() {
     cd "$DEB_REPO_DIR"
     dpkg-scanpackages --multiversion . /dev/null > Packages
     gzip -9c Packages > Packages.gz
-    cat > Release <<EOF
-Origin: pipa-pkgs
-Label: pipa-pkgs
-Suite: resolute
-Codename: resolute
-Architectures: arm64 all
-Components: main
-Description: Xiaomi Pad 6 packages for Ubuntu
-EOF
+    # Minimal but valid Release so apt does not warn about Date/Hash
+    {
+        echo "Origin: pipa-pkgs"
+        echo "Label: pipa-pkgs"
+        echo "Suite: resolute"
+        echo "Codename: resolute"
+        echo "Architectures: arm64 all"
+        echo "Components: main"
+        echo "Description: Xiaomi Pad 6 packages for Ubuntu"
+        echo "Date: $(date -Ru)"
+        echo "Acquire-By-Hash: no"
+        echo "MD5Sum:"
+        printf ' %s %16d %s\n' "$(md5sum Packages | awk '{print $1}')" "$(wc -c < Packages)" Packages
+        printf ' %s %16d %s\n' "$(md5sum Packages.gz | awk '{print $1}')" "$(wc -c < Packages.gz)" Packages.gz
+        echo "SHA256:"
+        printf ' %s %16d %s\n' "$(sha256sum Packages | awk '{print $1}')" "$(wc -c < Packages)" Packages
+        printf ' %s %16d %s\n' "$(sha256sum Packages.gz | awk '{print $1}')" "$(wc -c < Packages.gz)" Packages.gz
+    } > Release
 }
 
 cache_hit() {

@@ -16,7 +16,8 @@ override_dh_auto_configure:
 	$(MAKE) EXTRAVERSION="$(KEXTRAVERSION)" olddefconfig
 
 override_dh_auto_build:
-	$(MAKE) EXTRAVERSION="$(KEXTRAVERSION)" Image Image.gz modules dtbs
+	# Keep -j even with a custom override (dh parallel flags are otherwise ignored).
+	$(MAKE) -j$$(nproc) EXTRAVERSION="$(KEXTRAVERSION)" Image Image.gz modules dtbs
 
 override_dh_auto_install:
 	KernelVer=$$($(MAKE) -s EXTRAVERSION="$(KEXTRAVERSION)" kernelrelease); \
@@ -28,7 +29,7 @@ override_dh_auto_install:
 	install -Dm644 .config debian/linux-image-pipa/boot/config-$$KernelVer; \
 	install -Dm644 arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dtb \
 		debian/linux-image-pipa/boot/dtbs/qcom/sm8250-xiaomi-pipa.dtb; \
-	$(MAKE) EXTRAVERSION="$(KEXTRAVERSION)" INSTALL_MOD_PATH=$(CURDIR)/debian/linux-modules-pipa/usr modules_install; \
+	$(MAKE) -j$$(nproc) EXTRAVERSION="$(KEXTRAVERSION)" INSTALL_MOD_PATH=$(CURDIR)/debian/linux-modules-pipa/usr modules_install; \
 	ModDir=debian/linux-modules-pipa/usr/lib/modules/$$KernelVer; \
 	install -d $$ModDir/devicetree; \
 	cp arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dtb $$ModDir/devicetree/; \
@@ -36,7 +37,7 @@ override_dh_auto_install:
 	cp arch/arm64/boot/Image.gz $$ModDir/vmlinuz; \
 	cp arch/arm64/boot/Image $$ModDir/vmlinuz.uncompressed; \
 	rm -f $$ModDir/build $$ModDir/source; \
-	$(MAKE) EXTRAVERSION="$(KEXTRAVERSION)" INSTALL_HDR_PATH=$(CURDIR)/debian/linux-headers-pipa/usr headers_install; \
+	$(MAKE) -j$$(nproc) EXTRAVERSION="$(KEXTRAVERSION)" INSTALL_HDR_PATH=$(CURDIR)/debian/linux-headers-pipa/usr headers_install; \
 	find debian/linux-headers-pipa/usr/include -name '.*' -delete
 
 override_dh_strip:

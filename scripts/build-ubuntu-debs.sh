@@ -370,7 +370,10 @@ for name in "${BUILD_ORDER[@]}"; do
     echo "  Building $name"
     (
         cd "$work"
-        # Move built debs to BUILD_DIR parent for collection
+        # Parallel jobs: debian/rules overrides need their own -j; this also
+        # helps packages that still use dh_auto_build.
+        export DEB_BUILD_OPTIONS="parallel=$(nproc) ${DEB_BUILD_OPTIONS:-}"
+        export MAKEFLAGS="${MAKEFLAGS:--j$(nproc)}"
         dpkg-buildpackage -us -uc -b -d || dpkg-buildpackage -us -uc -b
     ) && ok=1 || ok=0
 

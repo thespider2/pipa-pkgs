@@ -96,19 +96,27 @@ cp %{SOURCE1} .config
 
 %build
 unset LDFLAGS
-make ARCH=arm64 LLVM=1 KBUILD_BUILD_VERSION=%{kbuildver} %{?_smp_mflags}
+make ARCH=arm64 LLVM=1 KBUILD_BUILD_VERSION=%{kbuildver} \
+    %{?_smp_mflags} Image Image.gz modules dtbs
 
 %install
 KernelVer=$(make ARCH=arm64 LLVM=1 KBUILD_BUILD_VERSION=%{kbuildver} -s kernelrelease)
 
 make ARCH=arm64 LLVM=1 KBUILD_BUILD_VERSION=%{kbuildver} \
-    modules_install zinstall dtbs_install \
-    INSTALL_PATH=%{buildroot}/boot \
     INSTALL_MOD_PATH=%{buildroot}/usr \
     INSTALL_MOD_STRIP=1 \
-    INSTALL_DTBS_PATH=%{buildroot}/boot/dtbs
+    modules_install
 
 rm -f %{buildroot}/usr/lib/modules/*/build %{buildroot}/usr/lib/modules/*/source
+
+install -Dm644 arch/arm64/boot/Image.gz %{buildroot}/boot/vmlinuz-${KernelVer}
+install -Dm644 arch/arm64/boot/Image %{buildroot}/boot/vmlinuz-${KernelVer}.uncompressed
+install -Dm644 arch/arm64/boot/Image.gz %{buildroot}/boot/Image.gz
+install -Dm644 arch/arm64/boot/Image %{buildroot}/boot/Image
+install -Dm644 System.map %{buildroot}/boot/System.map-${KernelVer}
+install -Dm644 .config %{buildroot}/boot/config-${KernelVer}
+install -Dm644 arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dtb \
+    %{buildroot}/boot/dtbs/qcom/sm8250-xiaomi-pipa.dtb
 
 ModDir=%{buildroot}/usr/lib/modules/${KernelVer}
 install -d ${ModDir}/devicetree

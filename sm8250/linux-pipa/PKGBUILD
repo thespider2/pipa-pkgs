@@ -47,7 +47,7 @@ build() {
   unset LDFLAGS
   make ARCH="$_carch" LLVM=1 \
     KBUILD_BUILD_VERSION="$((pkgrel + 1))-pipa" \
-    -j"$(nproc)"
+    -j"$(nproc)" Image Image.gz modules dtbs
 }
 
 package_linux-pipa() {
@@ -63,15 +63,22 @@ package_linux-pipa() {
 
   make ARCH="$_carch" LLVM=1 \
     KBUILD_BUILD_VERSION="$((pkgrel + 1))-pipa" \
-    modules_install zinstall dtbs_install \
-    INSTALL_PATH="$pkgdir/boot" \
     INSTALL_MOD_PATH="$pkgdir/usr" \
     INSTALL_MOD_STRIP=1 \
-    INSTALL_DTBS_PATH="$pkgdir/boot/dtbs"
+    modules_install
 
   rm -f "$pkgdir"/usr/lib/modules/*/build "$pkgdir"/usr/lib/modules/*/source
 
-  mkdir -p "$modulesdir/devicetree"
+  mkdir -p "$pkgdir/boot/dtbs/qcom" "$modulesdir/devicetree"
+  install -Dm644 arch/arm64/boot/Image.gz "$pkgdir/boot/vmlinuz-$kernver"
+  install -Dm644 arch/arm64/boot/Image "$pkgdir/boot/vmlinuz-$kernver.uncompressed"
+  install -Dm644 arch/arm64/boot/Image.gz "$pkgdir/boot/Image.gz"
+  install -Dm644 arch/arm64/boot/Image "$pkgdir/boot/Image"
+  install -Dm644 System.map "$pkgdir/boot/System.map-$kernver"
+  install -Dm644 .config "$pkgdir/boot/config-$kernver"
+  install -Dm644 arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dtb \
+    "$pkgdir/boot/dtbs/qcom/sm8250-xiaomi-pipa.dtb"
+
   cp arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dtb "$modulesdir/devicetree/"
   ln -s devicetree "$modulesdir/dtb"
   cp arch/arm64/boot/Image.gz "$modulesdir/vmlinuz"

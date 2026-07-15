@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     equivs lintian reprepro apt-utils \
     meson ninja-build cmake pkg-config \
     gcc g++ make bc bison flex cpio kmod rsync wget curl git \
+    clang lld llvm \
     python3 python3-dev python3-jinja2 python3-yaml python3-ply python3-pybind11 \
     libssl-dev libelf-dev dwarves libdw-dev \
     libglib2.0-dev libgudev-1.0-dev libprotobuf-c-dev protobuf-c-compiler protobuf-compiler \

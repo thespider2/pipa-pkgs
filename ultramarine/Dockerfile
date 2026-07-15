@@ -4,6 +4,7 @@ RUN dnf install -y \
     rpm-build rpmdevtools createrepo_c dnf-plugins-core \
     gcc gcc-c++ make cmake meson ninja-build \
     bc bison flex cpio kmod python3 tar xz rsync wget curl git \
+    clang llvm lld \
     openssl openssl-devel elfutils-devel dwarves perl hostname \
     glib2-devel libgudev-devel protobuf-c-devel libqmi-devel \
     json-glib-devel gobject-introspection-devel \

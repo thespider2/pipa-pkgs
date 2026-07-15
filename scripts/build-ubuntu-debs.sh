@@ -112,7 +112,7 @@ stage_common_sources() {
         "$ROOT_DIR/common/libcamera/ov13b10.yaml"
 
     link_files "$SOURCES_DIR/linux-pipa" \
-        "$ROOT_DIR/sm8250/linux-pipa/pipa.config" \
+        "$ROOT_DIR/sm8250/linux-pipa/config-xiaomi-pipa.aarch64" \
         "$ROOT_DIR/sm8250/linux-pipa/"0*.patch
 
     link_files "$SOURCES_DIR/pipa-metapkg" \
@@ -204,10 +204,10 @@ fetch_and_extract() {
             done
             ;;
         linux-pipa)
-            local commit=afac0607a1046fe1dcdd341297a2144d5013272a
-            local tar="$DL_DIR/linux-${commit}.tar.gz"
-            download "https://github.com/aymanrgab/linux/archive/${commit}.tar.gz" "$tar"
-            tar -xzf "$tar" -C "$work" --strip-components=1
+            local ver=7.1.3
+            local tar="$DL_DIR/linux-${ver}.tar.xz"
+            download "https://cdn.kernel.org/pub/linux/kernel/v7.x/linux-${ver}.tar.xz" "$tar"
+            tar -xJf "$tar" -C "$work" --strip-components=1
             ;;
         pipa-dracut|pipa-grub-config|pipa-sensors|pipa-sound-conf|pipa-metapkg)
             # Local-only payload packages; extras already staged.

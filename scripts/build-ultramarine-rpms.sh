@@ -110,7 +110,7 @@ package_present_in_repo() {
 echo "=== Gathering sources from pipa-pkgs ==="
 
 link_files "$SOURCES_DIR/kernel-pipa" \
-    "$ROOT_DIR/sm8250/linux-pipa/pipa.config" \
+    "$ROOT_DIR/sm8250/linux-pipa/config-xiaomi-pipa.aarch64" \
     "$ROOT_DIR/sm8250/linux-pipa/"0*.patch
 
 link_files "$SOURCES_DIR/xiaomi-pipa-firmware" \

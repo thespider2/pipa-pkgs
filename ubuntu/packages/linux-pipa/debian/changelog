@@ -1,5 +1,5 @@
-linux-pipa (7.0.8-21pipa1) resolute; urgency=medium
+linux-pipa (7.1.3-1pipa1) resolute; urgency=medium
 
-  * Ubuntu packaging of pipa kernel 7.0.8 (commit afac0607).
+  * Align with postmarketOS linux-xiaomi-pipa (upstream 7.1.3, pmaports patches).
 
- -- Ayman <ayman@pipa>  Mon, 13 Jul 2026 12:00:00 +0000
+ -- Ayman <ayman@pipa>  Wed, 15 Jul 2026 18:50:00 +0000

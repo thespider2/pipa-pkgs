@@ -9,7 +9,7 @@ RAW_KERNEL_REL=Image
 GZIP_KERNEL_REL=Image.gz
 INITRAMFS_STABLE_REL=initramfs-linux-pipa.img
 INITRAMFS_STABLE_PATH="$BOOT_DIR/$INITRAMFS_STABLE_REL"
-DEFAULT_CMDLINE='rw rootwait console=tty0 console=ttyS0 earlycon quiet splash'
+DEFAULT_CMDLINE='rw rootwait console=tty0 quiet'
 
 log() {
     printf 'pipa-grub-config: %s\n' "$*" >&2

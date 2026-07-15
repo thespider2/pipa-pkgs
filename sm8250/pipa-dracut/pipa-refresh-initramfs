@@ -57,7 +57,7 @@ main() {
     fi
 
     log "building initramfs for $kernver"
-    dracut --force --kver "$kernver" "$initramfs"
+    dracut --force --no-hostonly --kver "$kernver" "$initramfs"
 
     if [ -x /usr/local/bin/pipa-refresh-grub-config ]; then
         log "refreshing GRUB menu"

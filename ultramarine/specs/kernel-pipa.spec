@@ -1,7 +1,7 @@
 %global debug_package %{nil}
 
 %global kversion 7.1.3
-%global krelease 1
+%global krelease 2
 %global kbuildver %(echo $((%{krelease} + 1))-pipa)
 %global kmajor %(echo %{kversion} | cut -d. -f1)
 
@@ -57,7 +57,7 @@ Requires:       dracut
 Requires:       kmod
 Requires:       xiaomi-pipa-firmware
 Provides:       kernel = %{kversion}
-Conflicts:      kernel
+Obsoletes:      kernel-pipa < %{version}-%{release}
 
 %description
 Stable Linux kernel %{kversion} for the Xiaomi Pad 6 (SM8250 / pipa).
@@ -66,7 +66,7 @@ Matches postmarketOS linux-xiaomi-pipa patches and config.
 %package headers
 Summary:        Header files for kernel-pipa
 Provides:       kernel-headers = %{kversion}
-Conflicts:      kernel-headers
+Obsoletes:      kernel-pipa-headers < %{version}-%{release}
 
 %description headers
 Kernel header files for building out-of-tree modules against kernel-pipa.
@@ -75,6 +75,7 @@ Kernel header files for building out-of-tree modules against kernel-pipa.
 Summary:        Kernel modules for kernel-pipa
 Requires:       kernel-pipa = %{version}-%{release}
 Provides:       kernel-modules = %{kversion}
+Obsoletes:      kernel-pipa-modules < %{version}-%{release}
 
 %description modules
 Loadable kernel modules for kernel-pipa.
@@ -154,5 +155,9 @@ find %{buildroot}/usr/include -name '.*' -delete
 /usr/include/
 
 %changelog
+* Thu Jul 16 2026 Ayman <ayman@pipa> - 7.1.3-2
+- Drop Conflicts: kernel so dnf can upgrade between kernel-pipa releases
+- Obsolete older kernel-pipa releases so dnf can upgrade cleanly
+
 * Wed Jul 15 2026 Ayman <ayman@pipa> - 7.1.3-1
 - upstream 7.1.3

@@ -1,0 +1,115 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Ayman <ayman@pipa>
+Subject: [PATCH 15/15] arm64: dts: qcom: sm8250-xiaomi-pipa: Unify CSOT and
+ Tianma into a single DTB
+
+---
+ arch/arm64/boot/dts/qcom/Makefile             |  3 +--
+ arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa-csot.dts   | 23 -------------------
+ arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa-tianma.dts | 23 -------------------
+ arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts        | 22 ++++++++++++++++++
+ 4 files changed, 23 insertions(+), 48 deletions(-)
+ delete mode 100644 arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa-csot.dts
+ delete mode 100644 arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa-tianma.dts
+ create mode 100644 arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts
+
+diff --git a/arch/arm64/boot/dts/qcom/Makefile b/arch/arm64/boot/dts/qcom/Makefile
+index d3ec6c7cb25b..a1b2c3d4e5f6 100644
+--- a/arch/arm64/boot/dts/qcom/Makefile
++++ b/arch/arm64/boot/dts/qcom/Makefile
+@@ -315,8 +315,7 @@ dtb-$(CONFIG_ARCH_QCOM)	+= sm8250-sony-xperia-edo-pdx203.dtb
+ dtb-$(CONFIG_ARCH_QCOM)	+= sm8250-sony-xperia-edo-pdx206.dtb
+ dtb-$(CONFIG_ARCH_QCOM)	+= sm8250-xiaomi-elish-boe.dtb
+ dtb-$(CONFIG_ARCH_QCOM)	+= sm8250-xiaomi-elish-csot.dtb
+-dtb-$(CONFIG_ARCH_QCOM)	+= sm8250-xiaomi-pipa-csot.dtb
+-dtb-$(CONFIG_ARCH_QCOM)	+= sm8250-xiaomi-pipa-tianma.dtb
++dtb-$(CONFIG_ARCH_QCOM)	+= sm8250-xiaomi-pipa.dtb
+ dtb-$(CONFIG_ARCH_QCOM)	+= sm8350-hdk.dtb
+ dtb-$(CONFIG_ARCH_QCOM)	+= sm8350-microsoft-surface-duo2.dtb
+ dtb-$(CONFIG_ARCH_QCOM)	+= sm8350-mtp.dtb
+diff --git a/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa-csot.dts b/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa-csot.dts
+deleted file mode 100644
+index 4465a8e17c83..000000000000
+--- a/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa-csot.dts
++++ /dev/null
+@@ -1,23 +0,0 @@
+-// SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
+-/*
+- * Copyright (c) 2023 Luka Panio <lukapanio@gmail.com>
+- */
+-
+-/dts-v1/;
+-
+-#include "sm8250-xiaomi-pipa-common.dtsi"
+-
+-/ {
+-	model = "Xiaomi Pad 6 (CSOT)";
+-	compatible = "xiaomi,pipa", "qcom,sm8250";
+-};
+-
+-&display_panel {
+-	compatible = "xiaomi,pipa-csot-nt36532", "novatek,nt36532";
+-	status = "okay";
+-};
+-
+-&touchscreen {
+-	firmware-name = "novatek/nt36532_csot.bin";
+-	status = "okay";
+-};
+diff --git a/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa-tianma.dts b/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa-tianma.dts
+deleted file mode 100644
+index 820b5e123733..000000000000
+--- a/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa-tianma.dts
++++ /dev/null
+@@ -1,23 +0,0 @@
+-// SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
+-/*
+- * Copyright (c) 2023 Luka Panio <lukapanio@gmail.com>
+- */
+-
+-/dts-v1/;
+-
+-#include "sm8250-xiaomi-pipa-common.dtsi"
+-
+-/ {
+-	model = "Xiaomi Pad 6 (Tianma)";
+-	compatible = "xiaomi,pipa", "qcom,sm8250";
+-};
+-
+-&display_panel {
+-	compatible = "xiaomi,pipa-tianma-nt36532", "novatek,nt36532";
+-	status = "okay";
+-};
+-
+-&touchscreen {
+-	firmware-name = "novatek/nt36532_tianma.bin";
+-	status = "okay";
+-};
+diff --git a/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts b/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts
+new file mode 100644
+index 000000000000..f1e2d3c4b5a6
+--- /dev/null
++++ b/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts
+@@ -0,0 +1,22 @@
++// SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
++/*
++ * Copyright (c) 2023 Luka Panio <lukapanio@gmail.com>
++ */
++
++/dts-v1/;
++
++#include "sm8250-xiaomi-pipa-common.dtsi"
++
++/ {
++	model = "Xiaomi Pad 6";
++	compatible = "xiaomi,pipa", "qcom,sm8250";
++};
++
++&display_panel {
++	compatible = "xiaomi,pipa-nt36532", "novatek,nt36532";
++	status = "okay";
++};
++
++&touchscreen {
++	status = "okay";
++};

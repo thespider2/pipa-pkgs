@@ -29,6 +29,9 @@ Patch0011:      0011-FROMLIST-ASoC-qcom-qdsp6-q6afe-fix-clk-vote-response.patch
 Patch0012:      0012-HACK-ASoC-qcom-qdsp6-q6afe-pretend-the-AFE-vote-didn.patch
 Patch0013:      0013-Input-keyboard-add-Xiaomi-Nanosic-803-keyboard.patch
 Patch0014:      0014-UPSTREAM-libbpf-Fix-UAF-in-strset__add_str.patch
+Patch0015:      0015-arm64-dts-qcom-sm8250-xiaomi-pipa-Unify-single-dtb.patch
+Patch0016:      0016-drm-panel-novatek-nt36532-add-unified-pipa-compatible.patch
+Patch0017:      0017-Input-nt36523-try-both-pipa-touch-firmwares.patch
 
 BuildRequires:  bc
 BuildRequires:  bison
@@ -93,6 +96,9 @@ cp %{SOURCE1} .config
 %patch -P 0012 -p1 -F 2
 %patch -P 0013 -p1 -F 2
 %patch -P 0014 -p1 -F 2
+%patch -P 0015 -p1 -F 2
+%patch -P 0016 -p1 -F 2
+%patch -P 0017 -p1 -F 2
 
 %build
 unset LDFLAGS

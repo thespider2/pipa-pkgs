@@ -29,8 +29,11 @@ source=(
   '0012-HACK-ASoC-qcom-qdsp6-q6afe-pretend-the-AFE-vote-didn.patch'
   '0013-Input-keyboard-add-Xiaomi-Nanosic-803-keyboard.patch'
   '0014-UPSTREAM-libbpf-Fix-UAF-in-strset__add_str.patch'
+  '0015-arm64-dts-qcom-sm8250-xiaomi-pipa-Unify-single-dtb.patch'
+  '0016-drm-panel-novatek-nt36532-add-unified-pipa-compatible.patch'
+  '0017-Input-nt36523-try-both-pipa-touch-firmwares.patch'
 )
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 prepare() {
   cd "linux-$pkgver"
@@ -76,10 +79,9 @@ package_linux-pipa() {
   install -Dm644 arch/arm64/boot/Image "$pkgdir/boot/Image"
   install -Dm644 System.map "$pkgdir/boot/System.map-$kernver"
   install -Dm644 .config "$pkgdir/boot/config-$kernver"
-  install -Dm644 arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dtb \
-    "$pkgdir/boot/dtbs/qcom/sm8250-xiaomi-pipa.dtb"
-
-  cp arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dtb "$modulesdir/devicetree/"
+  local dtb=sm8250-xiaomi-pipa.dtb
+  install -Dm644 "arch/arm64/boot/dts/qcom/$dtb" "$pkgdir/boot/dtbs/qcom/$dtb"
+  cp "arch/arm64/boot/dts/qcom/$dtb" "$modulesdir/devicetree/"
   ln -s devicetree "$modulesdir/dtb"
   cp arch/arm64/boot/Image.gz "$modulesdir/vmlinuz"
   cp arch/arm64/boot/Image "$modulesdir/vmlinuz.uncompressed"

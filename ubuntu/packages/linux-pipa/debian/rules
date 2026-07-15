@@ -36,10 +36,10 @@ override_dh_auto_install:
 	install -Dm644 arch/arm64/boot/Image debian/linux-image-pipa/boot/Image; \
 	install -Dm644 System.map debian/linux-image-pipa/boot/System.map-$$KernelVer; \
 	install -Dm644 .config debian/linux-image-pipa/boot/config-$$KernelVer; \
-	install -Dm644 arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dtb \
-		debian/linux-image-pipa/boot/dtbs/qcom/sm8250-xiaomi-pipa.dtb; \
 	ModDir=debian/linux-modules-pipa/usr/lib/modules/$$KernelVer; \
 	install -d $$ModDir/devicetree; \
+	install -Dm644 arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dtb \
+		debian/linux-image-pipa/boot/dtbs/qcom/sm8250-xiaomi-pipa.dtb; \
 	cp arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dtb $$ModDir/devicetree/; \
 	ln -sfn devicetree $$ModDir/dtb; \
 	cp arch/arm64/boot/Image.gz $$ModDir/vmlinuz; \

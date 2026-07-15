@@ -1,0 +1,96 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Ayman <ayman@pipa>
+Subject: [PATCH 17/17] Input: nt36523: Try both pipa touch firmwares when
+ firmware-name is omitted
+
+---
+ drivers/input/touchscreen/nt36523/nt36xxx.c | 33 +++++++++++++++++++++++
+ drivers/input/touchscreen/nt36523/nt36xxx.h |  2 ++
+ 2 files changed, 35 insertions(+)
+
+diff --git a/drivers/input/touchscreen/nt36523/nt36xxx.c b/drivers/input/touchscreen/nt36523/nt36xxx.c
+index 123456789abc..abcdef012345 100644
+--- a/drivers/input/touchscreen/nt36523/nt36xxx.c
++++ b/drivers/input/touchscreen/nt36523/nt36xxx.c
+@@ -772,8 +772,12 @@ static int32_t nvt_parse_dt(struct device *dev)
+ 	ret = of_property_read_string(np, "firmware-name", &ts->fw_name);
+ 	if (ret) {
+ 		NVT_LOG("Unable to get touchscreen firmware name\n");
+-		ts->fw_name = DEFAULT_BOOT_UPDATE_FIRMWARE_NAME;
++		if (of_machine_is_compatible("xiaomi,pipa")) {
++			ts->pipa_auto_fw = true;
++		} else {
++			ts->fw_name = DEFAULT_BOOT_UPDATE_FIRMWARE_NAME;
++		}
+ 	}
+ 
+ 	ret = of_property_read_u32(np, "spi-max-frequency", &ts->spi_max_freq);
+@@ -1861,7 +1865,10 @@ static int32_t nvt_ts_resume(struct device *dev)
+ #if NVT_TOUCH_SUPPORT_HW_RST
+ 	gpio_set_value(ts->reset_gpio, 1);
+ #endif
+-	ret = nvt_update_firmware(ts->fw_name);
++	if (ts->pipa_auto_fw)
++		ret = nvt_update_pipa_firmware();
++	else
++		ret = nvt_update_firmware(ts->fw_name);
+ 	if (ret)
+ 		NVT_ERR("download firmware failed\n");
+ 
+@@ -3169,6 +3176,25 @@ request_firmware_fail:
+ 	return ret;
+ }
+ 
++int32_t nvt_update_pipa_firmware(void)
++{
++	static const char * const fw_names[] = {
++		"novatek/nt36532_csot.bin",
++		"novatek/nt36532_tianma.bin",
++	};
++	int32_t ret = -ENOENT;
++	unsigned int i;
++
++	for (i = 0; i < ARRAY_SIZE(fw_names); i++) {
++		ret = nvt_update_firmware(fw_names[i]);
++		if (!ret) {
++			ts->fw_name = fw_names[i];
++			return 0;
++		}
++	}
++
++	return ret;
++}
++
+ /*******************************************************
+ Description:
+ 	Novatek touchscreen update firmware when booting
+@@ -3186,7 +3212,10 @@ void Boot_Update_Firmware(struct work_struct *work)
+ 			nvt_update_firmware(ts->fw_name);
+ 		}
+ 	} else {
+-		nvt_update_firmware(ts->fw_name);
++		if (ts->pipa_auto_fw)
++			nvt_update_pipa_firmware();
++		else
++			nvt_update_firmware(ts->fw_name);
+ 	}
+ 	disable_pen_input_device(false);
+ 	nvt_get_fw_info();
+diff --git a/drivers/input/touchscreen/nt36523/nt36xxx.h b/drivers/input/touchscreen/nt36523/nt36xxx.h
+index 123456789abc..abcdef012345 100644
+--- a/drivers/input/touchscreen/nt36523/nt36xxx.h
++++ b/drivers/input/touchscreen/nt36523/nt36xxx.h
+@@ -2165,6 +2165,7 @@ struct nvt_ts_data {
+ 	struct drm_panel_follower panel_follower;
+ 	bool panel_on;
++	bool pipa_auto_fw;
+ 	uint32_t config_array_size;
+ 	struct nvt_config_info *config_array;
+ 	const struct nvt_ts_desc *desc;
+@@ -2265,6 +2266,7 @@ void nvt_set_dbgfw_status(bool enable);
+ void nvt_match_fw(void);
+ int32_t nvt_update_firmware(const char *firmware_name);
++int32_t nvt_update_pipa_firmware(void);
+ int32_t nvt_check_fw_reset_state(RST_COMPLETE_STATE check_reset_state);
+ int32_t nvt_get_fw_info(void);
+ int32_t nvt_clear_fw_status(void);

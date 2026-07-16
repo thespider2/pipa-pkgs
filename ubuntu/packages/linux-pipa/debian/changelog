@@ -1,3 +1,9 @@
+linux-pipa (7.1.3-2pipa1) resolute; urgency=medium
+
+  * HACK: ignore spurious AFE clock set_param errors so va_macro can probe.
+
+ -- Ayman <ayman@pipa>  Thu, 16 Jul 2026 16:20:00 +0000
+
 linux-pipa (7.1.3-1pipa1) resolute; urgency=medium
 
   * Align with postmarketOS linux-xiaomi-pipa (upstream 7.1.3, pmaports patches).

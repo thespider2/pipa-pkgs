@@ -32,6 +32,7 @@ Patch0014:      0014-UPSTREAM-libbpf-Fix-UAF-in-strset__add_str.patch
 Patch0015:      0015-arm64-dts-qcom-sm8250-xiaomi-pipa-Unify-single-dtb.patch
 Patch0016:      0016-drm-panel-novatek-nt36532-add-unified-pipa-compatible.patch
 Patch0017:      0017-Input-nt36523-try-both-pipa-touch-firmwares.patch
+Patch0018:      0018-HACK-ASoC-qcom-qdsp6-q6afe-ignore-clock-set-param-er.patch
 
 BuildRequires:  bc
 BuildRequires:  bison
@@ -100,6 +101,7 @@ cp %{SOURCE1} .config
 %patch -P 0015 -p1 -F 2
 %patch -P 0016 -p1 -F 2
 %patch -P 0017 -p1 -F 2
+%patch -P 0018 -p1 -F 2
 
 %build
 unset LDFLAGS
@@ -156,6 +158,7 @@ find %{buildroot}/usr/include -name '.*' -delete
 
 %changelog
 * Thu Jul 16 2026 Ayman <ayman@pipa> - 7.1.3-2
+- HACK: ignore spurious AFE clock set_param errors so va_macro can probe
 - Drop Conflicts: kernel so dnf can upgrade between kernel-pipa releases
 - Obsolete older kernel-pipa releases so dnf can upgrade cleanly
 

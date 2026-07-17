@@ -1,53 +1,39 @@
 pkgbase=linux-pipa
 pkgname=(linux-pipa linux-pipa-headers)
-pkgver=7.1.3
-pkgrel=2
-pkgdesc='Stable kernel for Xiaomi Pad 6'
+pkgver=7.1.0
+pkgrel=1
+pkgdesc='Xiaomi Pad 6 kernel (PipaDB pipa/7.1)'
 arch=('aarch64')
 _carch=arm64
-url='https://kernel.org'
-license=('GPL2')
+url='https://github.com/PipaDB/linux/tree/pipa/7.1'
+license=('GPL-2.0-only')
 install=linux-pipa.install
 makedepends=(
-  'bc' 'bison' 'clang' 'cpio' 'flex' 'kmod' 'lld' 'llvm' 'pahole' 'python'
+  'bc' 'bison' 'clang' 'cpio' 'flex' 'git' 'kmod' 'lld' 'llvm' 'pahole' 'python'
   'tar' 'xz' 'rsync'
 )
 options=('!strip')
+# Pin the branch tip so rebuilds are reproducible. Bump with:
+#   git ls-remote https://github.com/PipaDB/linux.git refs/heads/pipa/7.1
+_commit=e64607dc60963a05133304a8b682818ee4412106
 source=(
-  "https://cdn.kernel.org/pub/linux/kernel/v${pkgver%%.*}.x/linux-$pkgver.tar.xz"
+  "git+https://github.com/PipaDB/linux.git#commit=${_commit}"
   'config-xiaomi-pipa.aarch64'
-  '0001-arm64-dts-qcom-sm8250-xiaomi-pipa-Add-device-tree-fo.patch'
-  '0002-power-supply-Add-driver-for-Qualcomm-PMIC-fuel-gauge.patch'
-  '0003-Input-Add-nt36523-touchscreen-driver.patch'
-  '0004-drm-msm-dsi-change-sync-mode-to-sync-on-DSI0-rather-.patch'
-  '0005-drm-msm-dsi-support-DSC-configurations-with-slice_pe.patch'
-  '0006-drm-panel-Add-support-for-Novatek-NT36532-panel.patch'
-  '0007-drivers-media-i2c-ov13b10-add-device-tree-support-an.patch'
-  '0008-ASoC-qcom-sm8250-add-tertiary-tdm-support.patch'
-  '0010-HACK-ASoC-codecs-aw88261-add-xiaomi-pipa-hacks.patch'
-  '0011-FROMLIST-ASoC-qcom-qdsp6-q6afe-fix-clk-vote-response.patch'
-  '0012-HACK-ASoC-qcom-qdsp6-q6afe-pretend-the-AFE-vote-didn.patch'
-  '0013-Input-keyboard-add-Xiaomi-Nanosic-803-keyboard.patch'
-  '0014-UPSTREAM-libbpf-Fix-UAF-in-strset__add_str.patch'
-  '0015-arm64-dts-qcom-sm8250-xiaomi-pipa-Unify-single-dtb.patch'
-  '0016-drm-panel-novatek-nt36532-add-unified-pipa-compatible.patch'
-  '0017-Input-nt36523-try-both-pipa-touch-firmwares.patch'
-  '0018-HACK-ASoC-qcom-qdsp6-q6afe-ignore-clock-set-param-er.patch'
 )
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+sha256sums=('SKIP' 'SKIP')
 
 prepare() {
-  cd "linux-$pkgver"
+  cd linux
   cp ../config-xiaomi-pipa.aarch64 .config
 
-  local patch
-  for patch in ../*.patch; do
-    patch -p1 < "$patch"
-  done
+  # Match PipaDB build.sh: stable release string, no -gSHA localversion.
+  ./scripts/config --file .config -d LOCALVERSION_AUTO
+  ./scripts/config --file .config --set-str LOCALVERSION "-pipa"
+  make ARCH="$_carch" LLVM=1 olddefconfig
 }
 
 build() {
-  cd "linux-$pkgver"
+  cd linux
   unset LDFLAGS
   make ARCH="$_carch" LLVM=1 \
     KBUILD_BUILD_VERSION="$((pkgrel + 1))-pipa" \
@@ -59,7 +45,7 @@ package_linux-pipa() {
   depends=('coreutils' 'dracut' 'kmod' 'xiaomi-pipa-firmware')
   provides=('linux')
 
-  cd "linux-$pkgver"
+  cd linux
 
   local kernver
   kernver="$(make ARCH="$_carch" LLVM=1 KBUILD_BUILD_VERSION="$((pkgrel + 1))-pipa" -s kernelrelease)"
@@ -95,7 +81,7 @@ package_linux-pipa-headers() {
   pkgdesc='Header files and scripts for building modules for Linux kernel'
   provides=('linux-headers')
 
-  cd "linux-$pkgver"
+  cd linux
   make ARCH="$_carch" LLVM=1 \
     KBUILD_BUILD_VERSION="$((pkgrel + 1))-pipa" \
     INSTALL_HDR_PATH="$pkgdir/usr" headers_install

@@ -1,7 +1,7 @@
 pkgbase=linux-pipa
 pkgname=(linux-pipa linux-pipa-headers)
 pkgver=7.1.0
-pkgrel=1
+pkgrel=2
 pkgdesc='Xiaomi Pad 6 kernel (PipaDB pipa/7.1)'
 arch=('aarch64')
 _carch=arm64
@@ -29,6 +29,13 @@ prepare() {
   # Match PipaDB build.sh: stable release string, no -gSHA localversion.
   ./scripts/config --file .config -d LOCALVERSION_AUTO
   ./scripts/config --file .config --set-str LOCALVERSION "-pipa"
+  # Sailfish has no initramfs: panel + backlight must be built-in or the
+  # screen stays blank (DRM_MSM=y probes before modules-load).
+  ./scripts/config --file .config -e DRM_PANEL_NOVATEK_NT36532
+  ./scripts/config --file .config -e BACKLIGHT_KTZ8866
+  ./scripts/config --file .config -d MODULE_COMPRESS
+  ./scripts/config --file .config -d MODULE_COMPRESS_ZSTD
+  ./scripts/config --file .config -d MODULE_COMPRESS_ALL
   make ARCH="$_carch" LLVM=1 olddefconfig
 }
 

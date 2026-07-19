@@ -3,7 +3,8 @@
 # PipaDB/linux branch pipa/7.1 (Linux 7.1.0 + pipa DT/drivers).
 %global gitcommit e64607dc60963a05133304a8b682818ee4412106
 %global kversion 7.1.0
-%global krelease 2
+# Align with Arch linux-pipa pkgrel that carries SoftISP (6437f09) + patch layout (5e5527ee).
+%global krelease 4
 %global kbuildver %(echo $((%{krelease} + 1))-pipa)
 
 Name:           kernel-pipa
@@ -136,6 +137,10 @@ find %{buildroot}/usr/include -name '.*' -delete
 /usr/include/
 
 %changelog
+* Sun Jul 19 2026 Ayman <ayman@pipa> - 7.1.0-4
+- Rebuild as linux-pipa pkgrel 4 (SoftISP patches beside PKGBUILD for makepkg;
+  same SoftISP content as 7.1.0-2 / Arch 7.1.0-3+)
+
 * Sun Jul 19 2026 Ayman <ayman@pipa> - 7.1.0-2
 - Camera bring-up patches: CAMCC MCLK force-enable, HI846/OV13B10 power
   and MCLK retries, DTS assigned-clocks @ 19.2MHz + pinctrl (Android DT),

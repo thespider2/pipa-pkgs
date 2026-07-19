@@ -1,7 +1,7 @@
 pkgbase=linux-pipa
 pkgname=(linux-pipa linux-pipa-headers)
 pkgver=7.1.0
-pkgrel=3
+pkgrel=4
 pkgdesc='Xiaomi Pad 6 kernel (PipaDB pipa/7.1)'
 arch=('aarch64')
 _carch=arm64
@@ -19,7 +19,14 @@ _commit=e64607dc60963a05133304a8b682818ee4412106
 source=(
   "git+https://github.com/PipaDB/linux.git#commit=${_commit}"
   'config-xiaomi-pipa.aarch64'
-  'patches/'{0001-clk-qcom-clk-rcg2-keep-force-enable-in-shared_enable,0002-media-i2c-hi846-fix-power-on-reset-sequencing,0003-media-i2c-hi846-retry-MCLK-enable-and-accept-19.2MHz,0004-media-i2c-ov13b10-retry-MCLK-enable-and-set-19.2MHz-,0005-arm64-dts-qcom-pipa-fix-OV13B10-rear-camera-clocks-a,0006-arm64-dts-qcom-pipa-fix-HI846-front-camera-clocks-an,0007-media-qcom-camss-fix-video-pipeline-stop-streaming,0008-media-i2c-ov13b10-add-get_selection-pad-operation}.patch
+  '0001-clk-qcom-clk-rcg2-keep-force-enable-in-shared_enable.patch'
+  '0002-media-i2c-hi846-fix-power-on-reset-sequencing.patch'
+  '0003-media-i2c-hi846-retry-MCLK-enable-and-accept-19.2MHz.patch'
+  '0004-media-i2c-ov13b10-retry-MCLK-enable-and-set-19.2MHz-.patch'
+  '0005-arm64-dts-qcom-pipa-fix-OV13B10-rear-camera-clocks-a.patch'
+  '0006-arm64-dts-qcom-pipa-fix-HI846-front-camera-clocks-an.patch'
+  '0007-media-qcom-camss-fix-video-pipeline-stop-streaming.patch'
+  '0008-media-i2c-ov13b10-add-get_selection-pad-operation.patch'
 )
 sha256sums=('SKIP' 'SKIP'
             'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
@@ -32,7 +39,7 @@ prepare() {
     src="${src##*/}"
     [[ $src = *.patch ]] || continue
     echo "Applying patch $src..."
-    patch -Np1 < "../patches/$src"
+    patch -Np1 < "../$src"
   done
   cp ../config-xiaomi-pipa.aarch64 .config
 

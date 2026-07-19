@@ -9,7 +9,7 @@ Builds [PipaDB/linux](https://github.com/PipaDB/linux) branch [`pipa/7.1`](https
 
 Config: `config-xiaomi-pipa.aarch64` (packaging overlay; `olddefconfig` against the tree).
 
-Camera SoftISP bring-up patches live in `patches/` (MCLK/pinctrl aligned with Xiaomi Android DT at 19.2 MHz).
+Camera SoftISP bring-up patches are `0001`–`0008-*.patch` next to the PKGBUILD (MCLK/pinctrl aligned with Xiaomi Android DT at 19.2 MHz).
 
 ## Bump commit
 
@@ -25,4 +25,4 @@ makepkg -s
 ```
 
 Old vanilla `kernel.org` + full historical series live under `archived-patches/` (not applied).
-Camera SoftISP bring-up patches in `patches/` are applied by the Ultramarine RPM and Arch package.
+Those patches are applied by the Ultramarine RPM and Arch package.

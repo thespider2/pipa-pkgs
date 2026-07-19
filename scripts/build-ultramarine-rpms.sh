@@ -112,7 +112,7 @@ echo "=== Gathering sources from pipa-pkgs ==="
 # PipaDB/linux pipa/7.1 + camera bring-up patches + config overlay.
 link_files "$SOURCES_DIR/kernel-pipa" \
     "$ROOT_DIR/sm8250/linux-pipa/config-xiaomi-pipa.aarch64" \
-    "$ROOT_DIR"/sm8250/linux-pipa/patches/*.patch
+    "$ROOT_DIR"/sm8250/linux-pipa/*.patch
 
 link_files "$SOURCES_DIR/xiaomi-pipa-firmware" \
     "$ROOT_DIR/sm8250/xiaomi-pipa-firmware/awinic_firmware.files" \

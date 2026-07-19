@@ -3,7 +3,7 @@
 # PipaDB/linux branch pipa/7.1 (Linux 7.1.0 + pipa DT/drivers).
 %global gitcommit e64607dc60963a05133304a8b682818ee4412106
 %global kversion 7.1.0
-%global krelease 1
+%global krelease 2
 %global kbuildver %(echo $((%{krelease} + 1))-pipa)
 
 Name:           kernel-pipa
@@ -16,6 +16,16 @@ ExclusiveArch:  aarch64
 
 Source0:        https://github.com/PipaDB/linux/archive/%{gitcommit}/linux-%{gitcommit}.tar.gz
 Source1:        config-xiaomi-pipa.aarch64
+
+# Camera bring-up aligned with Xiaomi Android DT (19.2 MHz MCLK) + SoftISP.
+Patch0:         0001-clk-qcom-clk-rcg2-keep-force-enable-in-shared_enable.patch
+Patch1:         0002-media-i2c-hi846-fix-power-on-reset-sequencing.patch
+Patch2:         0003-media-i2c-hi846-retry-MCLK-enable-and-accept-19.2MHz.patch
+Patch3:         0004-media-i2c-ov13b10-retry-MCLK-enable-and-set-19.2MHz-.patch
+Patch4:         0005-arm64-dts-qcom-pipa-fix-OV13B10-rear-camera-clocks-a.patch
+Patch5:         0006-arm64-dts-qcom-pipa-fix-HI846-front-camera-clocks-an.patch
+Patch6:         0007-media-qcom-camss-fix-video-pipeline-stop-streaming.patch
+Patch7:         0008-media-i2c-ov13b10-add-get_selection-pad-operation.patch
 
 BuildRequires:  bc
 BuildRequires:  bison
@@ -45,7 +55,7 @@ Obsoletes:      kernel-pipa < %{version}-%{release}
 
 %description
 Linux %{kversion} from PipaDB/linux branch pipa/7.1 for the Xiaomi Pad 6
-(SM8250 / pipa). Includes rear OV13B10 and front HI846 camera DT.
+(SM8250 / pipa). Includes rear OV13B10 and front HI846 camera support (DT + SoftISP bring-up patches).
 
 %package headers
 Summary:        Header files for kernel-pipa
@@ -66,6 +76,7 @@ Loadable kernel modules for kernel-pipa.
 
 %prep
 %setup -q -n linux-%{gitcommit}
+%autopatch -p1
 cp %{SOURCE1} .config
 ./scripts/config --file .config -d LOCALVERSION_AUTO
 ./scripts/config --file .config --set-str LOCALVERSION "-pipa"
@@ -125,6 +136,11 @@ find %{buildroot}/usr/include -name '.*' -delete
 /usr/include/
 
 %changelog
+* Sun Jul 19 2026 Ayman <ayman@pipa> - 7.1.0-2
+- Camera bring-up patches: CAMCC MCLK force-enable, HI846/OV13B10 power
+  and MCLK retries, DTS assigned-clocks @ 19.2MHz + pinctrl (Android DT),
+  camss stop-streaming and ov13b10 get_selection for SoftISP
+
 * Fri Jul 17 2026 Ayman <ayman@pipa> - 7.1.0-1
 - Switch source to PipaDB/linux pipa/7.1 (commit e64607dc6096)
 - Drop vanilla kernel.org patch series (integrated in that tree)

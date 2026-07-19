@@ -1,0 +1,26 @@
+From a396307c493889210da344b05a5a474049cab2b2 Mon Sep 17 00:00:00 2001
+From: Ayman Ragab <aymanrar2c@gmail.com>
+Date: Sun, 19 Jul 2026 14:15:36 +0300
+Subject: [PATCH 1/8] clk: qcom: clk-rcg2: keep force-enable in shared_enable
+ for MCLK
+
+---
+ drivers/clk/qcom/clk-rcg2.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/clk/qcom/clk-rcg2.c b/drivers/clk/qcom/clk-rcg2.c
+index 6064a0e17d51..677b9b01ae92 100644
+--- a/drivers/clk/qcom/clk-rcg2.c
++++ b/drivers/clk/qcom/clk-rcg2.c
+@@ -1442,7 +1442,7 @@ static int clk_rcg2_shared_enable(struct clk_hw *hw)
+ 	if (ret)
+ 		return ret;
+ 
+-	return clk_rcg2_clear_force_enable(hw);
++	return 0;
+ }
+ 
+ static void clk_rcg2_shared_disable(struct clk_hw *hw)
+-- 
+2.54.0
+

@@ -1,0 +1,57 @@
+From ded14e2747c82ea38f0083bfc4957b4761089936 Mon Sep 17 00:00:00 2001
+From: Ayman Ragab <aymanrar2c@gmail.com>
+Date: Sun, 19 Jul 2026 14:15:57 +0300
+Subject: [PATCH 3/8] media: i2c: hi846: retry MCLK enable and accept 19.2MHz
+ on pipa
+
+---
+ drivers/media/i2c/hi846.c | 19 ++++++++++++++++---
+ 1 file changed, 16 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/media/i2c/hi846.c b/drivers/media/i2c/hi846.c
+index 24b4f56cf8f7..6cd7aa3b838c 100644
+--- a/drivers/media/i2c/hi846.c
++++ b/drivers/media/i2c/hi846.c
+@@ -1630,13 +1630,25 @@ static int hi846_set_stream(struct v4l2_subdev *sd, int enable)
+ 
+ static int hi846_power_on(struct hi846 *hi846)
+ {
++	struct device *dev = hi846->sd.dev;
+ 	int ret;
++	int retries;
+ 
+ 	ret = regulator_bulk_enable(HI846_NUM_SUPPLIES, hi846->supplies);
+ 	if (ret < 0)
+ 		return ret;
+ 
+-	ret = clk_prepare_enable(hi846->clock);
++	/* Match Xiaomi pipa board / CamX: MCLK3 @ 19.2 MHz */
++	ret = clk_set_rate(hi846->clock, 19200000);
++	if (ret < 0)
++		dev_warn(dev, "Failed to set MCLK rate to 19.2MHz: %d\n", ret);
++
++	for (retries = 3; retries > 0; retries--) {
++		ret = clk_prepare_enable(hi846->clock);
++		if (ret != -EBUSY)
++			break;
++		usleep_range(5000, 10000);
++	}
+ 	if (ret < 0)
+ 		goto err_reg;
+ 
+@@ -2065,9 +2077,10 @@ static int hi846_probe(struct i2c_client *client)
+ 				     hi846->clock);
+ 
+ 	mclk_freq = clk_get_rate(hi846->clock);
+-	if (mclk_freq != 25000000)
++	/* Pipa board wires MCLK3 at 19.2 MHz (CamX); upstream prefers 25 MHz */
++	if (mclk_freq != 19200000 && mclk_freq != 25000000)
+ 		dev_warn(&client->dev,
+-			 "External clock freq should be 25000000, not %u.\n",
++			 "External clock freq should be 19200000 or 25000000, not %u.\n",
+ 			 mclk_freq);
+ 
+ 	for (i = 0; i < HI846_NUM_SUPPLIES; i++)
+-- 
+2.54.0
+

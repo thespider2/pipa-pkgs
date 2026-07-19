@@ -1,0 +1,35 @@
+From adb905bdce0de6ecfbbc1a0dbbdd8fc968ab519c Mon Sep 17 00:00:00 2001
+From: Ayman Ragab <aymanrar2c@gmail.com>
+Date: Sun, 19 Jul 2026 14:15:58 +0300
+Subject: [PATCH 7/8] media: qcom: camss: fix video pipeline stop streaming
+
+---
+ drivers/media/platform/qcom/camss/camss-video.c | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/media/platform/qcom/camss/camss-video.c b/drivers/media/platform/qcom/camss/camss-video.c
+index 831486e14754..0775e3158860 100644
+--- a/drivers/media/platform/qcom/camss/camss-video.c
++++ b/drivers/media/platform/qcom/camss/camss-video.c
+@@ -310,12 +310,13 @@ static void video_stop_streaming(struct vb2_queue *q)
+ 		entity = pad->entity;
+ 		subdev = media_entity_to_v4l2_subdev(entity);
+ 
+-		ret = v4l2_subdev_call(subdev, video, s_stream, 0);
++		if (!subdev->s_stream_enabled)
++			continue;
+ 
+-		if (ret) {
+-			dev_err(video->camss->dev, "Video pipeline stop failed: %d\n", ret);
+-			return;
+-		}
++		ret = v4l2_subdev_call(subdev, video, s_stream, 0);
++		if (ret && ret != -ENOIOCTLCMD)
++			dev_err(video->camss->dev,
++				"Video pipeline stop failed: %d\n", ret);
+ 	}
+ 
+ 	video_device_pipeline_stop(vdev);
+-- 
+2.54.0
+

@@ -1,0 +1,37 @@
+From 826359cb6d4ebe7d42ac71f56073f155dab89a56 Mon Sep 17 00:00:00 2001
+From: Ayman Ragab <aymanrar2c@gmail.com>
+Date: Sun, 19 Jul 2026 14:15:57 +0300
+Subject: [PATCH 4/8] media: i2c: ov13b10: retry MCLK enable and set 19.2MHz
+ rate
+
+---
+ drivers/media/i2c/ov13b10.c | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/media/i2c/ov13b10.c b/drivers/media/i2c/ov13b10.c
+index bd8a564e92be..18bb63f96262 100644
+--- a/drivers/media/i2c/ov13b10.c
++++ b/drivers/media/i2c/ov13b10.c
+@@ -1214,8 +1214,18 @@ static int ov13b10_power_on(struct device *dev)
+ 	struct v4l2_subdev *sd = dev_get_drvdata(dev);
+ 	struct ov13b10 *ov13b10 = to_ov13b10(sd);
+ 	int ret;
++	int retries;
+ 
+-	ret = clk_prepare_enable(ov13b10->img_clk);
++	ret = clk_set_rate(ov13b10->img_clk, OV13B10_EXT_CLK);
++	if (ret < 0)
++		dev_warn(dev, "Failed to set MCLK rate to 19.2MHz: %d", ret);
++
++	for (retries = 3; retries > 0; retries--) {
++		ret = clk_prepare_enable(ov13b10->img_clk);
++		if (ret != -EBUSY)
++			break;
++		usleep_range(5000, 10000);
++	}
+ 	if (ret < 0) {
+ 		dev_err(dev, "failed to enable imaging clock: %d", ret);
+ 		return ret;
+-- 
+2.54.0
+

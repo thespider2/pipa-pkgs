@@ -79,12 +79,13 @@ Obsoletes:      kernel-pipa-modules < %{version}-%{release}
 %description modules
 Loadable kernel modules for kernel-pipa.
 
-# RPM %autopatch defaults to --fuzz=0; allow small offsets like makepkg/dpkg-source.
-%global _default_patch_fuzz 3
-
 %prep
 %setup -q -n linux-%{kversion}
-%autopatch -p1
+# %%autopatch uses --fuzz=0; apply with -F3 like makepkg/dpkg-source.
+for p in %{patches}; do
+  echo "Applying $(basename "$p")..."
+  /usr/bin/patch -p1 -F3 --no-backup-if-mismatch < "$p"
+done
 cp %{SOURCE1} .config
 ./scripts/config --file .config -d LOCALVERSION_AUTO
 ./scripts/config --file .config --set-str LOCALVERSION "-pipa"

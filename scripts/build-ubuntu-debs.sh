@@ -111,9 +111,10 @@ stage_common_sources() {
         "$ROOT_DIR/common/libcamera/hi846.yaml" \
         "$ROOT_DIR/common/libcamera/ov13b10.yaml"
 
-    # PipaDB/linux pipa/7.1 already has device support; only the config overlay.
+    # kernel.org device patches + config (+ local single-DTB unify).
     link_files "$SOURCES_DIR/linux-pipa" \
-        "$ROOT_DIR/sm8250/linux-pipa/config-xiaomi-pipa.aarch64"
+        "$ROOT_DIR/sm8250/linux-pipa/config-xiaomi-pipa.aarch64" \
+        "$ROOT_DIR"/sm8250/linux-pipa/*.patch
 
     link_files "$SOURCES_DIR/pipa-metapkg" \
         "$ROOT_DIR/sm8250/pipa-metapkg/90-pipa-gsk-renderer.sh" \
@@ -204,11 +205,11 @@ fetch_and_extract() {
             done
             ;;
         linux-pipa)
-            # Match sm8250/linux-pipa/PKGBUILD _commit (PipaDB/linux pipa/7.1).
-            local commit=e64607dc60963a05133304a8b682818ee4412106
-            local tar="$DL_DIR/linux-pipadb-${commit}.tar.gz"
-            download "https://github.com/PipaDB/linux/archive/${commit}/linux-${commit}.tar.gz" "$tar"
-            tar -xzf "$tar" -C "$work" --strip-components=1
+            # Match sm8250/linux-pipa/PKGBUILD (kernel.org + device patches).
+            local ver=7.1.4
+            local tar="$DL_DIR/linux-${ver}.tar.xz"
+            download "https://cdn.kernel.org/pub/linux/kernel/v${ver%%.*}.x/linux-${ver}.tar.xz" "$tar"
+            tar -xJf "$tar" -C "$work" --strip-components=1
             ;;
         pipa-dracut|pipa-grub-config|pipa-sensors|pipa-sound-conf|pipa-metapkg)
             # Local-only payload packages; extras already staged.

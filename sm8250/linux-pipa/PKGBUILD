@@ -1,38 +1,44 @@
 pkgbase=linux-pipa
 pkgname=(linux-pipa linux-pipa-headers)
-pkgver=7.1.0
-pkgrel=4
-pkgdesc='Xiaomi Pad 6 kernel (PipaDB pipa/7.1)'
+pkgver=7.1.4
+pkgrel=1
+pkgdesc='Stable kernel for Xiaomi Pad 6'
 arch=('aarch64')
 _carch=arm64
-url='https://github.com/PipaDB/linux/tree/pipa/7.1'
+url='https://kernel.org'
 license=('GPL-2.0-only')
 install=linux-pipa.install
 makedepends=(
-  'bc' 'bison' 'clang' 'cpio' 'flex' 'git' 'kmod' 'lld' 'llvm' 'pahole' 'python'
+  'bc' 'bison' 'clang' 'cpio' 'flex' 'kmod' 'lld' 'llvm' 'pahole' 'python'
   'tar' 'xz' 'rsync'
 )
 options=('!strip')
-# Pin the branch tip so rebuilds are reproducible. Bump with:
-#   git ls-remote https://github.com/PipaDB/linux.git refs/heads/pipa/7.1
-_commit=e64607dc60963a05133304a8b682818ee4412106
+# kernel.org + device patches; 0017 unifies to a single sm8250-xiaomi-pipa.dtb.
 source=(
-  "git+https://github.com/PipaDB/linux.git#commit=${_commit}"
+  "https://cdn.kernel.org/pub/linux/kernel/v${pkgver%%.*}.x/linux-$pkgver.tar.xz"
   'config-xiaomi-pipa.aarch64'
-  '0001-clk-qcom-clk-rcg2-keep-force-enable-in-shared_enable.patch'
-  '0002-media-i2c-hi846-fix-power-on-reset-sequencing.patch'
-  '0003-media-i2c-hi846-retry-MCLK-enable-and-accept-19.2MHz.patch'
-  '0004-media-i2c-ov13b10-retry-MCLK-enable-and-set-19.2MHz-.patch'
-  '0005-arm64-dts-qcom-pipa-fix-OV13B10-rear-camera-clocks-a.patch'
-  '0006-arm64-dts-qcom-pipa-fix-HI846-front-camera-clocks-an.patch'
-  '0007-media-qcom-camss-fix-video-pipeline-stop-streaming.patch'
-  '0008-media-i2c-ov13b10-add-get_selection-pad-operation.patch'
+  '0001-arm64-dts-qcom-sm8250-xiaomi-pipa-Add-device-tree-fo.patch'
+  '0002-power-supply-Add-driver-for-Qualcomm-PMIC-fuel-gauge.patch'
+  '0003-Input-Add-nt36523-touchscreen-driver.patch'
+  '0004-drm-msm-dsi-change-sync-mode-to-sync-on-DSI0-rather-.patch'
+  '0005-drm-msm-dsi-support-DSC-configurations-with-slice_pe.patch'
+  '0006-drm-panel-Add-support-for-Novatek-NT36532-panel.patch'
+  '0007-drivers-media-i2c-ov13b10-add-device-tree-support-an.patch'
+  '0008-ASoC-qcom-sm8250-add-tertiary-tdm-support.patch'
+  '0010-HACK-ASoC-codecs-aw88261-add-xiaomi-pipa-hacks.patch'
+  '0011-FROMLIST-ASoC-qcom-qdsp6-q6afe-fix-clk-vote-response.patch'
+  '0012-HACK-ASoC-qcom-qdsp6-q6afe-pretend-the-AFE-vote-didn.patch'
+  '0013-Input-keyboard-add-Xiaomi-Nanosic-803-keyboard.patch'
+  '0014-UPSTREAM-libbpf-Fix-UAF-in-strset__add_str.patch'
+  '0016-power-supply-add-nuvolta-rx1665-wireless-charger.patch'
+  '0017-arm64-dts-qcom-sm8250-xiaomi-pipa-Unify-single-dtb.patch'
 )
 sha256sums=('SKIP' 'SKIP'
-            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP'
+            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 prepare() {
-  cd linux
+  cd "linux-$pkgver"
   local src
   for src in "${source[@]}"; do
     src="${src%%::*}"
@@ -43,21 +49,13 @@ prepare() {
   done
   cp ../config-xiaomi-pipa.aarch64 .config
 
-  # Match PipaDB build.sh: stable release string, no -gSHA localversion.
   ./scripts/config --file .config -d LOCALVERSION_AUTO
   ./scripts/config --file .config --set-str LOCALVERSION "-pipa"
-  # Sailfish has no initramfs: panel + backlight must be built-in or the
-  # screen stays blank (DRM_MSM=y probes before modules-load).
-  ./scripts/config --file .config -e DRM_PANEL_NOVATEK_NT36532
-  ./scripts/config --file .config -e BACKLIGHT_KTZ8866
-  ./scripts/config --file .config -d MODULE_COMPRESS
-  ./scripts/config --file .config -d MODULE_COMPRESS_ZSTD
-  ./scripts/config --file .config -d MODULE_COMPRESS_ALL
   make ARCH="$_carch" LLVM=1 olddefconfig
 }
 
 build() {
-  cd linux
+  cd "linux-$pkgver"
   unset LDFLAGS
   make ARCH="$_carch" LLVM=1 \
     KBUILD_BUILD_VERSION="$((pkgrel + 1))-pipa" \
@@ -69,7 +67,7 @@ package_linux-pipa() {
   depends=('coreutils' 'dracut' 'kmod' 'xiaomi-pipa-firmware')
   provides=('linux')
 
-  cd linux
+  cd "linux-$pkgver"
 
   local kernver
   kernver="$(make ARCH="$_carch" LLVM=1 KBUILD_BUILD_VERSION="$((pkgrel + 1))-pipa" -s kernelrelease)"
@@ -105,7 +103,7 @@ package_linux-pipa-headers() {
   pkgdesc='Header files and scripts for building modules for Linux kernel'
   provides=('linux-headers')
 
-  cd linux
+  cd "linux-$pkgver"
   make ARCH="$_carch" LLVM=1 \
     KBUILD_BUILD_VERSION="$((pkgrel + 1))-pipa" \
     INSTALL_HDR_PATH="$pkgdir/usr" headers_install

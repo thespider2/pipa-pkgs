@@ -109,7 +109,7 @@ package_present_in_repo() {
 
 echo "=== Gathering sources from pipa-pkgs ==="
 
-# PipaDB/linux pipa/7.1 + camera bring-up patches + config overlay.
+# kernel.org device patches + config (+ local single-DTB unify).
 link_files "$SOURCES_DIR/kernel-pipa" \
     "$ROOT_DIR/sm8250/linux-pipa/config-xiaomi-pipa.aarch64" \
     "$ROOT_DIR"/sm8250/linux-pipa/*.patch

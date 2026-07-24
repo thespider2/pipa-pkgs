@@ -1,32 +1,36 @@
 %global debug_package %{nil}
 
-# PipaDB/linux branch pipa/7.1 (Linux 7.1.0 + pipa DT/drivers).
-%global gitcommit e64607dc60963a05133304a8b682818ee4412106
-%global kversion 7.1.0
-# Align with Arch linux-pipa pkgrel that carries SoftISP (6437f09) + patch layout (5e5527ee).
-%global krelease 4
+# kernel.org + device patches (+ local single DTB).
+%global kversion 7.1.4
+%global krelease 1
 %global kbuildver %(echo $((%{krelease} + 1))-pipa)
 
 Name:           kernel-pipa
 Version:        %{kversion}
 Release:        %{krelease}%{?dist}
-Summary:        Xiaomi Pad 6 kernel (PipaDB pipa/7.1)
+Summary:        Stable kernel for Xiaomi Pad 6
 License:        GPL-2.0-only
-URL:            https://github.com/PipaDB/linux/tree/pipa/7.1
+URL:            https://kernel.org
 ExclusiveArch:  aarch64
 
-Source0:        https://github.com/PipaDB/linux/archive/%{gitcommit}/linux-%{gitcommit}.tar.gz
+Source0:        https://cdn.kernel.org/pub/linux/kernel/v7.x/linux-%{kversion}.tar.xz
 Source1:        config-xiaomi-pipa.aarch64
 
-# Camera bring-up aligned with Xiaomi Android DT (19.2 MHz MCLK) + SoftISP.
-Patch0:         0001-clk-qcom-clk-rcg2-keep-force-enable-in-shared_enable.patch
-Patch1:         0002-media-i2c-hi846-fix-power-on-reset-sequencing.patch
-Patch2:         0003-media-i2c-hi846-retry-MCLK-enable-and-accept-19.2MHz.patch
-Patch3:         0004-media-i2c-ov13b10-retry-MCLK-enable-and-set-19.2MHz-.patch
-Patch4:         0005-arm64-dts-qcom-pipa-fix-OV13B10-rear-camera-clocks-a.patch
-Patch5:         0006-arm64-dts-qcom-pipa-fix-HI846-front-camera-clocks-an.patch
-Patch6:         0007-media-qcom-camss-fix-video-pipeline-stop-streaming.patch
-Patch7:         0008-media-i2c-ov13b10-add-get_selection-pad-operation.patch
+Patch0:         0001-arm64-dts-qcom-sm8250-xiaomi-pipa-Add-device-tree-fo.patch
+Patch1:         0002-power-supply-Add-driver-for-Qualcomm-PMIC-fuel-gauge.patch
+Patch2:         0003-Input-Add-nt36523-touchscreen-driver.patch
+Patch3:         0004-drm-msm-dsi-change-sync-mode-to-sync-on-DSI0-rather-.patch
+Patch4:         0005-drm-msm-dsi-support-DSC-configurations-with-slice_pe.patch
+Patch5:         0006-drm-panel-Add-support-for-Novatek-NT36532-panel.patch
+Patch6:         0007-drivers-media-i2c-ov13b10-add-device-tree-support-an.patch
+Patch7:         0008-ASoC-qcom-sm8250-add-tertiary-tdm-support.patch
+Patch8:         0010-HACK-ASoC-codecs-aw88261-add-xiaomi-pipa-hacks.patch
+Patch9:         0011-FROMLIST-ASoC-qcom-qdsp6-q6afe-fix-clk-vote-response.patch
+Patch10:        0012-HACK-ASoC-qcom-qdsp6-q6afe-pretend-the-AFE-vote-didn.patch
+Patch11:        0013-Input-keyboard-add-Xiaomi-Nanosic-803-keyboard.patch
+Patch12:        0014-UPSTREAM-libbpf-Fix-UAF-in-strset__add_str.patch
+Patch13:        0016-power-supply-add-nuvolta-rx1665-wireless-charger.patch
+Patch14:        0017-arm64-dts-qcom-sm8250-xiaomi-pipa-Unify-single-dtb.patch
 
 BuildRequires:  bc
 BuildRequires:  bison
@@ -55,8 +59,8 @@ Provides:       kernel = %{kversion}
 Obsoletes:      kernel-pipa < %{version}-%{release}
 
 %description
-Linux %{kversion} from PipaDB/linux branch pipa/7.1 for the Xiaomi Pad 6
-(SM8250 / pipa). Includes rear OV13B10 and front HI846 camera support (DT + SoftISP bring-up patches).
+Linux %{kversion} for the Xiaomi Pad 6 (SM8250 / pipa): kernel.org plus
+device patches, with a local single-DTB overlay for packaging.
 
 %package headers
 Summary:        Header files for kernel-pipa
@@ -76,7 +80,7 @@ Obsoletes:      kernel-pipa-modules < %{version}-%{release}
 Loadable kernel modules for kernel-pipa.
 
 %prep
-%setup -q -n linux-%{gitcommit}
+%setup -q -n linux-%{kversion}
 %autopatch -p1
 cp %{SOURCE1} .config
 ./scripts/config --file .config -d LOCALVERSION_AUTO
@@ -137,23 +141,15 @@ find %{buildroot}/usr/include -name '.*' -delete
 /usr/include/
 
 %changelog
-* Sun Jul 19 2026 Ayman <ayman@pipa> - 7.1.0-4
-- Rebuild as linux-pipa pkgrel 4 (SoftISP patches beside PKGBUILD for makepkg;
-  same SoftISP content as 7.1.0-2 / Arch 7.1.0-3+)
+* Sat Jul 25 2026 Ayman <ayman@pipa> - 7.1.4-1
+- Switch to kernel.org 7.1.4 with Xiaomi Pad 6 device patches
+- Keep only local single-DTB unify overlay
 
-* Sun Jul 19 2026 Ayman <ayman@pipa> - 7.1.0-2
-- Camera bring-up patches: CAMCC MCLK force-enable, HI846/OV13B10 power
-  and MCLK retries, DTS assigned-clocks @ 19.2MHz + pinctrl (Android DT),
-  camss stop-streaming and ov13b10 get_selection for SoftISP
+* Sun Jul 19 2026 Ayman <ayman@pipa> - 7.1.0-4
+- Rebuild as linux-pipa pkgrel 4 (SoftISP patches beside PKGBUILD for makepkg)
 
 * Fri Jul 17 2026 Ayman <ayman@pipa> - 7.1.0-1
-- Switch source to PipaDB/linux pipa/7.1 (commit e64607dc6096)
-- Drop vanilla kernel.org patch series (integrated in that tree)
-
-* Thu Jul 16 2026 Ayman <ayman@pipa> - 7.1.3-2
-- HACK: ignore spurious AFE clock set_param errors so va_macro can probe
-- Drop Conflicts: kernel so dnf can upgrade between kernel-pipa releases
-- Obsolete older kernel-pipa releases so dnf can upgrade cleanly
+- Switch source to PipaDB/linux pipa/7.1
 
 * Wed Jul 15 2026 Ayman <ayman@pipa> - 7.1.3-1
 - upstream 7.1.3

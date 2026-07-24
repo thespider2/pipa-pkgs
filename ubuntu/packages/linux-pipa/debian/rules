@@ -10,15 +10,17 @@ export LLVM = 1
 override_dh_auto_clean:
 
 override_dh_auto_configure:
-	# Tree is PipaDB/linux pipa/7.1 (already contains pipa DT/drivers).
-	# No debian/extras patches — use packaging config only.
+	# kernel.org + device patches (staged as debian/extras).
 	cp debian/extras/config-xiaomi-pipa.aarch64 .config
+	for p in debian/extras/0*.patch; do \
+		[ -f "$$p" ] || continue; \
+		patch -p1 -F2 < "$$p" || exit 1; \
+	done
 	./scripts/config --file .config -d LOCALVERSION_AUTO
 	./scripts/config --file .config --set-str LOCALVERSION "-pipa"
 	$(MAKE) ARCH=$(ARCH) LLVM=$(LLVM) olddefconfig
 
 override_dh_auto_build:
-	# Keep -j even with a custom override (dh parallel flags are otherwise ignored).
 	unset LDFLAGS; \
 	$(MAKE) -j$$(nproc) ARCH=$(ARCH) LLVM=$(LLVM) KBUILD_BUILD_VERSION=$(KBUILD_BUILD_VERSION) \
 		Image Image.gz modules dtbs

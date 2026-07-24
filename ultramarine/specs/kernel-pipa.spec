@@ -79,6 +79,9 @@ Obsoletes:      kernel-pipa-modules < %{version}-%{release}
 %description modules
 Loadable kernel modules for kernel-pipa.
 
+# RPM %autopatch defaults to --fuzz=0; allow small offsets like makepkg/dpkg-source.
+%global _default_patch_fuzz 3
+
 %prep
 %setup -q -n linux-%{kversion}
 %autopatch -p1

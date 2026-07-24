@@ -1,37 +1,35 @@
 diff --git a/drivers/power/supply/Kconfig b/drivers/power/supply/Kconfig
-index e981b8bbdfdf..2ae1024a021a 100644
 --- a/drivers/power/supply/Kconfig
 +++ b/drivers/power/supply/Kconfig
-@@ -919,6 +919,17 @@ config CHARGER_SC2731
+@@ -1017,6 +1017,17 @@ config CHARGER_SC2731
  	  Say Y here to enable support for battery charging with SC2731
  	  PMIC chips.
  
 +config FUDA_1665
-+        tristate "Nuvolta RX1665 wireless charger"
-+        depends on I2C
-+        help
-+          Say Y to include support for the Nuvolta RX1665 wireless power
-+          transmitter used to charge a stylus on some Xiaomi tablets.
++	tristate "Nuvolta RX1665 wireless charger"
++	depends on I2C
++	help
++	  Say Y to include support for the Nuvolta RX1665 wireless power
++	  transmitter used to charge a stylus on some Xiaomi tablets.
 +
-+          The driver reports stylus charge information through the power
-+          supply framework and controls the charger over I2C using device
-+          tree bindings.
++	  The driver reports stylus charge information through the power
++	  supply framework and controls the charger over I2C using device
++	  tree bindings.
 +
  config FUEL_GAUGE_SC27XX
  	tristate "Spreadtrum SC27XX fuel gauge driver"
  	depends on MFD_SC27XX_PMIC || COMPILE_TEST
 diff --git a/drivers/power/supply/Makefile b/drivers/power/supply/Makefile
-index 6334ab4c3555..8145a3d8c88a 100644
 --- a/drivers/power/supply/Makefile
 +++ b/drivers/power/supply/Makefile
-@@ -108,6 +108,7 @@ obj-$(CONFIG_CHARGER_CROS_CONTROL)	+= cros_charge-control.o
+@@ -115,6 +115,7 @@
+ obj-$(CONFIG_CHARGER_CROS_CONTROL)	+= cros_charge-control.o
  obj-$(CONFIG_CHARGER_CROS_USBPD)	+= cros_usbpd-charger.o
  obj-$(CONFIG_CHARGER_CROS_PCHG)	+= cros_peripheral_charger.o
  obj-$(CONFIG_CHARGER_SC2731)	+= sc2731_charger.o
-+obj-$(CONFIG_FUDA_1665)                 += nu1665.o
++obj-$(CONFIG_FUDA_1665)		+= nu1665.o
  obj-$(CONFIG_FUEL_GAUGE_SC27XX)	+= sc27xx_fuel_gauge.o
  obj-$(CONFIG_FUEL_GAUGE_STC3117)       += stc3117_fuel_gauge.o
- obj-$(CONFIG_CHARGER_UCS1002)	+= ucs1002_power.o
 diff --git a/drivers/power/supply/nu1665.c b/drivers/power/supply/nu1665.c
 new file mode 100644
 index 000000000000..a83472b91be2

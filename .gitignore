@@ -10,3 +10,10 @@ ubuntu/.sources/
 ubuntu/.downloads/
 ultramarine/.sources/
 ultramarine/.build-cache/
+
+# makepkg leftovers
+**/src/
+**/pkg/
+*.pkg.tar.*
+linux-*.tar.xz
+linux-*.tar.gz

@@ -2,7 +2,7 @@
 
 # kernel.org + device patches (+ local single DTB).
 %global kversion 7.1.4
-%global krelease 1
+%global krelease 2
 %global kbuildver %(echo $((%{krelease} + 1))-pipa)
 
 Name:           kernel-pipa
@@ -31,6 +31,8 @@ Patch11:        0013-Input-keyboard-add-Xiaomi-Nanosic-803-keyboard.patch
 Patch12:        0014-UPSTREAM-libbpf-Fix-UAF-in-strset__add_str.patch
 Patch13:        0016-power-supply-add-nuvolta-rx1665-wireless-charger.patch
 Patch14:        0017-arm64-dts-qcom-sm8250-xiaomi-pipa-Unify-single-dtb.patch
+Patch15:        0018-usb-typec-fsa4480-add-chip-id-read-retry-loop.patch
+Patch16:        0019-arm64-dts-qcom-sm8250-xiaomi-pipa-enable-DisplayPort.patch
 
 BuildRequires:  bc
 BuildRequires:  bison
@@ -145,6 +147,10 @@ find %{buildroot}/usr/include -name '.*' -delete
 /usr/include/
 
 %changelog
+* Sun Jul 26 2026 Ayman <ayman@pipa> - 7.1.4-2
+- Retry the FSA4480 chip id read so the USB-C SBU mux probes on pipa
+- Enable mdss_dp and CONFIG_TYPEC_DP_ALTMODE for USB-C DisplayPort output
+
 * Sat Jul 25 2026 Ayman <ayman@pipa> - 7.1.4-1
 - Switch to kernel.org 7.1.4 with Xiaomi Pad 6 device patches
 - Keep only local single-DTB unify overlay

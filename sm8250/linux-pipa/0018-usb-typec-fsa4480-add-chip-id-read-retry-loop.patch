@@ -1,0 +1,57 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Victor Paul <vipoll@mainlining.org>
+Subject: [PATCH 18/19] FROMLIST: usb: typec: fsa4480: Add chip id read retry
+ loop
+
+The first read attempt may fail on some devices (e.g. Xiaomi Pad 6), which
+makes the FSA4480 SBU mux probe fail with:
+
+  fsa4480 15-0042: error -ENODEV: FSA4480 not found
+
+Because the PMIC Type-C block (pm8150b_typec) consumes this mux, the whole
+USB-C stack then stays in deferred probe and DisplayPort altmode never comes
+up.  Retry the device id read a few times before giving up.
+
+Link: https://lore.kernel.org/all/20260511122246.31673-1-vipoll@mainlining.org/
+Signed-off-by: Victor Paul <vipoll@mainlining.org>
+---
+ drivers/usb/typec/mux/fsa4480.c | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/usb/typec/mux/fsa4480.c b/drivers/usb/typec/mux/fsa4480.c
+index c54e42c7e6a1..ae496c0fa805 100644
+--- a/drivers/usb/typec/mux/fsa4480.c
++++ b/drivers/usb/typec/mux/fsa4480.c
+@@ -5,6 +5,7 @@
+  */
+ 
+ #include <linux/bits.h>
++#include <linux/delay.h>
+ #include <linux/i2c.h>
+ #include <linux/kernel.h>
+ #include <linux/module.h>
+@@ -256,6 +257,7 @@ static int fsa4480_probe(struct i2c_client *client)
+ 	struct typec_switch_desc sw_desc = { };
+ 	struct typec_mux_desc mux_desc = { };
+ 	struct fsa4480 *fsa;
++	int retries = 5;
+ 	int val = 0;
+ 	int ret;
+ 
+@@ -278,7 +280,12 @@ static int fsa4480_probe(struct i2c_client *client)
+ 	if (ret && ret != -ENODEV)
+ 		return dev_err_probe(dev, ret, "Failed to get regulator\n");
+ 
+-	ret = regmap_read(fsa->regmap, FSA4480_DEVICE_ID, &val);
++	do {
++		ret = regmap_read(fsa->regmap, FSA4480_DEVICE_ID, &val);
++		if (!ret)
++			break;
++		usleep_range(1000, 1200);
++	} while (retries--);
+ 	if (ret)
+ 		return dev_err_probe(dev, -ENODEV, "FSA4480 not found\n");
+ 
+-- 
+2.52.0
+

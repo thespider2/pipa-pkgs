@@ -1,7 +1,7 @@
 pkgbase=linux-pipa
 pkgname=(linux-pipa linux-pipa-headers)
 pkgver=7.1.4
-pkgrel=1
+pkgrel=2
 pkgdesc='Stable kernel for Xiaomi Pad 6'
 arch=('aarch64')
 _carch=arm64
@@ -14,6 +14,7 @@ makedepends=(
 )
 options=('!strip')
 # kernel.org + device patches; 0017 unifies to a single sm8250-xiaomi-pipa.dtb.
+# 0018/0019 fix the FSA4480 SBU mux probe and enable USB-C DisplayPort altmode.
 source=(
   "https://cdn.kernel.org/pub/linux/kernel/v${pkgver%%.*}.x/linux-$pkgver.tar.xz"
   'config-xiaomi-pipa.aarch64'
@@ -32,10 +33,13 @@ source=(
   '0014-UPSTREAM-libbpf-Fix-UAF-in-strset__add_str.patch'
   '0016-power-supply-add-nuvolta-rx1665-wireless-charger.patch'
   '0017-arm64-dts-qcom-sm8250-xiaomi-pipa-Unify-single-dtb.patch'
+  '0018-usb-typec-fsa4480-add-chip-id-read-retry-loop.patch'
+  '0019-arm64-dts-qcom-sm8250-xiaomi-pipa-enable-DisplayPort.patch'
 )
 sha256sums=('SKIP' 'SKIP'
             'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP'
-            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP'
+            'SKIP')
 
 prepare() {
   cd "linux-$pkgver"

@@ -1,0 +1,37 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Ayman <ayman@pipa>
+Subject: [PATCH 19/19] arm64: dts: qcom: sm8250-xiaomi-pipa: enable the
+ DisplayPort controller
+
+The Type-C connector already declares the DisplayPort altmode and the DP
+output endpoint is wired to the USB3/DP combo PHY, but mdss_dp itself was
+left at its sm8250.dtsi default of "disabled".  Without it DRM only exposes
+the internal DSI panel and no DP-1 connector is created, so USB-C to
+DisplayPort/HDMI adapters never light up.
+
+Enable mdss_dp so the msm DP controller probes and registers the external
+connector.
+---
+ arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa-common.dtsi | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa-common.dtsi b/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa-common.dtsi
+index 111111111111..222222222222 100644
+--- a/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa-common.dtsi
++++ b/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa-common.dtsi
+@@ -789,8 +789,12 @@ &i2c16 {
+ &mdss {
+ 	status = "okay";
+ };
+ 
++&mdss_dp {
++	status = "okay";
++};
++
+ &mdss_dp_out {
+ 	data-lanes = <0 1>;
+ 	remote-endpoint = <&usb_1_qmpphy_dp_in>;
+ };
+-- 
+2.52.0
+

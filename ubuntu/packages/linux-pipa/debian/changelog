@@ -1,3 +1,10 @@
+linux-pipa (7.1.4-2pipa1) resolute; urgency=medium
+
+  * Retry the FSA4480 chip id read so the USB-C SBU mux probes on pipa.
+  * Enable mdss_dp and CONFIG_TYPEC_DP_ALTMODE for USB-C DisplayPort output.
+
+ -- Ayman <ayman@pipa>  Sun, 26 Jul 2026 00:55:00 +0000
+
 linux-pipa (7.1.4-1pipa1) resolute; urgency=medium
 
   * Switch to kernel.org 7.1.4 with Xiaomi Pad 6 device patches.

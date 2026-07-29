@@ -2,7 +2,7 @@
 
 # kernel.org + device patches (+ local single DTB).
 %global kversion 7.1.4
-%global krelease 2
+%global krelease 3
 %global kbuildver %(echo $((%{krelease} + 1))-pipa)
 
 Name:           kernel-pipa
@@ -147,6 +147,9 @@ find %{buildroot}/usr/include -name '.*' -delete
 /usr/include/
 
 %changelog
+* Thu Jul 30 2026 Ayman <ayman@pipa> - 7.1.4-3
+- Report tablet mode without keyboard (pmaports 4a6b2648)
+
 * Sun Jul 26 2026 Ayman <ayman@pipa> - 7.1.4-2
 - Retry the FSA4480 chip id read so the USB-C SBU mux probes on pipa
 - Enable mdss_dp and CONFIG_TYPEC_DP_ALTMODE for USB-C DisplayPort output

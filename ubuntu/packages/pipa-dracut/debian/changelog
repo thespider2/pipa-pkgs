@@ -1,3 +1,9 @@
+pipa-dracut (1.1-6pipa1) resolute; urgency=medium
+
+  * Force-load nanosic_803 and nu1665 in initramfs (pmaports a3236185/ee31f538).
+
+ -- Ayman <ayman@pipa>  Thu, 30 Jul 2026 01:50:00 +0000
+
 pipa-dracut (1.1-5pipa1) resolute; urgency=medium
 
   * Initial Ubuntu packaging for Xiaomi Pad 6 (pipa).

@@ -27,8 +27,9 @@ Depends: ${misc:Depends},
  mesa-vulkan-drivers,
  wireless-regdb,
  bluez
-Recommends: gstreamer1.0-libcamera, tuned, qrtr-tools, rmtfs, tqftpserv, pd-mapper
+Recommends: gstreamer1.0-libcamera, tuned, qrtr-tools, rmtfs, tqftpserv, pd-mapper, libinput
 Description: Xiaomi Pad 6 support meta package for Ubuntu
  Pulls in the full device support stack for running Ubuntu on the
  Xiaomi Pad 6 (pipa): custom kernel, firmware, sensors, audio, camera,
- and boot configuration. Also installs the pipa-pkgs apt source.
+ and boot configuration. Also installs the pipa-pkgs apt source and
+ libinput quirks for the Nanosic keyboard cover.

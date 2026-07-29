@@ -1,15 +1,18 @@
 pkgname=pipa-metapkg
 pkgver=1.1
-pkgrel=20
+pkgrel=21
 pkgdesc="Xiaomi Pad 6 support meta package for EndeavourOS"
 arch=('any')
 license=('MIT')
 depends=('linux-pipa' 'xiaomi-pipa-firmware' 'qbootctl' 'pipa-dracut' 'pipa-grub-config' 'pipa-sound-conf' 'swclock-offset' 'bootmac' 'bluez-git' 'mesa' 'pipa-sensors' 'libssc' 'libcamera' 'libcamera-ipa' 'libcamera-tools' 'gst-plugin-libcamera' 'pipewire-libcamera' 'qrtr' 'tqftpserv' 'pd-mapper' 'wireless-regdb' 'tuned' 'tuned-ppd' 'grub2-theme-endeavouros-classic' 'ath10k-shutdown' 'make-dynpart-mappings' 'qca-swiss-army-knife' 'usb-network')
+optdepends=('libinput: keyboard cover libinput quirks')
 
-source=('90-pipa-gsk-renderer.sh')
-sha256sums=('SKIP')
+source=('90-pipa-gsk-renderer.sh'
+        'local-overrides.quirks')
+sha256sums=('SKIP' 'SKIP')
 
 package() {
   mkdir -p "$pkgdir"
   install -Dm755 90-pipa-gsk-renderer.sh "$pkgdir/etc/profile.d/90-pipa-gsk-renderer.sh"
+  install -Dm644 local-overrides.quirks "$pkgdir/usr/share/libinput/local-overrides.quirks"
 }

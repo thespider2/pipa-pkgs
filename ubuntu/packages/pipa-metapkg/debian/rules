@@ -9,3 +9,5 @@ override_dh_auto_install:
 		debian/pipa-metapkg/etc/profile.d/90-pipa-gsk-renderer.sh
 	install -Dm644 debian/extras/pipa-pkgs.list \
 		debian/pipa-metapkg/etc/apt/sources.list.d/pipa-pkgs.list
+	install -Dm644 debian/extras/local-overrides.quirks \
+		debian/pipa-metapkg/usr/share/libinput/local-overrides.quirks

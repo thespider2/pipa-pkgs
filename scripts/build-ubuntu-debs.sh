@@ -118,6 +118,7 @@ stage_common_sources() {
 
     link_files "$SOURCES_DIR/pipa-metapkg" \
         "$ROOT_DIR/sm8250/pipa-metapkg/90-pipa-gsk-renderer.sh" \
+        "$ROOT_DIR/sm8250/pipa-metapkg/local-overrides.quirks" \
         "$UB_DIR/pipa-pkgs.list"
 }
 

@@ -1,3 +1,9 @@
+pipa-metapkg (1.1-5pipa1) resolute; urgency=medium
+
+  * Ship libinput quirks for Nanosic keyboard cover (pmaports a3236185).
+
+ -- Ayman <ayman@pipa>  Thu, 30 Jul 2026 01:50:00 +0000
+
 pipa-metapkg (1.1-4pipa1) resolute; urgency=medium
 
   * Initial Ubuntu metapackage for Xiaomi Pad 6 (pipa).

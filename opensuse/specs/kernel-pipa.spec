@@ -155,8 +155,27 @@ find %{buildroot}/usr/include -name '.*' -delete
 %files headers
 /usr/include/
 
+%post modules
+%{_sbindir}/depmod -a %{kversion}-pipa >/dev/null 2>&1 || :
+# Fall back to whatever module tree was installed if release naming drifts.
+if [ -d /usr/lib/modules ]; then
+  for d in /usr/lib/modules/*-pipa /usr/lib/modules/%{kversion}*; do
+    [ -d "$d" ] || continue
+    %{_sbindir}/depmod -a "$(basename "$d")" >/dev/null 2>&1 || :
+  done
+fi
+
+%postun modules
+if [ "$1" = "0" ] && [ -d /usr/lib/modules ]; then
+  for d in /usr/lib/modules/*-pipa /usr/lib/modules/%{kversion}*; do
+    [ -d "$d" ] || continue
+    %{_sbindir}/depmod -a "$(basename "$d")" >/dev/null 2>&1 || :
+  done
+fi
+
 %changelog
-* Thu Jul 30 2026 Ayman <ayman@pipa> - 7.1.4-3
+* Mon Aug 03 2026 Ayman <ayman@pipa> - 7.1.4-3
+- Run depmod in %%post for modules package
 - Report tablet mode without keyboard (pmaports 4a6b2648)
 
 * Sun Jul 26 2026 Ayman <ayman@pipa> - 7.1.4-2

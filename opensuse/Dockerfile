@@ -1,19 +1,23 @@
 FROM opensuse/tumbleweed
 
+# Tumbleweed aarch64 ships versioned python3NN-* packages; prefer concrete
+# names over unversioned provides so zypper does not fail the transaction.
 RUN zypper --non-interactive refresh && \
     zypper --non-interactive install -y \
     rpm-build rpmdevtools createrepo_c \
     gcc gcc-c++ make cmake meson ninja \
-    bc bison flex cpio kmod python3-base tar xz rsync wget curl git \
+    bc bison flex cpio kmod tar xz rsync wget curl git \
     clang llvm lld \
     openssl libopenssl-devel libelf-devel dwarves perl hostname \
-    glib2-devel libgudev-1_0-devel libprotobuf-c-devel libqmi-devel \
+    glib2-devel libgudev-1_0-devel protobuf-c-devel libqmi-devel \
     json-glib-devel gobject-introspection-devel \
     gtk-doc umockdev-devel systemd-rpm-macros systemd-devel \
-    polkit-devel python3-dbus \
-    python3-devel python3-Jinja2 python3-PyYAML python3-ply python3-pybind11 \
+    polkit-devel \
+    python313-base python313-devel \
+    python313-Jinja2 python313-PyYAML python313-ply \
+    python313-pybind11 python313-dbus-python \
     libevent-devel libyaml-devel libgnutls-devel \
-    libdrm-devel libjpeg8-devel SDL2-devel \
+    libdrm-devel libjpeg8-devel sdl2-compat-devel \
     gstreamer-devel gstreamer-plugins-base-devel \
     lttng-ust-devel libtiff-devel \
     qrtr-devel \

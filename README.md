@@ -11,7 +11,8 @@ It hosts Arch Linux (pacman), Ultramarine/Fedora (dnf), and Ubuntu (apt) package
 - Publish a pacman repository at `https://<user>.github.io/pipa-pkgs/repo/`
 - Publish a DNF repository at `https://<user>.github.io/pipa-pkgs/repo/ultramarine/`
 - Publish an apt repository at `https://<user>.github.io/pipa-pkgs/repo/ubuntu/`
-- Enable OTA updates for EndeavourOS, Ultramarine OS, and Ubuntu installs
+- Publish a zypper repository at `https://<user>.github.io/pipa-pkgs/repo/opensuse/`
+- Enable OTA updates for EndeavourOS, Ultramarine OS, Ubuntu, and openSUSE installs
 
 ## Repository Layout
 
@@ -19,6 +20,9 @@ It hosts Arch Linux (pacman), Ultramarine/Fedora (dnf), and Ubuntu (apt) package
 - `ultramarine/specs/`: RPM `.spec` files for Ultramarine/Fedora packages
 - `ultramarine/Dockerfile`: Fedora 44 build container for RPMs
 - `ultramarine/pipa-pkgs.repo`: DNF repo config file for the tablet
+- `opensuse/specs/`: RPM `.spec` files for openSUSE Tumbleweed packages
+- `opensuse/Dockerfile`: Tumbleweed build container for RPMs
+- `opensuse/pipa-pkgs.repo`: zypper repo config file for the tablet
 - `ubuntu/packages/*/debian/`: Debian packaging for Ubuntu 26.04 (Resolute)
 - `ubuntu/Dockerfile`: Ubuntu 26.04 build container for debs
 - `ubuntu/pipa-pkgs.list`: apt sources snippet shipped by `pipa-metapkg`
@@ -27,6 +31,7 @@ It hosts Arch Linux (pacman), Ultramarine/Fedora (dnf), and Ubuntu (apt) package
 - `config/repo.env`: repo configuration, Pages URL, sync source, and kernel version note
 - `scripts/build-local-packages.sh`: builds local `PKGBUILD`s into the pacman repo
 - `scripts/build-ultramarine-rpms.sh`: builds RPM specs into the Ultramarine repo
+- `scripts/build-opensuse-rpms.sh`: builds RPM specs into the openSUSE repo
 - `scripts/build-ubuntu-debs.sh`: builds Ubuntu debs into the apt repo
 - `scripts/sync-pkgbuilds.sh`: refreshes `pkgbuilds/` from the source `endeavouros-pipa` repo
 - `scripts/fetch-upstream.py`: downloads selected upstream packages into the pacman repo
@@ -146,6 +151,26 @@ docker run --rm -v "$PWD:/work" -w /work pipa-rpms-builder scripts/build-ultrama
 ```
 
 RPMs are output to `repo/ultramarine/`.
+
+## openSUSE Tumbleweed (zypper) Repository
+
+RPMs are built from `.spec` files in `opensuse/specs/` using the same sources as Ultramarine.
+
+```text
+https://thespider2.github.io/pipa-pkgs/repo/opensuse/
+```
+
+```bash
+sudo zypper addrepo https://thespider2.github.io/pipa-pkgs/repo/opensuse/ pipa-pkgs
+sudo zypper install pipa-metapkg
+```
+
+Build locally:
+
+```bash
+docker build -t pipa-opensuse-rpms-builder -f opensuse/Dockerfile .
+docker run --rm -v "$PWD:/work" -w /work pipa-opensuse-rpms-builder scripts/build-opensuse-rpms.sh
+```
 
 ## Use In Image Builds
 

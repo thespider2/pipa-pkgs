@@ -160,6 +160,61 @@ jobs:
           path: repo/ultramarine/
           retention-days: 1
 
+  # ── openSUSE Tumbleweed (RPM) ───────────────────────────────────
+  opensuse:
+    name: Build openSUSE RPMs
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute openSUSE RPM cache key
+        id: os-cache-key
+        run: |
+          set -euo pipefail
+          {
+            printf '%s\0' opensuse/Dockerfile scripts/build-opensuse-rpms.sh
+            find opensuse/specs -type f -print0
+            find common sm8250 -type f \
+              ! -path '*/src/*' \
+              ! -path '*/pkg/*' \
+              -print0
+          } | sort -z | xargs -0 sha256sum | sha256sum \
+            | awk '{print "hash="$1}' >> "$GITHUB_OUTPUT"
+
+      - name: Restore openSUSE RPM build cache
+        id: os-cache-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: opensuse/.build-cache
+          key: opensuse-rpm-${{ runner.arch }}-${{ github.ref_name }}-${{ steps.os-cache-key.outputs.hash }}
+          restore-keys: opensuse-rpm-${{ runner.arch }}-${{ github.ref_name }}-
+
+      - name: Build openSUSE RPM builder image
+        run: docker build -t pipa-opensuse-rpms-builder -f opensuse/Dockerfile .
+
+      - name: Build openSUSE RPMs
+        run: |
+          mkdir -p repo/opensuse
+          docker run --rm \
+            -v "$PWD:/work" \
+            -w /work \
+            pipa-opensuse-rpms-builder scripts/build-opensuse-rpms.sh
+          sudo chown -R "$USER:$USER" repo/opensuse
+
+      - name: Save openSUSE RPM build cache
+        if: steps.os-cache-restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: opensuse/.build-cache
+          key: ${{ steps.os-cache-restore.outputs.cache-primary-key }}
+
+      - name: Upload openSUSE repo
+        uses: actions/upload-artifact@v4
+        with:
+          name: opensuse-repo
+          path: repo/opensuse/
+          retention-days: 1
+
   # ── Ubuntu (deb) ────────────────────────────────────────────────
   ubuntu:
     name: Build Ubuntu debs
@@ -218,7 +273,7 @@ jobs:
   # ── Deploy to GitHub Pages ──────────────────────────────────────
   deploy:
     name: Deploy to Pages
-    needs: [pacman, ultramarine, ubuntu]
+    needs: [pacman, ultramarine, opensuse, ubuntu]
     runs-on: ubuntu-24.04-arm
     environment:
       name: github-pages
@@ -255,6 +310,12 @@ jobs:
         with:
           name: ubuntu-repo
           path: repo/ubuntu/
+
+      - name: Download openSUSE repo
+        uses: actions/download-artifact@v4
+        with:
+          name: opensuse-repo
+          path: repo/opensuse/
 
       - uses: actions/configure-pages@v5
 

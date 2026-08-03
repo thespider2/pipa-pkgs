@@ -1,0 +1,7 @@
+[pipa-pkgs]
+name=Pipa Packages for Xiaomi Pad 6 (openSUSE)
+baseurl=https://thespider2.github.io/pipa-pkgs/repo/opensuse/
+enabled=1
+gpgcheck=0
+autorefresh=1
+type=rpm-md

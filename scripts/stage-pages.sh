@@ -10,6 +10,7 @@ source "$CONFIG_FILE"
 
 UM_REPO_DIR="$ROOT_DIR/repo/ultramarine"
 UB_REPO_DIR="$ROOT_DIR/repo/ubuntu"
+OS_REPO_DIR="$ROOT_DIR/repo/opensuse"
 
 rm -rf "$SITE_DIR"
 mkdir -p "$SITE_DIR/repo"
@@ -23,6 +24,11 @@ fi
 if [ -d "$UB_REPO_DIR" ] && ls "$UB_REPO_DIR"/*.deb &>/dev/null; then
     mkdir -p "$SITE_DIR/repo/ubuntu"
     cp -r "$UB_REPO_DIR"/. "$SITE_DIR/repo/ubuntu/"
+fi
+
+if [ -d "$OS_REPO_DIR" ] && ls "$OS_REPO_DIR"/*.rpm &>/dev/null; then
+    mkdir -p "$SITE_DIR/repo/opensuse"
+    cp -r "$OS_REPO_DIR"/. "$SITE_DIR/repo/opensuse/"
 fi
 
 cat > "$SITE_DIR/index.html" <<EOF
@@ -42,6 +48,8 @@ cat > "$SITE_DIR/index.html" <<EOF
   <p>Repo URL: <a href="$PAGES_BASE_URL/repo/ultramarine/">$PAGES_BASE_URL/repo/ultramarine/</a></p>
   <h2>Ubuntu (apt)</h2>
   <p>Repo URL: <a href="$PAGES_BASE_URL/repo/ubuntu/">$PAGES_BASE_URL/repo/ubuntu/</a></p>
+  <h2>openSUSE (zypper)</h2>
+  <p>Repo URL: <a href="$PAGES_BASE_URL/repo/opensuse/">$PAGES_BASE_URL/repo/opensuse/</a></p>
   <p>Source repo: <a href="https://github.com/thespider2/pipa-pkgs">https://github.com/thespider2/pipa-pkgs</a></p>
 </body>
 </html>

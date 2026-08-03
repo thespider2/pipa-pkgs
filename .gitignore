@@ -17,3 +17,7 @@ ultramarine/.build-cache/
 *.pkg.tar.*
 linux-*.tar.xz
 linux-*.tar.gz
+
+opensuse/.build-cache/
+opensuse/.sources/
+repo/opensuse/

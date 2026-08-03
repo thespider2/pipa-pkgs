@@ -17,7 +17,7 @@ RUN zypper --non-interactive refresh && \
     bc bison flex cpio kmod tar xz rsync wget curl git \
     clang llvm lld \
     openssl libopenssl-devel libelf-devel dwarves perl hostname \
-    glib2-devel libgudev-1_0-devel protobuf-c-devel libqmi-devel \
+    glib2-devel libgudev-1_0-devel protobuf-c-devel protobuf-devel libqmi-devel \
     json-glib-devel gobject-introspection-devel \
     gtk-doc umockdev-devel systemd-rpm-macros systemd-devel \
     polkit-devel \

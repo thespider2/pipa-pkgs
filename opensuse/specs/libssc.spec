@@ -14,6 +14,8 @@ BuildRequires:  meson
 BuildRequires:  python313-devel
 BuildRequires:  systemd
 BuildRequires:  pkgconfig(libprotobuf-c)
+BuildRequires:  protobuf-devel
+BuildRequires:  /usr/bin/protoc
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(gudev-1.0)
 BuildRequires:  pkgconfig(qmi-glib)

@@ -4,16 +4,12 @@ Release:        1%{?dist}
 Summary:        Qualcomm IPC Router userspace
 License:        BSD-3-Clause
 URL:            https://github.com/linux-msm/qrtr
-# v1.0 is Makefile-only; master provides meson + qrtr.pc
 Source0:        %{url}/archive/refs/heads/master.tar.gz#/%{name}-master.tar.gz
 
 BuildRequires:  gcc
 BuildRequires:  meson
 BuildRequires:  ninja
-BuildRequires:  pkgconfig(libudev)
-BuildRequires:  systemd-rpm-macros
 
-Requires(post): systemd
 Obsoletes:      qrtr < 1.1-1
 Provides:       qrtr = %{version}-%{release}
 
@@ -40,20 +36,11 @@ Headers and pkg-config file for %{name}.
 %install
 %meson_install
 
-%post
-%systemd_post qrtr-ns.service
-
-%preun
-%systemd_preun qrtr-ns.service
-
-%postun
-%systemd_postun_with_restart qrtr-ns.service
-
 %files
 %license LICENSE
-%{_bindir}/qrtr-*
+%{_bindir}/qrtr-cfg
+%{_bindir}/qrtr-lookup
 %{_libdir}/libqrtr.so.*
-%{_unitdir}/qrtr-ns.service
 
 %files devel
 %{_includedir}/libqrtr.h
@@ -62,4 +49,4 @@ Headers and pkg-config file for %{name}.
 
 %changelog
 * Mon Aug 03 2026 Ayman <ayman@pipa> - 1.1-1
-- Build linux-msm qrtr master (meson) for openSUSE pkgconfig(qrtr)
+- Package current linux-msm qrtr (cfg/lookup + libqrtr, no ns service)

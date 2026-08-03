@@ -16,7 +16,6 @@ BuildRequires:  meson
 BuildRequires:  systemd-rpm-macros
 
 Requires(post): systemd
-%{?sysusers_requires_compat}
 
 %description
 FastRPC ioctl wrapper and a reverse tunnel. Used to communicate with
@@ -50,7 +49,12 @@ install -Dm644 %{SOURCE4} %{buildroot}%{_sysusersdir}/fastrpc.conf
 install -Dm644 %{SOURCE5} %{buildroot}%{_udevrulesdir}/10-fastrpc.rules
 
 %pre
-%sysusers_create_compat %{SOURCE4}
+# Avoid Fedora %%sysusers_create_compat (breaks under openSUSE rpm scriptlets).
+if ! getent passwd fastrpc >/dev/null 2>&1; then
+    groupadd -r fastrpc 2>/dev/null || true
+    useradd -r -g fastrpc -d / -s /sbin/nologin -c 'Qualcomm FastRPC' fastrpc 2>/dev/null || \
+        useradd -r -d / -s /sbin/nologin fastrpc 2>/dev/null || true
+fi
 
 %post
 %systemd_post hexagonrpcd-adsp-rootpd.service

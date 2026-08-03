@@ -32,7 +32,7 @@ BuildRequires:  pkgconfig(libudev)
 BuildRequires:  pkgconfig(libelf)
 BuildRequires:  pkgconfig(sdl2)
 BuildRequires:  pkgconfig(yaml-0.1)
-BuildRequires:  python313-pybind11-devel
+BuildRequires:  python3-pybind11-devel
 
 %description
 libcamera is a complex camera support library for Linux. This build

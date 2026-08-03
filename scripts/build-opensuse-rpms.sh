@@ -24,18 +24,17 @@ link_files() {
 download_spec_sources() {
     local spec="$1"
     local sources_dir="$HOME/rpmbuild/SOURCES"
-    local line tag raw url dest
+    local line raw url dest
 
     mkdir -p "$sources_dir"
     while IFS= read -r line; do
         case "$line" in
-            Source|Source[0-9]*|Patch|Patch[0-9]*)
+            Source:*|Source[0-9]*:*|Patch:*|Patch[0-9]*:*)
                 ;;
             *)
                 continue
                 ;;
         esac
-        tag="${line%%:*}"
         raw="$(printf '%s\n' "${line#*:}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
         [ -n "$raw" ] || continue
         case "$raw" in
@@ -54,15 +53,20 @@ download_spec_sources() {
             dest="$(basename "${url%%\?*}")"
         fi
 
-        if [ -f "$sources_dir/$dest" ]; then
+        if [ -f "$sources_dir/$dest" ] && [ -s "$sources_dir/$dest" ]; then
             echo "  Source present: $dest"
             continue
         fi
         echo "  Fetching $dest"
-        wget -q -O "$sources_dir/$dest" "$url" || {
+        if ! wget -q --user-agent='pipa-pkgs-builder' -O "$sources_dir/$dest" "$url"; then
             echo "  WARNING: failed to download $url" >&2
             rm -f "$sources_dir/$dest"
-        }
+            continue
+        fi
+        if [ ! -s "$sources_dir/$dest" ]; then
+            echo "  WARNING: empty download for $dest" >&2
+            rm -f "$sources_dir/$dest"
+        fi
     done < <(rpmspec -P --define "_topdir $HOME/rpmbuild" --define "dist .suse.tw" "$spec" 2>/dev/null \
         || cat "$spec")
 }
@@ -227,6 +231,7 @@ SKIPPED=0
 FAILED=0
 
 BUILD_ORDER=(
+    qrtr
     bootmac
     swclock-offset
     hexagonrpc
@@ -280,8 +285,7 @@ for name in "${BUILD_ORDER[@]}"; do
                     esac
                 done
                 if [ ${#cached_rpms[@]} -gt 0 ]; then
-                    rpm -Uvh --force "${cached_rpms[@]}" 2>/dev/null || \
-                        zypper --non-interactive --no-gpg-checks install --allow-unsigned-rpm --force "${cached_rpms[@]}" 2>/dev/null || true
+                    rpm -Uvh --force --noscripts "${cached_rpms[@]}" 2>/dev/null || true
                 fi
                 publish_rpms "${cache_lines[@]:1}"
                 SKIPPED=$((SKIPPED + 1))
@@ -345,8 +349,7 @@ for name in "${BUILD_ORDER[@]}"; do
             esac
         done
         if [ ${#install_rpms[@]} -gt 0 ]; then
-            rpm -Uvh --force "${install_rpms[@]}" 2>/dev/null || \
-                zypper --non-interactive --no-gpg-checks install --allow-unsigned-rpm --force "${install_rpms[@]}" 2>/dev/null || true
+            rpm -Uvh --force --noscripts "${install_rpms[@]}" 2>/dev/null || true
         fi
 
         BUILT=$((BUILT + 1))
@@ -377,7 +380,7 @@ if [ "$FAILED" -gt 0 ]; then
 fi
 
 missing_pkgs=()
-for pkg in bootmac swclock-offset hexagonrpc xiaomi-pipa-firmware pipa-dracut \
+for pkg in qrtr bootmac swclock-offset hexagonrpc xiaomi-pipa-firmware pipa-dracut \
     pipa-grub-config libssc iio-sensor-proxy pipa-sensors pipa-sound-conf \
     libcamera kernel-pipa pipa-metapkg; do
     if ! package_present_in_repo "$pkg"; then

@@ -4,7 +4,7 @@ Release:        1%{?dist}
 Summary:        Configures the MAC addresses of WLAN and Bluetooth interfaces at boot
 License:        GPL-3.0-or-later
 URL:            https://gitlab.postmarketos.org/postmarketOS/bootmac/
-Source:         %{url}/-/archive/v%{version}/bootmac-v%{version}.tar.gz
+Source0:        %{url}/-/archive/v%{version}/bootmac-v%{version}.tar.gz
 BuildArch:      noarch
 
 BuildRequires:  systemd-rpm-macros

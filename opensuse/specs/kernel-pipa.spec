@@ -102,11 +102,19 @@ make ARCH=arm64 LLVM=1 KBUILD_BUILD_VERSION=%{kbuildver} \
 KernelVer=$(make ARCH=arm64 LLVM=1 KBUILD_BUILD_VERSION=%{kbuildver} -s kernelrelease)
 
 make ARCH=arm64 LLVM=1 KBUILD_BUILD_VERSION=%{kbuildver} \
-    INSTALL_MOD_PATH=%{buildroot}/usr \
+    INSTALL_MOD_PATH=%{buildroot} \
     INSTALL_MOD_STRIP=1 \
+    DEPMOD=/bin/true \
     modules_install
 
+# openSUSE usrmerge: modules may land in /lib or /usr/lib under buildroot.
+if [ -d %{buildroot}/lib/modules ] && [ ! -d %{buildroot}/usr/lib/modules ]; then
+    install -d %{buildroot}/usr/lib
+    mv %{buildroot}/lib/modules %{buildroot}/usr/lib/modules
+fi
+
 rm -f %{buildroot}/usr/lib/modules/*/build %{buildroot}/usr/lib/modules/*/source
+rm -f %{buildroot}/lib/modules/*/build %{buildroot}/lib/modules/*/source
 
 install -Dm644 arch/arm64/boot/Image.gz %{buildroot}/boot/vmlinuz-${KernelVer}
 install -Dm644 arch/arm64/boot/Image %{buildroot}/boot/vmlinuz-${KernelVer}.uncompressed

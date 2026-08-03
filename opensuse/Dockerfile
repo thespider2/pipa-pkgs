@@ -15,12 +15,12 @@ RUN zypper --non-interactive refresh && \
     polkit-devel \
     python313-base python313-devel \
     python313-Jinja2 python313-PyYAML python313-ply \
-    python313-pybind11 python313-dbus-python \
+    python313-pybind11 python313-pybind11-devel \
+    python313-dbus-python python313-python-dbusmock \
     libevent-devel libyaml-devel libgnutls-devel \
     libdrm-devel libjpeg8-devel sdl2-compat-devel \
     gstreamer-devel gstreamer-plugins-base-devel \
     lttng-ust-devel libtiff-devel \
-    qrtr-devel \
     && zypper clean -a
 
 RUN rpmdev-setuptree

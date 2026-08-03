@@ -20,6 +20,53 @@ link_files() {
     done
 }
 
+# openSUSE rpmdevtools does not ship Fedora's spectool; download remote Source URLs.
+download_spec_sources() {
+    local spec="$1"
+    local sources_dir="$HOME/rpmbuild/SOURCES"
+    local line tag raw url dest
+
+    mkdir -p "$sources_dir"
+    while IFS= read -r line; do
+        case "$line" in
+            Source|Source[0-9]*|Patch|Patch[0-9]*)
+                ;;
+            *)
+                continue
+                ;;
+        esac
+        tag="${line%%:*}"
+        raw="$(printf '%s\n' "${line#*:}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+        [ -n "$raw" ] || continue
+        case "$raw" in
+            http://*|https://*|ftp://*)
+                ;;
+            *)
+                continue
+                ;;
+        esac
+
+        if [[ "$raw" == *#/* ]]; then
+            url="${raw%%#*}"
+            dest="${raw##*/}"
+        else
+            url="$raw"
+            dest="$(basename "${url%%\?*}")"
+        fi
+
+        if [ -f "$sources_dir/$dest" ]; then
+            echo "  Source present: $dest"
+            continue
+        fi
+        echo "  Fetching $dest"
+        wget -q -O "$sources_dir/$dest" "$url" || {
+            echo "  WARNING: failed to download $url" >&2
+            rm -f "$sources_dir/$dest"
+        }
+    done < <(rpmspec -P --define "_topdir $HOME/rpmbuild" --define "dist .suse.tw" "$spec" 2>/dev/null \
+        || cat "$spec")
+}
+
 compute_source_hash() {
     local name="$1"
     local spec="$SPECS_DIR/$name.spec"
@@ -233,7 +280,8 @@ for name in "${BUILD_ORDER[@]}"; do
                     esac
                 done
                 if [ ${#cached_rpms[@]} -gt 0 ]; then
-                    zypper --non-interactive --no-gpg-checks install --allow-unsigned-rpm "${cached_rpms[@]}" 2>/dev/null || true
+                    rpm -Uvh --force "${cached_rpms[@]}" 2>/dev/null || \
+                        zypper --non-interactive --no-gpg-checks install --allow-unsigned-rpm --force "${cached_rpms[@]}" 2>/dev/null || true
                 fi
                 publish_rpms "${cache_lines[@]:1}"
                 SKIPPED=$((SKIPPED + 1))
@@ -248,8 +296,7 @@ for name in "${BUILD_ORDER[@]}"; do
     cp "$SOURCES_DIR/$name"/* ~/rpmbuild/SOURCES/ 2>/dev/null || true
 
     echo "  Downloading sources..."
-    spectool -g -R --define "_topdir $HOME/rpmbuild" "$spec" || \
-        echo "  WARNING: spectool failed for $name, sources may be missing"
+    download_spec_sources "$spec"
 
     echo "  Running rpmbuild..."
     BUILD_LOG="/tmp/rpmbuild-$name.log"
@@ -298,7 +345,8 @@ for name in "${BUILD_ORDER[@]}"; do
             esac
         done
         if [ ${#install_rpms[@]} -gt 0 ]; then
-            zypper --non-interactive --no-gpg-checks install --allow-unsigned-rpm "${install_rpms[@]}" 2>/dev/null || true
+            rpm -Uvh --force "${install_rpms[@]}" 2>/dev/null || \
+                zypper --non-interactive --no-gpg-checks install --allow-unsigned-rpm --force "${install_rpms[@]}" 2>/dev/null || true
         fi
 
         BUILT=$((BUILT + 1))

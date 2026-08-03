@@ -26,15 +26,16 @@ Requires:       libssc
 Requires:       libcamera
 Requires:       libcamera-ipa
 Requires:       libcamera-tools
-Recommends:     gstreamer-plugin-libcamera
+Recommends:     gstreamer1-plugin-libcamera
 Recommends:     libinput10
 Requires:       iio-sensor-proxy
 Requires:       qrtr
-Requires:       tqftpserv
 Requires:       pd-mapper
 Requires:       Mesa-dri
 Requires:       wireless-regdb
 Requires:       tuned
+Recommends:     tqftpserv
+Recommends:     rmtfs
 
 %description
 Meta package that pulls in all components needed for running

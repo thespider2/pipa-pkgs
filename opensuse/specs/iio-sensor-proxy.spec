@@ -26,7 +26,7 @@ BuildRequires:  pkgconfig(gudev-1.0)
 BuildRequires:  pkgconfig(polkit-gobject-1)
 BuildRequires:  systemd-rpm-macros
 BuildRequires:  umockdev
-BuildRequires:  python3-dbusmock
+BuildRequires:  python313-python-dbusmock
 
 Requires:       libssc >= 0.2.2
 %{?systemd_requires}

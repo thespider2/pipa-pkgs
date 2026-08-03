@@ -39,7 +39,7 @@ BuildRequires:  bison
 BuildRequires:  clang
 BuildRequires:  cpio
 BuildRequires:  dwarves
-BuildRequires:  elfutils-devel
+BuildRequires:  libelf-devel
 BuildRequires:  flex
 BuildRequires:  gcc
 BuildRequires:  hostname
@@ -47,9 +47,9 @@ BuildRequires:  kmod
 BuildRequires:  lld
 BuildRequires:  llvm
 BuildRequires:  make
-BuildRequires:  openssl-devel
-BuildRequires:  perl-interpreter
-BuildRequires:  python3
+BuildRequires:  libopenssl-devel
+BuildRequires:  perl
+BuildRequires:  python313-base
 BuildRequires:  rsync
 BuildRequires:  tar
 BuildRequires:  xz

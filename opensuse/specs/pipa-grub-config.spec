@@ -12,7 +12,7 @@ BuildRequires:  systemd-rpm-macros
 Requires:       bash
 Requires:       coreutils
 Requires:       util-linux
-Requires:       grub2-efi-aa64
+Requires:       grub2-arm64-efi
 
 %description
 Refreshes the Xiaomi Pad 6 GRUB menu and keeps the DTB entry as default.

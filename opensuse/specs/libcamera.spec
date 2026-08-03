@@ -16,12 +16,12 @@ BuildRequires:  cmake
 BuildRequires:  gcc-c++
 BuildRequires:  git
 BuildRequires:  meson >= 0.60
-BuildRequires:  ninja-build
-BuildRequires:  openssl-devel
-BuildRequires:  python3-devel
-BuildRequires:  python3-jinja2
-BuildRequires:  python3-ply
-BuildRequires:  python3-pyyaml
+BuildRequires:  ninja
+BuildRequires:  libopenssl-devel
+BuildRequires:  python313-devel
+BuildRequires:  python313-Jinja2
+BuildRequires:  python313-ply
+BuildRequires:  python313-PyYAML
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(gstreamer-1.0)
 BuildRequires:  pkgconfig(gstreamer-video-1.0)
@@ -32,7 +32,7 @@ BuildRequires:  pkgconfig(libudev)
 BuildRequires:  pkgconfig(libelf)
 BuildRequires:  pkgconfig(sdl2)
 BuildRequires:  pkgconfig(yaml-0.1)
-BuildRequires:  pybind11-devel
+BuildRequires:  python313-pybind11-devel
 
 %description
 libcamera is a complex camera support library for Linux. This build

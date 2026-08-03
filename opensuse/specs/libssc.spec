@@ -11,7 +11,7 @@ Patch0002:      0002-ssc-guard-null-GError-in-task-return.patch
 
 BuildRequires:  gcc
 BuildRequires:  meson
-BuildRequires:  python3-devel
+BuildRequires:  python313-devel
 BuildRequires:  systemd
 BuildRequires:  pkgconfig(libprotobuf-c)
 BuildRequires:  pkgconfig(glib-2.0)

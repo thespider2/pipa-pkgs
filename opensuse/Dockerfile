@@ -2,8 +2,16 @@ FROM opensuse/tumbleweed
 
 # Tumbleweed aarch64 ships versioned python3NN-* packages; prefer concrete
 # names over unversioned provides so zypper does not fail the transaction.
+#
+# Hub image snapshots often drift from current TW repos (newer libs than
+# matching -devel). Sync with dup first; allow downgrade on install so
+# zypper does not pull *-mini/*-stage1 packages that need
+# this-is-only-for-build-envs.
 RUN zypper --non-interactive refresh && \
-    zypper --non-interactive install -y \
+    zypper --non-interactive dup -y && \
+    zypper --non-interactive addlock \
+      'glib2-stage1*' 'libudev-mini*' 'systemd-mini*' 'libsystemd-mini*' && \
+    zypper --non-interactive install --allow-downgrade -y \
     rpm-build rpmdevtools createrepo_c \
     gcc gcc-c++ make cmake meson ninja \
     bc bison flex cpio kmod tar xz rsync wget curl git \

@@ -26,7 +26,7 @@ BuildRequires:  pkgconfig(gudev-1.0)
 BuildRequires:  pkgconfig(polkit-gobject-1)
 BuildRequires:  systemd-rpm-macros
 BuildRequires:  umockdev
-BuildRequires:  python3-dbusmock
+BuildRequires:  python313-python-dbusmock
 
 Requires:       libssc >= 0.2.2
 %{?systemd_requires}
@@ -48,7 +48,14 @@ Documentation for %{name}.
 %autosetup -p1 -n %{name}-%{commit}
 
 %build
-%meson -Dgtk_doc=true -Dgtk-tests=false -Dssc-support=enabled
+# openSUSE ships libudev.pc, not udev.pc; set udevrulesdir explicitly
+# so meson does not require dependency('udev').
+%meson \
+  -Dgtk_doc=true \
+  -Dgtk-tests=false \
+  -Dssc-support=enabled \
+  -Dudevrulesdir=%{_udevrulesdir} \
+  -Dsystemdsystemunitdir=%{_unitdir}
 %meson_build
 
 %install

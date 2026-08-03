@@ -4,7 +4,7 @@ Release:        1%{?dist}
 Summary:        Library to expose Qualcomm Sensor Core sensors
 License:        GPL-3.0-or-later
 URL:            https://codeberg.org/DylanVanAssche/libssc
-Source:         %{url}/archive/v%{version}.tar.gz
+Source0:        %{url}/archive/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
 Patch0001:      0001-ssc-guard-against-null-GError-in-g_warning-g_debug.patch
 Patch0002:      0002-ssc-guard-null-GError-in-task-return.patch
@@ -18,7 +18,7 @@ BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(gudev-1.0)
 BuildRequires:  pkgconfig(qmi-glib)
 BuildRequires:  pkgconfig(qrtr)
-BuildRequires:  pkgconfig(udev)
+BuildRequires:  pkgconfig(libudev)
 
 %description
 libssc exposes sensors managed by the Qualcomm Sensor Core found in
@@ -34,7 +34,7 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 
 
 %prep
-%autosetup -p1 -n %{name}
+%autosetup -p1 -n %{name}-%{version}
 
 %build
 %meson

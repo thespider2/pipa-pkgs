@@ -21,6 +21,8 @@ RUN zypper --non-interactive refresh && \
     libdrm-devel libjpeg8-devel sdl2-compat-devel \
     gstreamer-devel gstreamer-plugins-base-devel \
     lttng-ust-devel libtiff-devel \
+    Mesa-libGLESv3-devel Mesa-libEGL-devel Mesa-libGLESv2-devel \
+    zstd \
     && zypper clean -a
 
 RUN rpmdev-setuptree

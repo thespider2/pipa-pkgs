@@ -33,6 +33,9 @@ BuildRequires:  pkgconfig(libelf)
 BuildRequires:  pkgconfig(sdl2)
 BuildRequires:  pkgconfig(yaml-0.1)
 BuildRequires:  python3-pybind11-devel
+BuildRequires:  Mesa-libGLESv3-devel
+BuildRequires:  Mesa-libEGL-devel
+BuildRequires:  Mesa-libGLESv2-devel
 
 %description
 libcamera is a complex camera support library for Linux. This build

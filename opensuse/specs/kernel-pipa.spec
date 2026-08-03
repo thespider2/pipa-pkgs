@@ -53,6 +53,7 @@ BuildRequires:  python313-base
 BuildRequires:  rsync
 BuildRequires:  tar
 BuildRequires:  xz
+BuildRequires:  zstd
 
 Requires:       dracut
 Requires:       kmod

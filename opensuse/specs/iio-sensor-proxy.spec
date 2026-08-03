@@ -18,7 +18,7 @@ Patch0005:      0005-drv-ssc-retry-open-after-resume.patch
 BuildRequires:  meson
 BuildRequires:  gcc
 BuildRequires:  gtk-doc
-BuildRequires:  pkgconfig(udev)
+BuildRequires:  pkgconfig(libudev)
 BuildRequires:  pkgconfig(systemd)
 BuildRequires:  pkgconfig(libssc)
 BuildRequires:  pkgconfig(gio-2.0)

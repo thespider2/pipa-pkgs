@@ -1,5 +1,5 @@
 #!/usr/bin/make -f
-export KBUILD_BUILD_VERSION = 4-pipa
+export KBUILD_BUILD_VERSION = 5-pipa
 export ARCH = arm64
 export LLVM = 1
 
@@ -18,6 +18,27 @@ override_dh_auto_configure:
 	done
 	./scripts/config --file .config -d LOCALVERSION_AUTO
 	./scripts/config --file .config --set-str LOCALVERSION "-pipa"
+	# Snap/snapd needs AppArmor confinement + squashfs (incl. zstd) and enough loop devices.
+	./scripts/config --file .config \
+		-e SECURITY \
+		-e SECURITYFS \
+		-e AUDIT \
+		-e SECURITY_APPARMOR \
+		-e DEFAULT_SECURITY_APPARMOR \
+		-d DEFAULT_SECURITY_DAC \
+		--set-str DEFAULT_SECURITY apparmor \
+		--set-str LSM "landlock,lockdown,yama,integrity,apparmor" \
+		-e SQUASHFS \
+		-e SQUASHFS_XZ \
+		-e SQUASHFS_ZSTD \
+		-e SQUASHFS_XATTR \
+		-e BLK_DEV_LOOP \
+		--set-val BLK_DEV_LOOP_MIN_COUNT 64 \
+		-e OVERLAY_FS \
+		-e FUSE_FS \
+		-e SECCOMP \
+		-e SECCOMP_FILTER \
+		-e KEYS
 	$(MAKE) ARCH=$(ARCH) LLVM=$(LLVM) olddefconfig
 
 override_dh_auto_build:

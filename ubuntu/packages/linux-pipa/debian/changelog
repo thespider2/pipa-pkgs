@@ -1,3 +1,9 @@
+linux-pipa (7.1.4-4pipa1) resolute; urgency=medium
+
+  * Enable AppArmor, squashfs/zstd, and loop support required by snapd.
+
+ -- Ayman <ayman@pipa>  Tue, 04 Aug 2026 20:36:00 +0000
+
 linux-pipa (7.1.4-3pipa1) resolute; urgency=medium
 
   * Report tablet mode without keyboard (pmaports 4a6b2648).

@@ -13,7 +13,7 @@ Depends: ${misc:Depends}, kmod, dracut | initramfs-tools, xiaomi-pipa-firmware
 Provides: linux-image, linux-image-arm64
 Description: Linux kernel for Xiaomi Pad 6 (pipa)
  Linux 7.1.4 (kernel.org + device patches) for the Xiaomi Pad 6
- (SM8250 / pipa).
+ (SM8250 / pipa). Built with AppArmor and squashfs options for snapd.
 
 Package: linux-modules-pipa
 Architecture: arm64

@@ -1,6 +1,6 @@
 Name:           pipa-sound-conf
 Version:        1.4
-Release:        12%{?dist}
+Release:        13%{?dist}
 Summary:        Sound and camera settings for Xiaomi Pad 6 (pipa)
 License:        MIT
 BuildArch:      noarch
@@ -62,6 +62,9 @@ install -Dm644 %{SOURCE5} %{buildroot}%{_unitdir}/pipa-audio-init.service
 %{_unitdir}/pipa-audio-init.service
 
 %changelog
+* Tue Aug 04 2026 Ayman <ayman@pipa> - 1.4-13
+- Drop rmtfs/udev-settle from pipa-audio-init (faster boot; rmtfs unused on pipa)
+
 * Sat Jul 04 2026 Ayman <ayman@pipa> - 1.4-12
 - Require Fedora alsa-ucm instead of Arch alsa-ucm-conf
 

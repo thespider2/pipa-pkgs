@@ -1,7 +1,8 @@
 [Unit]
 Description=Initialize Xiaomi Pad 6 ALSA state
-After=systemd-udev-settle.service pd-mapper.service rmtfs.service tqftpserv.service
-Wants=systemd-udev-settle.service pd-mapper.service rmtfs.service tqftpserv.service
+# Avoid systemd-udev-settle (slow) and rmtfs (modem EFS; not used on pipa).
+After=pd-mapper.service tqftpserv.service sound.target
+Wants=pd-mapper.service
 Before=display-manager.service
 
 [Service]

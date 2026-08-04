@@ -1,6 +1,6 @@
 Name:           pipa-metapkg
 Version:        1.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Xiaomi Pad 6 support meta package for openSUSE
 License:        MIT
 BuildArch:      noarch
@@ -34,8 +34,8 @@ Requires:       pd-mapper
 Requires:       Mesa-dri
 Requires:       wireless-regdb
 Requires:       tuned
+# tqftpserv serves DSP firmware over QRTR; rmtfs is modem EFS and unused on pipa.
 Recommends:     tqftpserv
-Recommends:     rmtfs
 
 %description
 Meta package that pulls in all components needed for running
@@ -53,5 +53,8 @@ install -Dm644 %{SOURCE3} %{buildroot}%{_datadir}/libinput/local-overrides.quirk
 %{_datadir}/libinput/local-overrides.quirks
 
 %changelog
+* Tue Aug 04 2026 Ayman <ayman@pipa> - 1.1-2
+- Drop rmtfs recommend (modem EFS; not used on pipa)
+
 * Mon Aug 03 2026 Ayman <ayman@pipa> - 1.1-1
 - Initial openSUSE Tumbleweed meta package

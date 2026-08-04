@@ -1,6 +1,6 @@
 Name:           pipa-metapkg
 Version:        1.1
-Release:        2%{?dist}
+Release:        4%{?dist}
 Summary:        Xiaomi Pad 6 support meta package for openSUSE
 License:        MIT
 BuildArch:      noarch
@@ -33,7 +33,9 @@ Requires:       qrtr
 Requires:       pd-mapper
 Requires:       Mesa-dri
 Requires:       wireless-regdb
+# GNOME/KDE Power Mode via TuneD + PPD compatibility daemon.
 Requires:       tuned
+Requires:       tuned-ppd
 # tqftpserv serves DSP firmware over QRTR; rmtfs is modem EFS and unused on pipa.
 Recommends:     tqftpserv
 
@@ -53,6 +55,12 @@ install -Dm644 %{SOURCE3} %{buildroot}%{_datadir}/libinput/local-overrides.quirk
 %{_datadir}/libinput/local-overrides.quirks
 
 %changelog
+* Tue Aug 04 2026 Ayman <ayman@pipa> - 1.1-4
+- Require tuned + tuned-ppd for GNOME Power Mode (drop power-profiles-daemon)
+
+* Tue Aug 04 2026 Ayman <ayman@pipa> - 1.1-3
+- Require power-profiles-daemon instead of tuned (GNOME Power Mode)
+
 * Tue Aug 04 2026 Ayman <ayman@pipa> - 1.1-2
 - Drop rmtfs recommend (modem EFS; not used on pipa)
 

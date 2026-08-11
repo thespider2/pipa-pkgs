@@ -2,7 +2,7 @@
 
 # kernel.org + device patches (+ local single DTB).
 %global kversion 7.1.4
-%global krelease 4
+%global krelease 5
 %global kbuildver %(echo $((%{krelease} + 1))-pipa)
 
 Name:           kernel-pipa
@@ -58,7 +58,12 @@ BuildRequires:  xz
 Requires:       dracut
 Requires:       kmod
 Requires:       xiaomi-pipa-firmware
+Recommends:     pipa-dracut
+Recommends:     pipa-grub-config
+# Rich deps like "(kmod(i2c_dev.ko) if kernel)" need this for built-in i2c-dev.
 Provides:       kernel = %{kversion}
+Provides:       kernel-uname-r = %{kversion}-pipa
+Provides:       kmod(i2c_dev.ko)
 Obsoletes:      kernel-pipa < %{version}-%{release}
 
 %description
@@ -76,6 +81,8 @@ Kernel header files for building out-of-tree modules against kernel-pipa.
 %package modules
 Summary:        Kernel modules for kernel-pipa
 Requires:       kernel-pipa = %{version}-%{release}
+Recommends:     pipa-dracut
+Recommends:     pipa-grub-config
 Provides:       kernel-modules = %{kversion}
 Obsoletes:      kernel-pipa-modules < %{version}-%{release}
 
@@ -147,7 +154,33 @@ find %{buildroot}/usr/include -name '.*' -delete
 %files headers
 /usr/include/
 
+%post modules
+%{_sbindir}/depmod -a %{kversion}-pipa >/dev/null 2>&1 || :
+if [ -d /usr/lib/modules ]; then
+  for d in /usr/lib/modules/*-pipa /usr/lib/modules/%{kversion}*; do
+    [ -d "$d" ] || continue
+    %{_sbindir}/depmod -a "$(basename "$d")" >/dev/null 2>&1 || :
+  done
+fi
+if [ -x /usr/local/bin/pipa-refresh-initramfs ]; then
+  /usr/local/bin/pipa-refresh-initramfs >/dev/null 2>&1 || :
+elif [ -x /usr/local/bin/pipa-refresh-grub-config ]; then
+  /usr/local/bin/pipa-refresh-grub-config >/dev/null 2>&1 || :
+fi
+
+%postun modules
+if [ "$1" = "0" ] && [ -d /usr/lib/modules ]; then
+  for d in /usr/lib/modules/*-pipa /usr/lib/modules/%{kversion}*; do
+    [ -d "$d" ] || continue
+    %{_sbindir}/depmod -a "$(basename "$d")" >/dev/null 2>&1 || :
+  done
+fi
+
 %changelog
+* Tue Aug 11 2026 Ayman <ayman@pipa> - 7.1.4-5
+- Provide kmod(i2c_dev.ko) / kernel-uname-r so fwupd deps work without kernel-default
+- Rebuild pipa initramfs and GRUB from kernel-pipa-modules %%post
+
 * Tue Aug 11 2026 Ayman <ayman@pipa> - 7.1.4-4
 - Ignore AFE clock set_param errors so va_macro probes (fixes silent audio)
 

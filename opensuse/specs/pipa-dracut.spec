@@ -1,6 +1,6 @@
 Name:           pipa-dracut
 Version:        1.1
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Dracut modules for the Xiaomi Pad 6
 License:        GPL-2.0-only
 BuildArch:      noarch
@@ -30,6 +30,9 @@ install -Dm755 %{SOURCE3} %{buildroot}/usr/local/bin/pipa-refresh-initramfs
 /usr/local/bin/pipa-refresh-initramfs
 
 %changelog
+* Tue Aug 11 2026 Ayman <ayman@pipa> - 1.1-7
+- Publish /boot/initrd-$kver and initramfs-linux-pipa.img from refresh helper
+
 * Thu Jul 30 2026 Ayman <ayman@pipa> - 1.1-6
 - Force-load nanosic_803 and nu1665 in initramfs (pmaports a3236185/ee31f538)
 

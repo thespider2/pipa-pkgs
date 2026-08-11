@@ -1,3 +1,10 @@
+linux-pipa (7.1.4-6pipa1) resolute; urgency=medium
+
+  * Provide kmod(i2c_dev.ko) / kernel-uname-r for fwupd without kernel-default.
+  * Rebuild pipa initramfs and GRUB from kernel package postinst.
+
+ -- Ayman <ayman@pipa>  Tue, 11 Aug 2026 17:05:00 +0000
+
 linux-pipa (7.1.4-5pipa1) resolute; urgency=medium
 
   * Ignore AFE clock set_param errors so va_macro probes (fixes silent audio).

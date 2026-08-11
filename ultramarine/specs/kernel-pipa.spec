@@ -2,7 +2,7 @@
 
 # kernel.org + device patches (+ local single DTB).
 %global kversion 7.1.4
-%global krelease 3
+%global krelease 4
 %global kbuildver %(echo $((%{krelease} + 1))-pipa)
 
 Name:           kernel-pipa
@@ -33,6 +33,7 @@ Patch13:        0016-power-supply-add-nuvolta-rx1665-wireless-charger.patch
 Patch14:        0017-arm64-dts-qcom-sm8250-xiaomi-pipa-Unify-single-dtb.patch
 Patch15:        0018-usb-typec-fsa4480-add-chip-id-read-retry-loop.patch
 Patch16:        0019-arm64-dts-qcom-sm8250-xiaomi-pipa-enable-DisplayPort.patch
+Patch17:        0020-HACK-ASoC-qcom-qdsp6-q6afe-ignore-clock-set-param-er.patch
 
 BuildRequires:  bc
 BuildRequires:  bison
@@ -147,6 +148,9 @@ find %{buildroot}/usr/include -name '.*' -delete
 /usr/include/
 
 %changelog
+* Tue Aug 11 2026 Ayman <ayman@pipa> - 7.1.4-4
+- Ignore AFE clock set_param errors so va_macro probes (fixes silent audio)
+
 * Thu Jul 30 2026 Ayman <ayman@pipa> - 7.1.4-3
 - Report tablet mode without keyboard (pmaports 4a6b2648)
 

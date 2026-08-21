@@ -1,0 +1,58 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Auto <auto@local>
+Date: Thu, 16 Jul 2026 19:30:00 +0000
+Subject: [PATCH] HACK: ASoC: qcom: qdsp6: q6afe: ignore clock set_param errors
+
+On xiaomi-pipa the ADSP often returns status 0x16 for AFE_SVC_CMD_SET_PARAM
+(clock enable) right after the similarly-spurious LPASS core HW vote error.
+That makes va_macro probe fail with -22, which blocks rx/tx macros,
+SoundWire, WCD, and the sm8250 sound card.
+
+Mirror the existing vote HACK: clear the error so clk_prepare_enable can
+succeed and the rest of the audio graph can bind.
+
+Also silence unknown-cmd spam for DEVOTE_REQUEST (0x100f6), which the
+firmware rejects the same way.
+---
+ sound/soc/qcom/qdsp6/q6afe.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/sound/soc/qcom/qdsp6/q6afe.c b/sound/soc/qcom/qdsp6/q6afe.c
+index b8ef41b28ac7..a1b2c3d4e5f6 100644
+--- a/sound/soc/qcom/qdsp6/q6afe.c
++++ b/sound/soc/qcom/qdsp6/q6afe.c
+@@ -991,20 +991,32 @@ static int q6afe_callback(struct apr_device *adev, const struct apr_resp_pkt *da
+ 		case AFE_SVC_CMD_SET_PARAM:
+ 			port = q6afe_find_port(afe, hdr->token);
+ 			if (port) {
+ 				port->result = *res;
++				if (port->result.status) {
++					dev_err(afe->dev,
++						"HACK(xiaomi-pipa): Ignoring AFE set_param error\n");
++					port->result.status = 0;
++				}
+ 				wake_up(&port->wait);
+ 				kref_put(&port->refcount, q6afe_port_free);
+ 			} else if (hdr->token == AFE_CLK_TOKEN) {
+ 				afe->result = *res;
++				if (afe->result.status) {
++					dev_err(afe->dev,
++						"HACK(xiaomi-pipa): Ignoring AFE clock set_param error\n");
++					afe->result.status = 0;
++				}
+ 				wake_up(&afe->wait);
+ 			}
+ 			break;
+ 		case AFE_CMD_REMOTE_LPASS_CORE_HW_VOTE_REQUEST:
+ 			dev_err(afe->dev, "HACK(xiaomi-pipa): Pretending that the vote did not return an error\n");
+ 			afe->result.opcode = AFE_CMD_RSP_REMOTE_LPASS_CORE_HW_VOTE_REQUEST;
+ 			afe->result.status = 0;
+ 			wake_up(&afe->wait);
+ 			break;
++		case AFE_CMD_REMOTE_LPASS_CORE_HW_DEVOTE_REQUEST:
++			break;
+ 		default:
+ 			dev_err(afe->dev, "Unknown cmd 0x%x\n",	res->opcode);
+ 			break;
+-- 
+2.52.0

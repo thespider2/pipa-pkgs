@@ -1,3 +1,9 @@
+pipa-dracut (1.1-7pipa1) resolute; urgency=medium
+
+  * Publish /boot/initrd-$kver and initramfs-linux-pipa.img from refresh helper.
+
+ -- Ayman <ayman@pipa>  Tue, 11 Aug 2026 17:05:00 +0000
+
 pipa-dracut (1.1-6pipa1) resolute; urgency=medium
 
   * Force-load nanosic_803 and nu1665 in initramfs (pmaports a3236185/ee31f538).

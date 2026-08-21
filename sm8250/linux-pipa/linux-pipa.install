@@ -51,7 +51,14 @@ refresh_boot_artifacts() {
     fi
 
     log "building initramfs for $kernver"
-    dracut --force --kver "$kernver" "$initramfs"
+    dracut --force --no-hostonly --kver "$kernver" "$initramfs"
+
+    if [ -d /boot ]; then
+        cp -f "$initramfs" /boot/initramfs-linux-pipa.img
+        cp -f "$initramfs" "/boot/initramfs-${kernver}.img"
+        cp -f "$initramfs" "/boot/initrd-${kernver}"
+        ln -sfn "initrd-${kernver}" /boot/initrd
+    fi
 
     if [ -x /usr/local/bin/pipa-refresh-grub-config ]; then
         log "refreshing GRUB menu"

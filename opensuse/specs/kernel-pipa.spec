@@ -2,7 +2,7 @@
 
 # kernel.org + device patches (+ local single DTB).
 %global kversion 7.1.4
-%global krelease 3
+%global krelease 4
 %global kbuildver %(echo $((%{krelease} + 1))-pipa)
 
 Name:           kernel-pipa
@@ -58,6 +58,9 @@ BuildRequires:  zstd
 Requires:       dracut
 Requires:       kmod
 Requires:       xiaomi-pipa-firmware
+# Rebuild initramfs + GRUB (with DTB) after every kernel upgrade.
+Requires:       pipa-dracut
+Requires:       pipa-grub-config
 Provides:       kernel = %{kversion}
 Obsoletes:      kernel-pipa < %{version}-%{release}
 
@@ -155,6 +158,12 @@ find %{buildroot}/usr/include -name '.*' -delete
 %files headers
 /usr/include/
 
+%post
+# Ensure GRUB still loads the pipa DTB after openSUSE regenerates grub.cfg.
+if [ -x /usr/local/bin/pipa-refresh-grub-config ]; then
+  /usr/local/bin/pipa-refresh-grub-config >/dev/null 2>&1 || :
+fi
+
 %post modules
 %{_sbindir}/depmod -a %{kversion}-pipa >/dev/null 2>&1 || :
 # Fall back to whatever module tree was installed if release naming drifts.
@@ -163,6 +172,13 @@ if [ -d /usr/lib/modules ]; then
     [ -d "$d" ] || continue
     %{_sbindir}/depmod -a "$(basename "$d")" >/dev/null 2>&1 || :
   done
+fi
+# Arch/Fedora rebuild initramfs on kernel install; openSUSE was missing this,
+# so upgrades could leave a stale initramfs / grub.cfg without the DTB.
+if [ -x /usr/local/bin/pipa-refresh-initramfs ]; then
+  /usr/local/bin/pipa-refresh-initramfs >/dev/null 2>&1 || :
+elif [ -x /usr/local/bin/pipa-refresh-grub-config ]; then
+  /usr/local/bin/pipa-refresh-grub-config >/dev/null 2>&1 || :
 fi
 
 %postun modules
@@ -174,6 +190,9 @@ if [ "$1" = "0" ] && [ -d /usr/lib/modules ]; then
 fi
 
 %changelog
+* Fri Aug 21 2026 Ayman <ayman@pipa> - 7.1.4-4
+- Rebuild initramfs and refresh GRUB (DTB) on kernel/modules install
+
 * Mon Aug 03 2026 Ayman <ayman@pipa> - 7.1.4-3
 - Run depmod in %%post for modules package
 - Report tablet mode without keyboard (pmaports 4a6b2648)

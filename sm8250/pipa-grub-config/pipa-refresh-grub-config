@@ -90,13 +90,34 @@ mkdir -p "$GRUB_DIR"
 ensure_tmpdir
 discover_dtbs
 
+# Prefer the pipa kernel. openSUSE zypper can install stock TW as /boot/Image
+# (symlink to Image-*-default); booting that with the pipa DTB fails to find root.
 separate_kernel_rel=
-if [ -f "$BOOT_DIR/$RAW_KERNEL_REL" ]; then
-    separate_kernel_rel="$RAW_KERNEL_REL"
-elif [ -f "$BOOT_DIR/$GZIP_KERNEL_REL" ]; then
-    separate_kernel_rel="$GZIP_KERNEL_REL"
+if [ -n "${PIPA_KERNEL_REL:-}" ] && [ -f "$BOOT_DIR/$PIPA_KERNEL_REL" ]; then
+    separate_kernel_rel="$PIPA_KERNEL_REL"
 else
-    log "no kernel image found under $BOOT_DIR"
+    shopt -s nullglob
+    pipa_uncompressed=("$BOOT_DIR"/vmlinuz-*-pipa.uncompressed)
+    shopt -u nullglob
+    if [ "${#pipa_uncompressed[@]}" -gt 0 ]; then
+        separate_kernel_rel="$(basename "$(ls -1t "${pipa_uncompressed[@]}" | head -n1)")"
+    elif [ -f "$BOOT_DIR/$GZIP_KERNEL_REL" ]; then
+        separate_kernel_rel="$GZIP_KERNEL_REL"
+    elif [ -f "$BOOT_DIR/$RAW_KERNEL_REL" ] && [ ! -L "$BOOT_DIR/$RAW_KERNEL_REL" ]; then
+        # Only use bare Image if it is a real file (pipa), not a stock-kernel symlink.
+        separate_kernel_rel="$RAW_KERNEL_REL"
+    elif [ -f "$BOOT_DIR/$RAW_KERNEL_REL" ]; then
+        target="$(readlink -f "$BOOT_DIR/$RAW_KERNEL_REL" 2>/dev/null || true)"
+        case "$target" in
+            *pipa*) separate_kernel_rel="$RAW_KERNEL_REL" ;;
+            *)
+                log "ignoring stock-kernel symlink $BOOT_DIR/$RAW_KERNEL_REL -> $target"
+                ;;
+        esac
+    fi
+fi
+if [ -z "$separate_kernel_rel" ]; then
+    log "no pipa kernel image found under $BOOT_DIR"
     exit 1
 fi
 

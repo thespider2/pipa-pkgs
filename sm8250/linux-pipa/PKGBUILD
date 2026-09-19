@@ -1,7 +1,7 @@
 pkgbase=linux-pipa
 pkgname=(linux-pipa linux-pipa-headers)
 pkgver=7.1.7
-pkgrel=2
+pkgrel=3
 pkgdesc='Stable kernel for Xiaomi Pad 6'
 arch=('aarch64')
 _carch=arm64
@@ -13,17 +13,27 @@ makedepends=(
   'tar' 'xz' 'rsync'
 )
 options=('!strip')
-# PAD6-DEV pipa/7.1.7-Stable + config only. AFE audio hacks archived under archived-patches/.
+# PAD6-DEV pipa/7.1.7-Stable + config + DTB duplicate-label fix. AFE hacks archived.
 # Bump with: git ls-remote https://github.com/PAD6-DEV/linux-7.xx.git refs/heads/pipa/7.1.7-Stable
 _commit=f6344729eb71c1cb0c4189827c679502f4cd85a8
 source=(
   "git+https://github.com/PAD6-DEV/linux-7.xx.git#commit=${_commit}"
   'config-xiaomi-pipa.aarch64'
+  '0001-arm64-dts-qcom-sm8250-xiaomi-pipa-fix-duplicate-cpu7.patch'
 )
-sha256sums=('SKIP' 'SKIP')
+sha256sums=('SKIP' 'SKIP'
+            'ccd58a4aed8dcb2432d7352599fb1fffdc87ea629ecfc18737599e494f23b857')
 
 prepare() {
   cd linux-7.xx
+  local src
+  for src in "${source[@]}"; do
+    src="${src%%::*}"
+    src="${src##*/}"
+    [[ $src = *.patch ]] || continue
+    echo "Applying patch $src..."
+    patch -Np1 < "../$src"
+  done
   cp ../config-xiaomi-pipa.aarch64 .config
 
   ./scripts/config --file .config -d LOCALVERSION_AUTO

@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Ayman <ayman@pipa>
+Subject: [PATCH] arm64: dts: qcom: sm8250-xiaomi-pipa: fix duplicate cpu7 OPP label
+
+The pipa overlay adds opp-3187200000 under &cpu7_opp_table with label
+cpu7_opp21, but sm8250.dtsi already defines cpu7_opp21 on opp-3091200000.
+Rename the higher-frequency node to cpu7_opp22 so dtc no longer reports
+duplicate_label and DTB build succeeds.
+---
+ arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts b/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts
+index 111111111111..222222222222 100644
+--- a/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts
++++ b/arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dts
+@@ -309,7 +309,7 @@
+ };
+ 
+ &cpu7_opp_table {
+-	cpu7_opp21: opp-3187200000 {
++	cpu7_opp22: opp-3187200000 {
+ 		opp-hz = /bits/ 64 <3187200000>;
+ 		opp-peak-kBps = <8368000 51609600>;
+ 	};
+--
+2.47.1

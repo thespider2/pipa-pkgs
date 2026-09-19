@@ -1,3 +1,9 @@
+linux-pipa (7.1.7-3pipa1) resolute; urgency=medium
+
+  * Fix duplicate cpu7_opp21 label in pipa DTB overlay (DTB build failure).
+
+ -- Ayman <ayman@pipa>  Sun, 20 Sep 2026 02:00:00 +0000
+
 linux-pipa (7.1.7-2pipa1) resolute; urgency=medium
 
   * Archive AFE audio hacks; build stock PAD6 tree + config only.

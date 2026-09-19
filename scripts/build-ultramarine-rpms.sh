@@ -109,9 +109,10 @@ package_present_in_repo() {
 
 echo "=== Gathering sources from pipa-pkgs ==="
 
-# PAD6-DEV pipa/7.1.7-Stable + config only (no kernel patches).
+# PAD6-DEV pipa/7.1.7-Stable + config + DTB duplicate-label fix.
 link_files "$SOURCES_DIR/kernel-pipa" \
-    "$ROOT_DIR/sm8250/linux-pipa/config-xiaomi-pipa.aarch64"
+    "$ROOT_DIR/sm8250/linux-pipa/config-xiaomi-pipa.aarch64" \
+    "$ROOT_DIR"/sm8250/linux-pipa/000*.patch
 
 link_files "$SOURCES_DIR/xiaomi-pipa-firmware" \
     "$ROOT_DIR/sm8250/xiaomi-pipa-firmware/awinic_firmware.files" \

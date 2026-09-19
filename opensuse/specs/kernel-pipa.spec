@@ -1,8 +1,8 @@
 %global debug_package %{nil}
 
-# PAD6-DEV pipa/7.1.7-Stable + config only. AFE audio hacks archived.
+# PAD6-DEV pipa/7.1.7-Stable + config + DTB duplicate-label fix. AFE hacks archived.
 %global kversion 7.1.7
-%global krelease 2
+%global krelease 3
 %global kbuildver %(echo %{krelease}-pipa)
 %global kcommit f6344729eb71c1cb0c4189827c679502f4cd85a8
 %global ksrcdir linux-7.xx-%{kcommit}
@@ -17,6 +17,8 @@ ExclusiveArch:  aarch64
 
 Source0:        https://github.com/PAD6-DEV/linux-7.xx/archive/%{kcommit}/linux-7.xx-%{kcommit}.tar.gz
 Source1:        config-xiaomi-pipa.aarch64
+
+Patch0:         0001-arm64-dts-qcom-sm8250-xiaomi-pipa-fix-duplicate-cpu7.patch
 
 BuildRequires:  bc
 BuildRequires:  bison
@@ -54,7 +56,7 @@ Obsoletes:      kernel-pipa < %{version}-%{release}
 
 %description
 Linux %{kversion} for the Xiaomi Pad 6 (SM8250 / pipa): PAD6-DEV pipa/7.1.7-Stable
-with pipa config only (no local kernel patches).
+with pipa config and a local DTB duplicate-label fix.
 
 %package headers
 Summary:        Header files for kernel-pipa
@@ -77,6 +79,11 @@ Loadable kernel modules for kernel-pipa.
 
 %prep
 %setup -q -n %{ksrcdir}
+# %%autopatch uses --fuzz=0; apply with -F3 like makepkg/dpkg-source.
+for p in %{patches}; do
+  echo "Applying $(basename "$p")..."
+  /usr/bin/patch -p1 -F3 --no-backup-if-mismatch < "$p"
+done
 cp %{SOURCE1} .config
 ./scripts/config --file .config -d LOCALVERSION_AUTO
 ./scripts/config --file .config --set-str LOCALVERSION "-pipa"
@@ -174,6 +181,9 @@ if [ "$1" = "0" ] && [ -d /usr/lib/modules ]; then
 fi
 
 %changelog
+* Sun Sep 20 2026 Ayman <ayman@pipa> - 7.1.7-3
+- Fix duplicate cpu7_opp21 label in pipa DTB overlay (DTB build failure)
+
 * Sun Sep 20 2026 Ayman <ayman@pipa> - 7.1.7-2
 - Archive AFE audio hacks; build stock PAD6 tree + config only
 

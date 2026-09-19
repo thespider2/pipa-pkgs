@@ -111,9 +111,10 @@ stage_common_sources() {
         "$ROOT_DIR/common/libcamera/hi846.yaml" \
         "$ROOT_DIR/common/libcamera/ov13b10.yaml"
 
-    # PAD6-DEV pipa/7.1.7-Stable + config only (no kernel patches).
+    # PAD6-DEV pipa/7.1.7-Stable + config + DTB duplicate-label fix.
     link_files "$SOURCES_DIR/linux-pipa" \
-        "$ROOT_DIR/sm8250/linux-pipa/config-xiaomi-pipa.aarch64"
+        "$ROOT_DIR/sm8250/linux-pipa/config-xiaomi-pipa.aarch64" \
+        "$ROOT_DIR"/sm8250/linux-pipa/000*.patch
 
     link_files "$SOURCES_DIR/pipa-metapkg" \
         "$ROOT_DIR/sm8250/pipa-metapkg/90-pipa-gsk-renderer.sh" \

@@ -1,3 +1,9 @@
+linux-pipa (7.1.7-4pipa1) resolute; urgency=medium
+
+  * Include linux/hex.h in nanosic_803 for hex_to_bin (7.1.x build failure).
+
+ -- Ayman <ayman@pipa>  Sun, 20 Sep 2026 03:00:00 +0000
+
 linux-pipa (7.1.7-3pipa1) resolute; urgency=medium
 
   * Fix duplicate cpu7_opp21 label in pipa DTB overlay (DTB build failure).

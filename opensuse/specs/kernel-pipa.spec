@@ -1,8 +1,8 @@
 %global debug_package %{nil}
 
-# PAD6-DEV pipa/7.1.7-Stable + config + DTB duplicate-label fix. AFE hacks archived.
+# PAD6-DEV pipa/7.1.7-Stable + config + DTB/hex.h fixes. AFE hacks archived.
 %global kversion 7.1.7
-%global krelease 3
+%global krelease 4
 %global kbuildver %(echo %{krelease}-pipa)
 %global kcommit f6344729eb71c1cb0c4189827c679502f4cd85a8
 %global ksrcdir linux-7.xx-%{kcommit}
@@ -19,6 +19,7 @@ Source0:        https://github.com/PAD6-DEV/linux-7.xx/archive/%{kcommit}/linux-
 Source1:        config-xiaomi-pipa.aarch64
 
 Patch0:         0001-arm64-dts-qcom-sm8250-xiaomi-pipa-fix-duplicate-cpu7.patch
+Patch1:         0002-Input-nanosic_803-include-linux-hex.h-for-hex_to_bin.patch
 
 BuildRequires:  bc
 BuildRequires:  bison
@@ -56,7 +57,7 @@ Obsoletes:      kernel-pipa < %{version}-%{release}
 
 %description
 Linux %{kversion} for the Xiaomi Pad 6 (SM8250 / pipa): PAD6-DEV pipa/7.1.7-Stable
-with pipa config and a local DTB duplicate-label fix.
+with pipa config and local DTB/hex.h build fixes.
 
 %package headers
 Summary:        Header files for kernel-pipa
@@ -181,6 +182,9 @@ if [ "$1" = "0" ] && [ -d /usr/lib/modules ]; then
 fi
 
 %changelog
+* Sun Sep 20 2026 Ayman <ayman@pipa> - 7.1.7-4
+- Include linux/hex.h in nanosic_803 for hex_to_bin (7.1.x build failure)
+
 * Sun Sep 20 2026 Ayman <ayman@pipa> - 7.1.7-3
 - Fix duplicate cpu7_opp21 label in pipa DTB overlay (DTB build failure)
 

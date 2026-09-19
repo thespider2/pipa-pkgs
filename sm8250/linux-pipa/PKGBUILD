@@ -1,7 +1,7 @@
 pkgbase=linux-pipa
 pkgname=(linux-pipa linux-pipa-headers)
 pkgver=7.1.7
-pkgrel=3
+pkgrel=4
 pkgdesc='Stable kernel for Xiaomi Pad 6'
 arch=('aarch64')
 _carch=arm64
@@ -13,16 +13,16 @@ makedepends=(
   'tar' 'xz' 'rsync'
 )
 options=('!strip')
-# PAD6-DEV pipa/7.1.7-Stable + config + DTB duplicate-label fix. AFE hacks archived.
+# PAD6-DEV pipa/7.1.7-Stable + config + DTB/hex.h fixes. AFE hacks archived.
 # Bump with: git ls-remote https://github.com/PAD6-DEV/linux-7.xx.git refs/heads/pipa/7.1.7-Stable
 _commit=f6344729eb71c1cb0c4189827c679502f4cd85a8
 source=(
   "git+https://github.com/PAD6-DEV/linux-7.xx.git#commit=${_commit}"
   'config-xiaomi-pipa.aarch64'
   '0001-arm64-dts-qcom-sm8250-xiaomi-pipa-fix-duplicate-cpu7.patch'
+  '0002-Input-nanosic_803-include-linux-hex.h-for-hex_to_bin.patch'
 )
-sha256sums=('SKIP' 'SKIP'
-            'ccd58a4aed8dcb2432d7352599fb1fffdc87ea629ecfc18737599e494f23b857')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 prepare() {
   cd linux-7.xx

@@ -1,5 +1,5 @@
 #!/usr/bin/make -f
-export KBUILD_BUILD_VERSION = 3-pipa
+export KBUILD_BUILD_VERSION = 4-pipa
 export ARCH = arm64
 export LLVM = 1
 
@@ -10,7 +10,7 @@ export LLVM = 1
 override_dh_auto_clean:
 
 override_dh_auto_configure:
-	# PAD6-DEV pipa/7.1.7-Stable + config + DTB fix (AFE hacks archived).
+	# PAD6-DEV pipa/7.1.7-Stable + config + DTB/hex.h fixes (AFE hacks archived).
 	cp debian/extras/config-xiaomi-pipa.aarch64 .config
 	for p in debian/extras/0*.patch; do \
 		[ -f "$$p" ] || continue; \

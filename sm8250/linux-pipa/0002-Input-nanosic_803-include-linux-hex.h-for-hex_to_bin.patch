@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Ayman <ayman@pipa>
+Subject: [PATCH] Input: nanosic_803: include linux/hex.h for hex_to_bin
+
+On Linux 7.1.x, hex_to_bin() is declared in include/linux/hex.h and is no
+longer pulled in transitively. Include it explicitly so nanosic_803 builds.
+---
+ drivers/input/keyboard/nanosic_803.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/input/keyboard/nanosic_803.c b/drivers/input/keyboard/nanosic_803.c
+index 111111111111..222222222222 100644
+--- a/drivers/input/keyboard/nanosic_803.c
++++ b/drivers/input/keyboard/nanosic_803.c
+@@ -14,6 +14,7 @@
+ #include <linux/input/mt.h>
+ #include <linux/interrupt.h>
+ #include <linux/kernel.h>
++#include <linux/hex.h>
+ #include <linux/log2.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
+--
+2.47.1

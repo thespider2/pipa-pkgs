@@ -1,3 +1,16 @@
+linux-pipa (7.1.7-2pipa1) resolute; urgency=medium
+
+  * Archive AFE audio hacks; build stock PAD6 tree + config only.
+
+ -- Ayman <ayman@pipa>  Sun, 20 Sep 2026 01:00:00 +0000
+
+linux-pipa (7.1.7-1pipa1) resolute; urgency=medium
+
+  * Switch to PAD6-DEV/linux-7.xx pipa/7.1.7-Stable (f6344729eb71).
+  * Drop integrated 7.1.4 kernel.org device patches; keep AFE audio hacks only.
+
+ -- Ayman <ayman@pipa>  Sun, 20 Sep 2026 00:00:00 +0000
+
 linux-pipa (7.1.4-6pipa1) resolute; urgency=medium
 
   * Provide kmod(i2c_dev.ko) / kernel-uname-r for fwupd without kernel-default.

@@ -111,10 +111,9 @@ stage_common_sources() {
         "$ROOT_DIR/common/libcamera/hi846.yaml" \
         "$ROOT_DIR/common/libcamera/ov13b10.yaml"
 
-    # kernel.org device patches + config (+ local single-DTB unify).
+    # PAD6-DEV pipa/7.1.7-Stable + config only (no kernel patches).
     link_files "$SOURCES_DIR/linux-pipa" \
-        "$ROOT_DIR/sm8250/linux-pipa/config-xiaomi-pipa.aarch64" \
-        "$ROOT_DIR"/sm8250/linux-pipa/*.patch
+        "$ROOT_DIR/sm8250/linux-pipa/config-xiaomi-pipa.aarch64"
 
     link_files "$SOURCES_DIR/pipa-metapkg" \
         "$ROOT_DIR/sm8250/pipa-metapkg/90-pipa-gsk-renderer.sh" \
@@ -206,11 +205,11 @@ fetch_and_extract() {
             done
             ;;
         linux-pipa)
-            # Match sm8250/linux-pipa/PKGBUILD (kernel.org + device patches).
-            local ver=7.1.4
-            local tar="$DL_DIR/linux-${ver}.tar.xz"
-            download "https://cdn.kernel.org/pub/linux/kernel/v${ver%%.*}.x/linux-${ver}.tar.xz" "$tar"
-            tar -xJf "$tar" -C "$work" --strip-components=1
+            # Match sm8250/linux-pipa/PKGBUILD (PAD6-DEV commit archive).
+            local commit=f6344729eb71c1cb0c4189827c679502f4cd85a8
+            local tar="$DL_DIR/linux-7.xx-${commit}.tar.gz"
+            download "https://github.com/PAD6-DEV/linux-7.xx/archive/${commit}/linux-7.xx-${commit}.tar.gz" "$tar"
+            tar -xzf "$tar" -C "$work" --strip-components=1
             ;;
         pipa-dracut|pipa-grub-config|pipa-sensors|pipa-sound-conf|pipa-metapkg)
             # Local-only payload packages; extras already staged.

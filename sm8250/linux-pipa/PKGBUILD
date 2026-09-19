@@ -1,58 +1,29 @@
 pkgbase=linux-pipa
 pkgname=(linux-pipa linux-pipa-headers)
-pkgver=7.1.4
-pkgrel=5
+pkgver=7.1.7
+pkgrel=2
 pkgdesc='Stable kernel for Xiaomi Pad 6'
 arch=('aarch64')
 _carch=arm64
-url='https://kernel.org'
+url='https://github.com/PAD6-DEV/linux-7.xx/tree/pipa/7.1.7-Stable'
 license=('GPL-2.0-only')
 install=linux-pipa.install
 makedepends=(
-  'bc' 'bison' 'clang' 'cpio' 'flex' 'kmod' 'lld' 'llvm' 'pahole' 'python'
+  'bc' 'bison' 'clang' 'cpio' 'flex' 'git' 'kmod' 'lld' 'llvm' 'pahole' 'python'
   'tar' 'xz' 'rsync'
 )
 options=('!strip')
-# kernel.org + device patches; 0017 unifies to a single sm8250-xiaomi-pipa.dtb.
-# 0018/0019 fix the FSA4480 SBU mux probe and enable USB-C DisplayPort altmode.
-# 0020 ignores AFE clock set_param errors so va_macro can probe (speakers).
+# PAD6-DEV pipa/7.1.7-Stable + config only. AFE audio hacks archived under archived-patches/.
+# Bump with: git ls-remote https://github.com/PAD6-DEV/linux-7.xx.git refs/heads/pipa/7.1.7-Stable
+_commit=f6344729eb71c1cb0c4189827c679502f4cd85a8
 source=(
-  "https://cdn.kernel.org/pub/linux/kernel/v${pkgver%%.*}.x/linux-$pkgver.tar.xz"
+  "git+https://github.com/PAD6-DEV/linux-7.xx.git#commit=${_commit}"
   'config-xiaomi-pipa.aarch64'
-  '0001-arm64-dts-qcom-sm8250-xiaomi-pipa-Add-device-tree-fo.patch'
-  '0002-power-supply-Add-driver-for-Qualcomm-PMIC-fuel-gauge.patch'
-  '0003-Input-Add-nt36523-touchscreen-driver.patch'
-  '0004-drm-msm-dsi-change-sync-mode-to-sync-on-DSI0-rather-.patch'
-  '0005-drm-msm-dsi-support-DSC-configurations-with-slice_pe.patch'
-  '0006-drm-panel-Add-support-for-Novatek-NT36532-panel.patch'
-  '0007-drivers-media-i2c-ov13b10-add-device-tree-support-an.patch'
-  '0008-ASoC-qcom-sm8250-add-tertiary-tdm-support.patch'
-  '0010-HACK-ASoC-codecs-aw88261-add-xiaomi-pipa-hacks.patch'
-  '0011-FROMLIST-ASoC-qcom-qdsp6-q6afe-fix-clk-vote-response.patch'
-  '0012-HACK-ASoC-qcom-qdsp6-q6afe-pretend-the-AFE-vote-didn.patch'
-  '0013-Input-keyboard-add-Xiaomi-Nanosic-803-keyboard.patch'
-  '0014-UPSTREAM-libbpf-Fix-UAF-in-strset__add_str.patch'
-  '0016-power-supply-add-nuvolta-rx1665-wireless-charger.patch'
-  '0017-arm64-dts-qcom-sm8250-xiaomi-pipa-Unify-single-dtb.patch'
-  '0018-usb-typec-fsa4480-add-chip-id-read-retry-loop.patch'
-  '0019-arm64-dts-qcom-sm8250-xiaomi-pipa-enable-DisplayPort.patch'
-  '0020-HACK-ASoC-qcom-qdsp6-q6afe-ignore-clock-set-param-er.patch'
 )
-sha256sums=('SKIP' 'SKIP'
-            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP'
-            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP'
-            'SKIP' 'SKIP')
+sha256sums=('SKIP' 'SKIP')
 
 prepare() {
-  cd "linux-$pkgver"
-  local src
-  for src in "${source[@]}"; do
-    src="${src%%::*}"
-    src="${src##*/}"
-    [[ $src = *.patch ]] || continue
-    echo "Applying patch $src..."
-    patch -Np1 < "../$src"
-  done
+  cd linux-7.xx
   cp ../config-xiaomi-pipa.aarch64 .config
 
   ./scripts/config --file .config -d LOCALVERSION_AUTO
@@ -61,10 +32,10 @@ prepare() {
 }
 
 build() {
-  cd "linux-$pkgver"
+  cd linux-7.xx
   unset LDFLAGS
   make ARCH="$_carch" LLVM=1 \
-    KBUILD_BUILD_VERSION="$((pkgrel + 1))-pipa" \
+    KBUILD_BUILD_VERSION="${pkgrel}-pipa" \
     -j"$(nproc)" Image Image.gz modules dtbs
 }
 
@@ -73,14 +44,14 @@ package_linux-pipa() {
   depends=('coreutils' 'dracut' 'kmod' 'xiaomi-pipa-firmware')
   provides=('linux')
 
-  cd "linux-$pkgver"
+  cd linux-7.xx
 
   local kernver
-  kernver="$(make ARCH="$_carch" LLVM=1 KBUILD_BUILD_VERSION="$((pkgrel + 1))-pipa" -s kernelrelease)"
+  kernver="$(make ARCH="$_carch" LLVM=1 KBUILD_BUILD_VERSION="${pkgrel}-pipa" -s kernelrelease)"
   local modulesdir="$pkgdir/usr/lib/modules/$kernver"
 
   make ARCH="$_carch" LLVM=1 \
-    KBUILD_BUILD_VERSION="$((pkgrel + 1))-pipa" \
+    KBUILD_BUILD_VERSION="${pkgrel}-pipa" \
     INSTALL_MOD_PATH="$pkgdir/usr" \
     INSTALL_MOD_STRIP=1 \
     modules_install
@@ -109,8 +80,8 @@ package_linux-pipa-headers() {
   pkgdesc='Header files and scripts for building modules for Linux kernel'
   provides=('linux-headers')
 
-  cd "linux-$pkgver"
+  cd linux-7.xx
   make ARCH="$_carch" LLVM=1 \
-    KBUILD_BUILD_VERSION="$((pkgrel + 1))-pipa" \
+    KBUILD_BUILD_VERSION="${pkgrel}-pipa" \
     INSTALL_HDR_PATH="$pkgdir/usr" headers_install
 }

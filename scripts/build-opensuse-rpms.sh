@@ -160,10 +160,9 @@ package_present_in_repo() {
 
 echo "=== Gathering sources from pipa-pkgs ==="
 
-# kernel.org device patches + config (+ local single-DTB unify).
+# PAD6-DEV pipa/7.1.7-Stable + config only (no kernel patches).
 link_files "$SOURCES_DIR/kernel-pipa" \
-    "$ROOT_DIR/sm8250/linux-pipa/config-xiaomi-pipa.aarch64" \
-    "$ROOT_DIR"/sm8250/linux-pipa/*.patch
+    "$ROOT_DIR/sm8250/linux-pipa/config-xiaomi-pipa.aarch64"
 
 link_files "$SOURCES_DIR/xiaomi-pipa-firmware" \
     "$ROOT_DIR/sm8250/xiaomi-pipa-firmware/awinic_firmware.files" \

@@ -5,14 +5,14 @@ Maintainer: Ayman <ayman@pipa>
 Build-Depends: debhelper-compat (= 13), bc, bison, flex, cpio, dwarves,
  clang, lld, llvm, libelf-dev, libssl-dev, kmod, rsync, xz-utils, python3, perl
 Standards-Version: 4.6.2
-Homepage: https://kernel.org
+Homepage: https://github.com/PAD6-DEV/linux-7.xx/tree/pipa/7.1.7-Stable
 
 Package: linux-image-pipa
 Architecture: arm64
 Depends: ${misc:Depends}, kmod, dracut | initramfs-tools, xiaomi-pipa-firmware
 Provides: linux-image, linux-image-arm64
 Description: Linux kernel for Xiaomi Pad 6 (pipa)
- Linux 7.1.4 (kernel.org + device patches) for the Xiaomi Pad 6
+ Linux 7.1.7 (PAD6-DEV pipa/7.1.7-Stable + config) for the Xiaomi Pad 6
  (SM8250 / pipa). Built with AppArmor and squashfs options for snapd.
 
 Package: linux-modules-pipa

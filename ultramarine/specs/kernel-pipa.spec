@@ -1,39 +1,22 @@
 %global debug_package %{nil}
 
-# kernel.org + device patches (+ local single DTB).
-%global kversion 7.1.4
-%global krelease 5
-%global kbuildver %(echo $((%{krelease} + 1))-pipa)
+# PAD6-DEV pipa/7.1.7-Stable + config only. AFE audio hacks archived.
+%global kversion 7.1.7
+%global krelease 2
+%global kbuildver %(echo %{krelease}-pipa)
+%global kcommit f6344729eb71c1cb0c4189827c679502f4cd85a8
+%global ksrcdir linux-7.xx-%{kcommit}
 
 Name:           kernel-pipa
 Version:        %{kversion}
 Release:        %{krelease}%{?dist}
 Summary:        Stable kernel for Xiaomi Pad 6
 License:        GPL-2.0-only
-URL:            https://kernel.org
+URL:            https://github.com/PAD6-DEV/linux-7.xx/tree/pipa/7.1.7-Stable
 ExclusiveArch:  aarch64
 
-Source0:        https://cdn.kernel.org/pub/linux/kernel/v7.x/linux-%{kversion}.tar.xz
+Source0:        https://github.com/PAD6-DEV/linux-7.xx/archive/%{kcommit}/linux-7.xx-%{kcommit}.tar.gz
 Source1:        config-xiaomi-pipa.aarch64
-
-Patch0:         0001-arm64-dts-qcom-sm8250-xiaomi-pipa-Add-device-tree-fo.patch
-Patch1:         0002-power-supply-Add-driver-for-Qualcomm-PMIC-fuel-gauge.patch
-Patch2:         0003-Input-Add-nt36523-touchscreen-driver.patch
-Patch3:         0004-drm-msm-dsi-change-sync-mode-to-sync-on-DSI0-rather-.patch
-Patch4:         0005-drm-msm-dsi-support-DSC-configurations-with-slice_pe.patch
-Patch5:         0006-drm-panel-Add-support-for-Novatek-NT36532-panel.patch
-Patch6:         0007-drivers-media-i2c-ov13b10-add-device-tree-support-an.patch
-Patch7:         0008-ASoC-qcom-sm8250-add-tertiary-tdm-support.patch
-Patch8:         0010-HACK-ASoC-codecs-aw88261-add-xiaomi-pipa-hacks.patch
-Patch9:         0011-FROMLIST-ASoC-qcom-qdsp6-q6afe-fix-clk-vote-response.patch
-Patch10:        0012-HACK-ASoC-qcom-qdsp6-q6afe-pretend-the-AFE-vote-didn.patch
-Patch11:        0013-Input-keyboard-add-Xiaomi-Nanosic-803-keyboard.patch
-Patch12:        0014-UPSTREAM-libbpf-Fix-UAF-in-strset__add_str.patch
-Patch13:        0016-power-supply-add-nuvolta-rx1665-wireless-charger.patch
-Patch14:        0017-arm64-dts-qcom-sm8250-xiaomi-pipa-Unify-single-dtb.patch
-Patch15:        0018-usb-typec-fsa4480-add-chip-id-read-retry-loop.patch
-Patch16:        0019-arm64-dts-qcom-sm8250-xiaomi-pipa-enable-DisplayPort.patch
-Patch17:        0020-HACK-ASoC-qcom-qdsp6-q6afe-ignore-clock-set-param-er.patch
 
 BuildRequires:  bc
 BuildRequires:  bison
@@ -67,8 +50,8 @@ Provides:       kmod(i2c_dev.ko)
 Obsoletes:      kernel-pipa < %{version}-%{release}
 
 %description
-Linux %{kversion} for the Xiaomi Pad 6 (SM8250 / pipa): kernel.org plus
-device patches, with a local single-DTB overlay for packaging.
+Linux %{kversion} for the Xiaomi Pad 6 (SM8250 / pipa): PAD6-DEV pipa/7.1.7-Stable
+with pipa config only (no local kernel patches).
 
 %package headers
 Summary:        Header files for kernel-pipa
@@ -90,12 +73,7 @@ Obsoletes:      kernel-pipa-modules < %{version}-%{release}
 Loadable kernel modules for kernel-pipa.
 
 %prep
-%setup -q -n linux-%{kversion}
-# %%autopatch uses --fuzz=0; apply with -F3 like makepkg/dpkg-source.
-for p in %{patches}; do
-  echo "Applying $(basename "$p")..."
-  /usr/bin/patch -p1 -F3 --no-backup-if-mismatch < "$p"
-done
+%setup -q -n %{ksrcdir}
 cp %{SOURCE1} .config
 ./scripts/config --file .config -d LOCALVERSION_AUTO
 ./scripts/config --file .config --set-str LOCALVERSION "-pipa"
@@ -177,6 +155,13 @@ if [ "$1" = "0" ] && [ -d /usr/lib/modules ]; then
 fi
 
 %changelog
+* Sun Sep 20 2026 Ayman <ayman@pipa> - 7.1.7-2
+- Archive AFE audio hacks; build stock PAD6 tree + config only
+
+* Sun Sep 20 2026 Ayman <ayman@pipa> - 7.1.7-1
+- Switch to PAD6-DEV/linux-7.xx pipa/7.1.7-Stable (f6344729eb71)
+- Drop integrated 7.1.4 kernel.org device patches; keep AFE audio hacks only
+
 * Tue Aug 11 2026 Ayman <ayman@pipa> - 7.1.4-5
 - Provide kmod(i2c_dev.ko) / kernel-uname-r so fwupd deps work without kernel-default
 - Rebuild pipa initramfs and GRUB from kernel-pipa-modules %%post

@@ -6,7 +6,7 @@ It hosts Arch Linux (pacman), Ultramarine/Fedora (dnf), and Ubuntu (apt) package
 ## Goals
 
 - Build all packages whose sources are stored in this repo (PKGBUILDs, RPM specs, and Debian packaging)
-- Use the local `linux-pipa` 7.1.4 package as the kernel source of truth
+- Use the local `linux-pipa` 7.1.7 package as the kernel source of truth
 - Mirror only the remaining upstream Pipa packages that do not yet have local `PKGBUILD`s
 - Publish a pacman repository at `https://<user>.github.io/pipa-pkgs/repo/`
 - Publish a DNF repository at `https://<user>.github.io/pipa-pkgs/repo/ultramarine/`
@@ -55,7 +55,7 @@ This repo is self-contained for the local packages that already live under `pkgb
 The local kernel source is:
 
 ```text
-sm8250/linux-pipa/PKGBUILD -> pkgver=7.1.4
+sm8250/linux-pipa/PKGBUILD -> pkgver=7.1.7 (PAD6-DEV pipa/7.1.7-Stable)
 ```
 
 To build locally on an ARM64 host:
@@ -197,6 +197,6 @@ PIPA_REPO_URL="https://thespider2.github.io/pipa-pkgs/repo/" \
 - The workflow assumes an ARM64 runner because these packages target `aarch64`.
 - The builder image uses Arch Linux ARM so `docker build` works on ARM64 runners.
 - If `ubuntu-24.04-arm` is unavailable for your repository, use a self-hosted ARM64 runner.
-- The local kernel source in this repo is the Xiaomi Pad 6 `linux-pipa` package pinned to 7.1.4.
+- The local kernel source in this repo is the Xiaomi Pad 6 `linux-pipa` package pinned to 7.1.7 from PAD6-DEV/linux-7.xx.
 - `packages.upstream.txt` now represents only the packages that still have no local `PKGBUILD` sources in this workspace.
 - Local packages win over mirrored upstream packages because overlapping package names are intentionally excluded from `packages.upstream.txt`.

@@ -13,8 +13,9 @@ RUN dnf install -y \
     python3-devel python3-jinja2 python3-yaml python3-ply python3-pybind11 pybind11-devel \
     libevent-devel libyaml-devel gnutls-devel \
     libdrm-devel libjpeg-turbo-devel SDL2-devel \
+    mesa-libEGL-devel mesa-libGLES-devel \
     gstreamer1-devel gstreamer1-plugins-base-devel \
-    lttng-ust-devel libtiff-devel \
+    lttng-ust-devel libtiff-devel libunwind-devel \
     qrtr-devel \
     && dnf clean all
 

@@ -1,7 +1,7 @@
 Epoch:          1
 Name:           libcamera
 Version:        0.7.1
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Camera support library for Linux with pipa sensor support
 License:        LGPL-2.1-or-later AND GPL-2.0-or-later
 URL:            https://libcamera.org/
@@ -32,6 +32,11 @@ BuildRequires:  pkgconfig(libudev)
 BuildRequires:  pkgconfig(libelf)
 BuildRequires:  pkgconfig(sdl2)
 BuildRequires:  pkgconfig(yaml-0.1)
+BuildRequires:  pkgconfig(egl)
+BuildRequires:  pkgconfig(glesv2)
+# %%meson passes --auto-features=enabled, which turns libunwind/libdw from
+# auto into required; install the devel package so meson can find it.
+BuildRequires:  pkgconfig(libunwind)
 BuildRequires:  pybind11-devel
 
 %description
@@ -130,6 +135,10 @@ install -Dm644 %{SOURCE11} %{buildroot}%{_datadir}/libcamera/ipa/simple/ov13b10.
 %{python3_sitearch}/libcamera/
 
 %changelog
+* Sun Sep 20 2026 Ayman <ayman@pipa> - 1:0.7.1-4
+- Require libunwind (%%meson --auto-features=enabled makes it mandatory)
+- Add pkgconfig(egl) and pkgconfig(glesv2) for SoftISP GPU debayering
+
 * Sat Jul 04 2026 Ayman <ayman@pipa> - 1:0.7.1-3
 - Add libexecdir to ipa package (proxy executables, v4l2-compat)
 - Disable qcam (not needed, removes Qt6 build dependency)
